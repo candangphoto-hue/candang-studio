@@ -316,6 +316,7 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
     <div class="sb-sec">
       <div class="sb-lbl">Vận hành</div>
       <div class="ni" onclick="sw('projects',this)"><span class="ni-ic">🎬</span>Dự án</div>
+      <div class="ni" onclick="sw('leads',this)"><span class="ni-ic">📬</span>Liên hệ mới</div>
       <div class="ni" onclick="sw('revenue',this)"><span class="ni-ic">💰</span>Doanh thu</div>
       <div class="ni" onclick="sw('salary',this)"><span class="ni-ic">👤</span>Nhân sự & Lương</div>
       <div class="ni" onclick="sw('clients',this)"><span class="ni-ic">👥</span>Khách hàng</div>
@@ -384,7 +385,7 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
       </div>
       <div class="sh">
         <div><div class="st">Dự án đang triển khai & còn công nợ</div><div class="ss">Chưa hoàn thành hoặc chưa thu đủ tiền</div></div>
-        <button class="btn btn-g btn-s" onclick="sw('projects',document.querySelectorAll('.ni')[2])">Xem kanban →</button>
+        <button class="btn btn-g btn-s" onclick="sw('projects',document.querySelectorAll('.ni')[2])">Xem dự án →</button>
       </div>
       <div class="card">
         <div class="tw"><table>
@@ -450,6 +451,15 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
         <button class="btn btn-p" onclick="openModal('addP')">+ Dự án mới</button>
       </div>
       <div class="kb" id="kbBoard"></div>
+    </div>
+
+    <!-- LEADS -->
+    <div id="v-leads" class="view">
+      <div class="sh">
+        <div><div class="st">Liên hệ mới & Báo giá</div><div class="ss" id="leadCnt">0 lead</div></div>
+        <button class="btn btn-p" onclick="openModal('addP')">+ Thêm lead</button>
+      </div>
+      <div class="kb" id="leadBoard"></div>
     </div>
 
     <!-- REVENUE -->
@@ -808,11 +818,13 @@ const SC={
   'Hoàn thành': {bg:'#e8f4ed',co:'#1f6b3b',dot:'#3a7d5a'},
 };
 const COLS=[
-  {k:'Liên hệ mới',l:'Lead mới',i:'🔵'},
-  {k:'Đã báo giá', l:'Báo giá', i:'🟡'},
   {k:'Đang chụp',  l:'Shooting',i:'🎬'},
   {k:'Hậu kỳ',     l:'Editing', i:'🎞️'},
   {k:'Hoàn thành', l:'Done',    i:'✅'},
+];
+const LEAD_COLS=[
+  {k:'Liên hệ mới',l:'Liên hệ mới',i:'📬'},
+  {k:'Đã báo giá', l:'Đã báo giá', i:'📋'},
 ];
 const ROLES=['Chụp ảnh chính','Phụ tá chụp','Hậu kỳ / Edit','Stylist','Makeup','Đạo diễn hình ảnh','Quay phim','Khác'];
 
@@ -829,7 +841,7 @@ function fmtS(n){
 }
 function fmtM(el){const r=el.value.replace(/\D/g,'');el.value=r?Number(r).toLocaleString('vi-VN'):'';}
 function pM(s){return parseInt((s||'').replace(/\D/g,''))||0;}
-function fmtDate(d){if(!d)return'—';const[y,m,dd]=d.split('-');return`${dd}/${m}/${y}`;}
+function fmtDate(d){if(!d)return'—';const clean=String(d).split('T')[0];const[y,m,dd]=clean.split('-');if(!dd||!m||!y)return String(d);return`${dd}/${m}/${y}`;}
 function $(id){return document.getElementById(id);}
 
 // ═══ DEFAULT STAFF — quản lý từ Settings ═══
@@ -1711,7 +1723,7 @@ function renderKPIs(){
   const rev=mp.reduce((s,p)=>s+(p.grossValue||p.netValue||0),0);
   const cost=mp.reduce((s,p)=>s+getTotalCost(p),0);
   const profit=rev-cost;
-  const pend=PROJECTS.filter(p=>p.status!=='Hoàn thành').length;
+  const pend=PROJECTS.filter(p=>p.status==='Đang chụp'||p.status==='Hậu kỳ').length;
   const totalDebt=PROJECTS.reduce((s,p)=>s+getDebt(p),0);
   const debtProjects=PROJECTS.filter(p=>getDebt(p)>0).length;
   $('kpiG').innerHTML=`
@@ -1769,7 +1781,7 @@ function renderDonut(){
 function renderRecentProjects(){
   const tbody=$('rPT');
   // Chỉ dự án chưa hoàn thành HOẶC còn công nợ
-  const active=PROJECTS.filter(p=>p.status!=='Hoàn thành'||getDebt(p)>0)
+  const active=PROJECTS.filter(p=>(p.status==='Đang chụp'||p.status==='Hậu kỳ')||(p.status==='Hoàn thành'&&getDebt(p)>0))
     .sort((a,b)=>{
       // Nợ lên đầu → Đang chụp → Hậu kỳ → Đã báo giá → Liên hệ → Hoàn thành còn nợ
       const order={s1:0,s2:0};
@@ -1817,7 +1829,37 @@ function renderKanban(){
       }).join(''):'<div style="text-align:center;padding:20px;color:var(--t3);font-size:11.5px">Trống</div>'}</div>
     </div>`;
   }).join('');
-  $('pCnt').textContent=PROJECTS.length+' dự án';
+  $('pCnt').textContent=PROJECTS.filter(p=>p.status!=='Liên hệ mới'&&p.status!=='Đã báo giá').length+' dự án';
+}
+
+function renderLeads(){
+  const leads=PROJECTS.filter(p=>p.status==='Liên hệ mới'||p.status==='Đã báo giá');
+  $('leadBoard').innerHTML=LEAD_COLS.map(col=>{
+    const cards=leads.filter(p=>p.status===col.k);
+    const s=SC[col.k]||{};
+    return`<div class="kc">
+      <div class="kh"><div class="kt">${col.i} ${col.l}<span class="cb2" style="background:${s.bg||'#eee'};color:${s.co||'#555'}">${cards.length}</span></div></div>
+      <div class="kb2">${cards.length?cards.map(p=>{
+        const dateStr=p.dateStart?fmtDate(p.dateStart):'Chưa có ngày';
+        return`<div class="pc" style="position:relative">
+          <div class="pc-cl" onclick="openDetail('${p.id}')" style="cursor:pointer">${p.client}</div>
+          <div class="pc-sv">${p.service||'—'}</div>
+          ${p.grossValue||p.netValue?`<div class="pc-cs">💰 ${fmtS(p.grossValue||p.netValue)}</div>`:''}
+          <div class="pc-ft"><div class="pc-dt">📅 ${dateStr}</div></div>
+          <button class="btn btn-gn btn-xs" style="margin-top:8px;width:100%" onclick="confirmLead('${p.id}')">✓ Chốt → Dự án</button>
+        </div>`;
+      }).join(''):'<div style="text-align:center;padding:20px;color:var(--t3);font-size:11.5px">Trống</div>'}</div>
+    </div>`;
+  }).join('');
+  $('leadCnt').textContent=leads.length+' lead';
+}
+
+function confirmLead(id){
+  const p=PROJECTS.find(x=>x.id===id); if(!p)return;
+  if(!confirm(`Chốt "${p.client}" — chuyển sang Đang chụp?`))return;
+  p.status='Đang chụp';
+  saveLocal();renderAll();
+  toast('✅ Đã chốt — chuyển sang mục Dự án');
 }
 
 function renderRevenue(){
@@ -2515,6 +2557,7 @@ const VIEWS={
   dashboard:['Dashboard','Tổng quan hoạt động'],
   weekly:['Lịch','Lịch chụp & công việc'],
   projects:['Dự án','Quản lý theo trạng thái'],
+  leads:['Liên hệ mới & Báo giá','Leads chưa chốt'],
   revenue:['Doanh thu','Phân tích tài chính'],
   salary:['Nhân sự & Lương','Bảng lương theo tháng'],
   clients:['Khách hàng','Danh sách & lịch sử'],
@@ -2589,7 +2632,7 @@ function delDefaultStaff(i){
   toast('🗑️ Đã xóa');
 }
 function renderAll(){
-  renderKPIs();renderChart();renderDonut();renderRecentProjects();renderKanban();
+  renderKPIs();renderChart();renderDonut();renderRecentProjects();renderKanban();renderLeads();
   renderRevenue();renderClients();
   if(calMode==='month')renderMonthly(); else renderWeekly();
 }
@@ -2605,6 +2648,20 @@ function renderAll(){
 // Default calendar to month mode
 switchCalMode('month');
 renderAll();
+
+// Auto-sync mỗi 30 phút — im lặng, chỉ cập nhật đồng hồ
+setInterval(async()=>{
+  if(!SHEETS_URL)return;
+  try{
+    const r=await fetch(SHEETS_URL+'?action=getAll&t='+Date.now());
+    const d=await r.json();
+    if(d.error)return;
+    if(d.projects&&d.projects.length>0)PROJECTS=d.projects;
+    if(d.clients&&d.clients.length>0)CLIENTS=d.clients;
+    saveLocal();renderAll();
+    setSync('ok','Auto-sync '+new Date().toLocaleTimeString('vi-VN'));
+  }catch(e){}
+},30*60*1000);
 </script>
 </body>
 </html>
