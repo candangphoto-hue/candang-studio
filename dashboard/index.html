@@ -297,6 +297,11 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
 
 /* DEBT BADGE on kanban */
 .debt-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--rd)}
+
+/* EXPENSES */
+.exp-cur{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:600;margin-left:4px}
+.exp-vnd{background:var(--gl);color:var(--gn)}.exp-usd{background:#dbeafe;color:var(--bl2)}.exp-yr{background:var(--al);color:var(--ad)}
+.owner-sal-card{background:linear-gradient(135deg,var(--bll),#fff);border:1px solid #bfdbfe}
 </style>
 </head>
 <body>
@@ -319,6 +324,7 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
       <div class="ni" onclick="sw('leads',this)"><span class="ni-ic">📬</span>Liên hệ mới</div>
       <div class="ni" onclick="sw('revenue',this)"><span class="ni-ic">💰</span>Doanh thu</div>
       <div class="ni" onclick="sw('salary',this)"><span class="ni-ic">👤</span>Nhân sự & Lương</div>
+      <div class="ni" onclick="sw('expenses',this)"><span class="ni-ic">🏢</span>Chi phí vận hành</div>
       <div class="ni" onclick="sw('clients',this)"><span class="ni-ic">👥</span>Khách hàng</div>
     </div>
     <div class="sb-sec">
@@ -515,12 +521,55 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
       </div>
       <!-- KPI lương tháng -->
       <div class="kpi-g" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px" id="salKpi"></div>
+      <!-- Owner salary card -->
+      <div class="card owner-sal-card" style="margin-bottom:14px" id="ownerSalCard">
+        <div class="ch">
+          <div><div class="ct">💼 Lương chủ studio</div><div class="cs">Cố định hàng tháng — không từ dự án</div></div>
+        </div>
+        <div class="cb" id="ownerSalBody" style="padding:12px 18px"></div>
+      </div>
       <div class="card" id="salCard">
         <div class="tw"><table>
           <thead id="salThead"></thead>
           <tbody id="salTbody"></tbody>
         </table></div>
       </div>
+    </div>
+
+    <!-- EXPENSES -->
+    <div id="v-expenses" class="view">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div class="st">Chi phí vận hành</div>
+          <div class="ss">Theo dõi riêng — không ảnh hưởng KPI dự án</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <label style="font-size:12px;color:var(--t2);display:flex;align-items:center;gap:6px">
+            💱 Tỷ giá USD:
+            <input class="fi" id="usdRateInput" type="text" style="width:96px;padding:5px 8px;font-size:13px" placeholder="25.000" oninput="onUsdRateChange(this)">
+            <span style="font-size:11px;color:var(--t3)">VND/USD</span>
+          </label>
+          <button class="btn btn-p btn-s" onclick="openAddExpense()">+ Thêm danh mục</button>
+        </div>
+      </div>
+      <div class="kpi-g" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px" id="expKpi"></div>
+      <div class="card">
+        <div class="ch"><div><div class="ct">Danh mục chi phí cố định hàng tháng</div><div class="cs">Tổng hàng tháng (quy đổi về VND)</div></div></div>
+        <div class="tw"><table>
+          <thead><tr>
+            <th style="width:36px">#</th>
+            <th>Danh mục</th>
+            <th style="text-align:center">Số tiền gốc</th>
+            <th style="text-align:center">Chu kỳ</th>
+            <th style="text-align:right">VND / tháng</th>
+            <th>Ghi chú</th>
+            <th style="width:70px"></th>
+          </tr></thead>
+          <tbody id="expTable"></tbody>
+          <tfoot id="expFoot"></tfoot>
+        </table></div>
+      </div>
+      <div id="expInlineForm" style="display:none;margin-top:14px"></div>
     </div>
 
     <!-- CLAUDE -->
@@ -767,7 +816,23 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
 
     <!-- SETTINGS -->
     <div id="v-settings" class="view">
-      <div class="sh"><div class="st">Cài đặt — Nhân sự cố định</div></div>
+      <div class="sh"><div class="st">Cài đặt</div></div>
+      <!-- Owner salary card -->
+      <div class="card" style="max-width:680px;margin-bottom:16px">
+        <div class="ch"><div class="ct">💼 Lương chủ studio (Can Đăng)</div></div>
+        <div class="cb">
+          <div class="fg2" style="align-items:end">
+            <div>
+              <label class="fl">Lương cố định / tháng (đ)</label>
+              <input class="fi" id="ownerSalInput" type="text" placeholder="15.600.000" oninput="fmtM(this)">
+            </div>
+            <div>
+              <button class="btn btn-a" onclick="saveOwnerSalary()">Lưu lương</button>
+            </div>
+          </div>
+          <div class="hint">Hiển thị trong Nhân sự &amp; Lương — không gắn với dự án nào</div>
+        </div>
+      </div>
       <div class="card" style="max-width:680px">
         <div class="ch"><div class="ct">👥 Danh sách nhân sự thường xuyên</div><button class="btn btn-gn btn-s" onclick="addDefaultStaffRow()">+ Thêm người</button></div>
         <div class="cb">
@@ -807,6 +872,21 @@ let PROJECTS = JSON.parse(localStorage.getItem('cd_p')||'[]');
 let CLIENTS  = JSON.parse(localStorage.getItem('cd_c')||'[]');
 let SHEETS_URL = localStorage.getItem('cd_url')||'';
 let EDIT_ID = null;
+
+// OWNER SALARY
+let OWNER_SALARY = JSON.parse(localStorage.getItem('cd_owner_salary')||'null') || {name:'Can Đăng',amount:15600000};
+
+// EXPENSES
+const _DEFAULT_EXPENSES = [
+  {id:'exp1',name:'Thuê nhà',amount:5000000,currency:'VND',period:'month',note:''},
+  {id:'exp2',name:'Photoshop + Lightroom',amount:120,currency:'USD',period:'year',note:'Adobe CC Plan'},
+  {id:'exp3',name:'Claude Pro AI',amount:0,currency:'VND',period:'month',note:'Nhập số tiền thực tế'},
+  {id:'exp4',name:'Photoroom',amount:250000,currency:'VND',period:'month',note:''},
+  {id:'exp5',name:'Mạng internet',amount:250000,currency:'VND',period:'month',note:''},
+  {id:'exp6',name:'Phần mềm khác',amount:0,currency:'VND',period:'month',note:''},
+];
+let EXPENSES = JSON.parse(localStorage.getItem('cd_expenses')||'null') || JSON.parse(JSON.stringify(_DEFAULT_EXPENSES));
+let USD_RATE = parseInt(localStorage.getItem('cd_usd_rate')||'25000');
 
 if(SHEETS_URL){ $('sUrl').value=SHEETS_URL; setSync('ok','Sheets đã kết nối'); }
 
@@ -2424,11 +2504,17 @@ function renderSalary(){
   const totalTax=entries.reduce((s,e)=>s+e.tax,0);
   const totalNet=entries.reduce((s,e)=>s+e.netPay,0);
   const paidCount=entries.filter(e=>e.paid).length;
+  const ownerKey=`owner_${selM}_${y}`;
+  const ownerPaid=!!SALARY_PAID[ownerKey];
+  const totalPayout=totalNet+OWNER_SALARY.amount;
   $('salKpi').innerHTML=`
-    <div class="kpi"><div class="kpi-l">👥 Tổng nhân sự</div><div class="kpi-v">${new Set(entries.map(e=>e.name)).size}</div><div class="kpi-d nt">${entries.length} lượt làm việc</div></div>
-    <div class="kpi"><div class="kpi-l">💰 Tổng lương + HH</div><div class="kpi-v">${fmtS(totalGross)}</div><div class="kpi-d nt">Trước thuế</div></div>
-    <div class="kpi"><div class="kpi-l">🏛️ Thuế TNCN 10%</div><div class="kpi-v" style="color:var(--or)">${fmtS(totalTax)}</div><div class="kpi-d nt">Khấu trừ</div></div>
-    <div class="kpi"><div class="kpi-l">💵 Thực trả</div><div class="kpi-v" style="color:var(--gn)">${fmtS(totalNet)}</div><div class="kpi-d ${paidCount===entries.length&&entries.length>0?'up':'dn'}">${entries.length-paidCount} chưa trả</div></div>`;
+    <div class="kpi"><div class="kpi-l">👥 Nhân sự dự án</div><div class="kpi-v">${new Set(entries.map(e=>e.name)).size}</div><div class="kpi-d nt">${entries.length} lượt làm việc</div></div>
+    <div class="kpi"><div class="kpi-l">💰 Lương + HH nhân sự</div><div class="kpi-v">${fmtS(totalGross)}</div><div class="kpi-d nt">Trước thuế TNCN</div></div>
+    <div class="kpi"><div class="kpi-l">💼 Lương Can Đăng</div><div class="kpi-v" style="color:var(--bl2)">${fmtS(OWNER_SALARY.amount)}</div><div class="kpi-d ${ownerPaid?'up':'dn'}">${ownerPaid?'✅ Đã trả':'⏳ Chưa trả'}</div></div>
+    <div class="kpi"><div class="kpi-l">💵 Tổng chi lương</div><div class="kpi-v" style="color:var(--gn)">${fmtS(totalPayout)}</div><div class="kpi-d nt">Nhân sự + chủ studio</div></div>`;
+
+  // Render owner salary card
+  renderOwnerSalary(selM,y);
 
   if(!entries.length){
     $('salThead').innerHTML='';
@@ -2561,9 +2647,10 @@ const VIEWS={
   leads:['Liên hệ mới & Báo giá','Leads chưa chốt'],
   revenue:['Doanh thu','Phân tích tài chính'],
   salary:['Nhân sự & Lương','Bảng lương theo tháng'],
+  expenses:['Chi phí vận hành','Thuê nhà · Phần mềm · Cố định hàng tháng'],
   clients:['Khách hàng','Danh sách & lịch sử'],
   claude:['Claude Shortcut','Nhập liệu nhanh từ điện thoại'],
-  settings:['Cài đặt','Quản lý nhân sự cố định & cấu hình'],
+  settings:['Cài đặt','Nhân sự cố định & cấu hình studio'],
 };
 function sw(id,el){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
@@ -2586,7 +2673,8 @@ function sw(id,el){
   if(el)el.classList.add('on');
   const[t,s]=VIEWS[id]||['',''];$('pgT').textContent=t;$('pgS').textContent=s;
   if(id==='salary')renderSalary();
-  if(id==='settings')renderSettings();
+  if(id==='expenses')renderExpenses();
+  if(id==='settings'){renderSettings();renderSettingsOwner();}
 }
 
 function renderSettings(){
@@ -2632,9 +2720,209 @@ function delDefaultStaff(i){
   saveDefaultStaff(); renderSettings();
   toast('🗑️ Đã xóa');
 }
+// ═══════════════════════════════════════════════
+// OWNER SALARY
+// ═══════════════════════════════════════════════
+function renderOwnerSalary(selM,y){
+  const el=$('ownerSalBody'); if(!el)return;
+  const key=`owner_${selM}_${y}`;
+  const paid=!!SALARY_PAID[key];
+  const s=OWNER_SALARY;
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:20px">
+        <div>
+          <div style="font-size:13.5px;font-weight:600;color:var(--bl2)">${s.name}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px">Chủ studio · Lương cố định</div>
+        </div>
+        <div style="border-left:1px solid var(--border);padding-left:16px">
+          <div style="font-size:10.5px;color:var(--t3);margin-bottom:2px">Lương tháng ${selM}/${y}</div>
+          <div style="font-size:18px;font-weight:700;color:var(--bl2);font-family:'DM Serif Display',serif">${fmt(s.amount)}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="sal-paid ${paid?'sal-done':'sal-pend'}">${paid?'✅ Đã trả':'⏳ Chưa trả'}</span>
+        <button class="btn ${paid?'btn-g':'btn-gn'} btn-xs" onclick="toggleOwnerSalPaid(${selM},${y})">${paid?'Hoàn tác':'Đánh dấu đã trả'}</button>
+        <button class="btn btn-g btn-xs" onclick="editOwnerSalary()">✏️ Sửa</button>
+      </div>
+    </div>`;
+}
+
+function toggleOwnerSalPaid(m,y){
+  const key=`owner_${m}_${y}`;
+  SALARY_PAID[key]=!SALARY_PAID[key];
+  localStorage.setItem('cd_sal_paid',JSON.stringify(SALARY_PAID));
+  renderSalary();
+  toast(SALARY_PAID[key]?'✅ Đã đánh dấu trả lương Can Đăng':'↩️ Đã hoàn tác');
+}
+
+function editOwnerSalary(){
+  const cur=Number(OWNER_SALARY.amount).toLocaleString('vi-VN');
+  const raw=prompt('Lương Can Đăng / tháng (đ):',cur);
+  if(raw===null)return;
+  const v=parseInt((raw||'').replace(/\D/g,''));
+  if(!v){toast('⚠️ Số tiền không hợp lệ');return;}
+  OWNER_SALARY.amount=v;
+  localStorage.setItem('cd_owner_salary',JSON.stringify(OWNER_SALARY));
+  renderSalary();
+  toast('✅ Đã cập nhật lương: '+fmt(v));
+}
+
+function saveOwnerSalary(){
+  const v=pM($('ownerSalInput').value);
+  if(!v){toast('⚠️ Nhập số tiền hợp lệ');return;}
+  OWNER_SALARY.amount=v;
+  localStorage.setItem('cd_owner_salary',JSON.stringify(OWNER_SALARY));
+  toast('✅ Đã lưu lương Can Đăng: '+fmt(v));
+}
+
+function renderSettingsOwner(){
+  const inp=$('ownerSalInput'); if(!inp)return;
+  inp.value=Number(OWNER_SALARY.amount).toLocaleString('vi-VN');
+}
+
+// ═══════════════════════════════════════════════
+// EXPENSES (Chi phí vận hành)
+// ═══════════════════════════════════════════════
+function getVndMonth(e){
+  const r=e.currency==='USD'?e.amount*USD_RATE:e.amount;
+  return e.period==='year'?r/12:r;
+}
+
+function onUsdRateChange(el){
+  const v=parseInt((el.value||'').replace(/\D/g,''))||25000;
+  USD_RATE=v;
+  localStorage.setItem('cd_usd_rate',v);
+  renderExpenses();
+}
+
+function renderExpenses(){
+  // Sync USD rate input
+  const inp=$('usdRateInput');
+  if(inp) inp.value=Number(USD_RATE).toLocaleString('vi-VN');
+
+  const total=EXPENSES.reduce((s,e)=>s+getVndMonth(e),0);
+  const nonZero=EXPENSES.filter(e=>e.amount>0).length;
+
+  const kpiEl=$('expKpi'); if(!kpiEl)return;
+  kpiEl.innerHTML=`
+    <div class="kpi"><div class="kpi-l">🏢 Tổng chi phí / tháng</div><div class="kpi-v" style="color:var(--rd)">${total?fmtS(Math.round(total)):'0đ'}</div><div class="kpi-d nt">${nonZero} danh mục có số tiền</div></div>
+    <div class="kpi"><div class="kpi-l">📅 Ước tính / năm</div><div class="kpi-v">${fmtS(Math.round(total*12))}</div><div class="kpi-d nt">Chi phí cố định</div></div>
+    <div class="kpi"><div class="kpi-l">💱 Tỷ giá USD hiện tại</div><div class="kpi-v" style="font-size:20px">${Number(USD_RATE).toLocaleString('vi-VN')}</div><div class="kpi-d nt">VND / 1 USD</div></div>`;
+
+  const tbody=$('expTable'); if(!tbody)return;
+  if(!EXPENSES.length){
+    tbody.innerHTML=`<tr><td colspan="7"><div class="emp"><div class="eic">🏢</div><div class="etl">Chưa có danh mục</div></div></td></tr>`;
+    $('expFoot').innerHTML=''; return;
+  }
+
+  tbody.innerHTML=EXPENSES.map((e,i)=>{
+    const vndM=getVndMonth(e);
+    const curBadge=e.currency==='USD'
+      ?`<span class="exp-cur exp-usd">USD</span>`
+      :`<span class="exp-cur exp-vnd">VND</span>`;
+    const perLabel=e.period==='year'
+      ?`<span class="exp-cur exp-yr">/ năm</span>`
+      :`<span class="exp-cur" style="background:var(--bg);color:var(--t3)">/tháng</span>`;
+    const amtDisplay=e.amount?Number(e.amount).toLocaleString('vi-VN'):'—';
+    return`<tr style="border-bottom:1px solid var(--bl)">
+      <td style="padding:10px 14px;color:var(--t3);font-size:12px">${i+1}</td>
+      <td style="padding:10px 14px;font-weight:500">${e.name}</td>
+      <td style="padding:10px 14px;text-align:center">${amtDisplay} ${curBadge}</td>
+      <td style="padding:10px 14px;text-align:center">${perLabel}</td>
+      <td style="padding:10px 14px;text-align:right;font-weight:600;color:${vndM>0?'var(--rd)':'var(--t3)'}">${vndM>0?fmt(Math.round(vndM)):'—'}</td>
+      <td style="padding:10px 14px;font-size:12px;color:var(--t3)">${e.note||'—'}</td>
+      <td style="padding:10px 14px;white-space:nowrap">
+        <button class="btn btn-g btn-xs" onclick="editExpense('${e.id}')">✏️</button>
+        <button class="btn btn-d btn-xs" onclick="delExpense('${e.id}')">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  $('expFoot').innerHTML=`<tr style="border-top:2px solid var(--border);background:var(--bg)">
+    <td colspan="4" style="padding:11px 14px;font-weight:600;font-size:13px;color:var(--t2)">Tổng cộng / tháng</td>
+    <td style="padding:11px 14px;text-align:right;font-weight:700;font-size:15px;color:var(--rd)">${total?fmt(Math.round(total)):'—'}</td>
+    <td colspan="2"></td>
+  </tr>`;
+}
+
+function openAddExpense(){showExpenseForm(null);}
+function editExpense(id){const e=EXPENSES.find(x=>x.id===id);if(e)showExpenseForm(e);}
+
+function showExpenseForm(e){
+  const isEdit=!!e;
+  const form=$('expInlineForm');
+  form.style.display='block';
+  const selCur=(cur)=>cur==='USD'?'selected':'';
+  const selVnd=(cur)=>cur!=='USD'?'selected':'';
+  const selMon=(per)=>per==='month'?'selected':'';
+  const selYr=(per)=>per==='year'?'selected':'';
+  form.innerHTML=`<div class="card" style="border-color:var(--ac)">
+    <div class="ch"><div class="ct">${isEdit?'Sửa danh mục':'Thêm danh mục mới'}</div><button class="btn btn-g btn-s" onclick="hideExpForm()">✕ Đóng</button></div>
+    <div class="cb">
+      <div class="fg2" style="margin-bottom:12px">
+        <div><label class="fl">Tên danh mục *</label><input class="fi" id="ef-name" value="${isEdit?e.name:''}" placeholder="VD: Thuê nhà, Cloud storage..."></div>
+        <div><label class="fl">Ghi chú</label><input class="fi" id="ef-note" value="${isEdit?e.note||'':''}" placeholder="Tùy chọn"></div>
+      </div>
+      <div class="fg3" style="margin-bottom:14px">
+        <div><label class="fl">Số tiền</label><input class="fi" id="ef-amount" type="text" value="${isEdit&&e.amount?Number(e.amount).toLocaleString('vi-VN'):''}" placeholder="0" oninput="fmtM(this)"></div>
+        <div><label class="fl">Đơn vị tiền</label>
+          <select class="fs" id="ef-cur">
+            <option value="VND" ${isEdit?selVnd(e.currency):'selected'}>VND (đồng)</option>
+            <option value="USD" ${isEdit?selCur(e.currency):''}>USD (đô)</option>
+          </select>
+        </div>
+        <div><label class="fl">Chu kỳ thanh toán</label>
+          <select class="fs" id="ef-period">
+            <option value="month" ${isEdit?selMon(e.period):'selected'}>/ tháng</option>
+            <option value="year" ${isEdit?selYr(e.period):''}>/ năm (quy đổi → VND/tháng)</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-g btn-s" onclick="hideExpForm()">Hủy</button>
+        <button class="btn btn-a btn-s" onclick="saveExpense('${isEdit?e.id:''}')">Lưu danh mục</button>
+      </div>
+    </div>
+  </div>`;
+  form.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function hideExpForm(){
+  const f=$('expInlineForm'); if(f){f.style.display='none';f.innerHTML='';}
+}
+
+function saveExpense(id){
+  const name=$('ef-name').value.trim();
+  if(!name){toast('⚠️ Nhập tên danh mục');return;}
+  const amount=pM($('ef-amount').value);
+  const currency=$('ef-cur').value;
+  const period=$('ef-period').value;
+  const note=$('ef-note').value.trim();
+  if(id){
+    const idx=EXPENSES.findIndex(e=>e.id===id);
+    if(idx>=0)EXPENSES[idx]={...EXPENSES[idx],name,amount,currency,period,note};
+  } else {
+    EXPENSES.push({id:'exp'+Date.now(),name,amount,currency,period,note});
+  }
+  localStorage.setItem('cd_expenses',JSON.stringify(EXPENSES));
+  hideExpForm();
+  renderExpenses();
+  toast(id?'✅ Đã cập nhật: '+name:'✅ Đã thêm: '+name);
+}
+
+function delExpense(id){
+  const e=EXPENSES.find(x=>x.id===id);
+  if(!e||!confirm(`Xóa "${e.name}" khỏi danh mục?`))return;
+  EXPENSES=EXPENSES.filter(x=>x.id!==id);
+  localStorage.setItem('cd_expenses',JSON.stringify(EXPENSES));
+  renderExpenses();
+  toast('🗑️ Đã xóa: '+e.name);
+}
+
 function renderAll(){
   renderKPIs();renderChart();renderDonut();renderRecentProjects();renderKanban();renderLeads();
-  renderRevenue();renderClients();renderSalary();
+  renderRevenue();renderClients();renderSalary();renderExpenses();
   if(calMode==='month')renderMonthly(); else renderWeekly();
 }
 
