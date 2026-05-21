@@ -585,7 +585,7 @@ const DEFAULT_APPS = [
   },
   {
     id:'app-quote',
-    name:'Báo giá Studio',
+    name:'Báo giá chụp ảnh quảng cáo',
     icon:'💰',
     color:'#fff7e0',
     url:'bao-gia/',
@@ -596,7 +596,7 @@ const DEFAULT_APPS = [
 
 let APPS = JSON.parse(localStorage.getItem('cd_apps') || JSON.stringify(DEFAULT_APPS));
 // Migrate stale default names without losing custom apps
-const _nameMap = {'app-contract-v2':'Hợp đồng chụp ảnh'};
+const _nameMap = {'app-contract-v2':'Hợp đồng chụp ảnh','app-quote':'Báo giá chụp ảnh quảng cáo'};
 let _migrated = false;
 APPS.forEach(a => { if(_nameMap[a.id] && a.name !== _nameMap[a.id]){ a.name = _nameMap[a.id]; _migrated = true; } });
 if(_migrated) localStorage.setItem('cd_apps', JSON.stringify(APPS));
