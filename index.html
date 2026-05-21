@@ -608,6 +608,8 @@ let APPS = JSON.parse(localStorage.getItem('cd_apps') || JSON.stringify(DEFAULT_
 const _nameMap = {'app-contract-v2':'Hợp đồng chụp ảnh','app-quote':'Báo giá chụp ảnh quảng cáo'};
 let _migrated = false;
 APPS.forEach(a => { if(_nameMap[a.id] && a.name !== _nameMap[a.id]){ a.name = _nameMap[a.id]; _migrated = true; } });
+// Add new DEFAULT_APPS that don't exist in cached APPS yet
+DEFAULT_APPS.forEach(da => { if(!APPS.find(a => a.id === da.id)){ APPS.push(da); _migrated = true; } });
 if(_migrated) localStorage.setItem('cd_apps', JSON.stringify(APPS));
 let GH_BASE = localStorage.getItem('cd_gh_base') || '';
 let selIcon = '📊';
