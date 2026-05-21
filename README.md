@@ -14,7 +14,8 @@ Bộ công cụ HTML cho Can Đăng Studio, hoạt động trực tiếp trên t
 | 📊 Studio Dashboard | `/dashboard/` | Quản lý dự án, khách hàng, doanh thu |
 | 🎬 Hợp đồng Quay phim | `/hop-dong-quay-phim/` | Tạo bộ 3 văn bản hợp đồng quay phim |
 | 📄 Bộ Văn bản v2 | `/hop-dong-v2/` | Hợp đồng chụp ảnh (cơ bản, sản phẩm, tổng hợp, cao cấp) |
-| 💰 Báo giá Studio | `/bao-gia/` | Tạo báo giá chụp ảnh xuất file Word |
+| 💰 Báo giá chụp ảnh | `/bao-gia/` | Tạo báo giá chụp ảnh quảng cáo xuất file Word |
+| 🎬 Báo giá Quay phim TVC | `/bao-gia-quay-phim/` | Tạo báo giá quay phim TVC (Standard/PRO/PREMIUM) xuất file Word |
 
 ---
 
@@ -30,7 +31,9 @@ candang-studio/
 ├── hop-dong-v2/
 │   └── index.html              ← Bộ Văn bản v2
 ├── bao-gia/
-│   └── index.html              ← Báo giá Studio
+│   └── index.html              ← Báo giá chụp ảnh quảng cáo
+├── bao-gia-quay-phim/
+│   └── index.html              ← Báo giá quay phim TVC
 └── README.md
 ```
 

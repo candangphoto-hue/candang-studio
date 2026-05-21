@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Báo Giá Quay Phim TVC – Can Đăng Studio</title>
+<style>
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ===== BODY ===== */
+body {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 13pt;
+  line-height: 1.2;
+  background: #e8e8e8;
+  color: #000;
+}
+
+/* ===== MOBILE TAB BAR ===== */
+.mobile-tabs { display: none; }
+
+/* ===== APP LAYOUT ===== */
+.app-wrap { display: flex; gap: 0; min-height: 100vh; }
+
+/* ===== FORM PANEL ===== */
+.form-panel {
+  width: 310px;
+  flex-shrink: 0;
+  background: #1e2a3a;
+  color: #eee;
+  padding: 20px 16px 30px;
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.form-panel h2 {
+  font-family: Arial, sans-serif;
+  font-size: 13pt;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #4a7fc1;
+  letter-spacing: 0.5px;
+}
+
+.form-section { margin-bottom: 18px; }
+
+.form-section-title {
+  font-family: Arial, sans-serif;
+  font-size: 9pt;
+  font-weight: bold;
+  color: #7ab3e0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #2e3e54;
+}
+
+.form-panel label {
+  display: block;
+  font-family: Arial, sans-serif;
+  font-size: 9pt;
+  color: #bbb;
+  margin-bottom: 3px;
+  margin-top: 8px;
+}
+.form-panel label:first-of-type { margin-top: 0; }
+
+.form-panel input[type="text"],
+.form-panel input[type="number"],
+.form-panel select {
+  width: 100%;
+  padding: 6px 8px;
+  background: #253447;
+  border: 1px solid #3a5070;
+  border-radius: 4px;
+  color: #fff;
+  font-family: 'Times New Roman', serif;
+  font-size: 11pt;
+  line-height: 1.3;
+}
+
+.form-panel input:focus,
+.form-panel select:focus {
+  outline: none;
+  border-color: #4a7fc1;
+  background: #2c3f56;
+}
+
+.form-panel select option { background: #253447; }
+
+.pkg-check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.pkg-check-row input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: #4a7fc1;
+  flex-shrink: 0;
+}
+
+.pkg-check-row span {
+  font-family: Arial, sans-serif;
+  font-size: 10pt;
+  color: #ddd;
+}
+
+.pkg-fields {
+  background: #253447;
+  border: 1px solid #3a5070;
+  border-radius: 4px;
+  padding: 10px 10px 4px;
+  margin-bottom: 10px;
+}
+
+.pkg-fields label { margin-top: 6px; }
+.pkg-fields label:first-of-type { margin-top: 0; }
+
+.vat-note {
+  font-family: Arial, sans-serif;
+  font-size: 8.5pt;
+  color: #7ab3e0;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.btn-export {
+  width: 100%;
+  padding: 12px 10px;
+  background: #2a6fc9;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+  font-size: 12pt;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.2s;
+}
+.btn-export:hover { background: #3a82e0; }
+
+/* ===== PREVIEW AREA ===== */
+.preview-area {
+  flex: 1;
+  padding: 24px 24px 40px;
+  overflow-y: auto;
+}
+
+.preview-label {
+  text-align: center;
+  font-family: Arial, sans-serif;
+  font-size: 9pt;
+  color: #777;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ===== DOCUMENT ===== */
+.doc {
+  background: #fff;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 20mm 22mm 22mm;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 13pt;
+  line-height: 1.2;
+  color: #000;
+}
+
+.doc-title {
+  text-align: center;
+  font-size: 15pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  line-height: 1.3;
+}
+
+.doc-header-info { margin-bottom: 14px; text-align: right; }
+.doc-header-info p { margin-bottom: 3px; line-height: 1.4; }
+
+.doc p { margin-bottom: 6px; line-height: 1.4; }
+.doc ul { margin-left: 22px; margin-bottom: 8px; }
+.doc ul li { margin-bottom: 3px; line-height: 1.4; }
+
+.cell-list {
+  margin: 5px 0 2px 0;
+  padding-left: 1.3em;
+  list-style-type: disc;
+}
+.cell-list li { margin-bottom: 4px; line-height: 1.4; font-size: 12pt; }
+
+.doc-spacer { height: 10px; }
+
+/* ===== NOTE BOX ===== */
+.note-box {
+  background: #fdf6e3;
+  border-left: 3px solid #e6a817;
+  padding: 8px 12px;
+  margin: 10px 0;
+  font-size: 12pt;
+  line-height: 1.5;
+}
+
+/* ===== TABLES ===== */
+.baogia-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 18px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 12pt;
+  line-height: 1.3;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.10);
+}
+
+.baogia-table th,
+.baogia-table td {
+  border: 1px solid #b8cce4;
+  padding: 7px 9px;
+  vertical-align: top;
+  text-align: left;
+}
+
+.baogia-table thead th {
+  text-align: center;
+  font-weight: bold;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2a5298 100%);
+  color: #fff;
+  vertical-align: middle;
+  font-size: 12pt;
+  border-color: #1a3060;
+  letter-spacing: 0.2px;
+  padding: 9px;
+}
+
+.baogia-table .col-stt { width: 5%;  text-align: center; }
+.baogia-table .col-nd  { width: 46%; }
+.baogia-table .col-dvt { width: 9%;  text-align: center; }
+.baogia-table .col-dg  { width: 13%; text-align: right; }
+.baogia-table .col-sl  { width: 13%; text-align: center; }
+.baogia-table .col-tt  { width: 14%; text-align: right; }
+
+.baogia-table tbody tr:first-child td:nth-child(2) {
+  border-left: 3px solid #2a5298;
+}
+
+.baogia-table .row-summary td {
+  font-weight: bold;
+  background-color: #eaf1fb;
+  color: #1e3a5f;
+}
+
+.baogia-table .row-vat td {
+  font-weight: bold;
+  background-color: #fdf6e3;
+  color: #5a3e00;
+}
+
+.baogia-table .row-total td {
+  font-weight: bold;
+  font-size: 13pt;
+  background: linear-gradient(90deg, #1e3a5f 0%, #2a5298 100%);
+  color: #fff;
+  border-color: #1a3060;
+}
+
+.baogia-table .row-gift td {
+  background-color: #f0f7ff;
+  border-left: 3px solid #4a9ad4;
+}
+
+.gift-badge {
+  display: inline-block;
+  background: #4a9ad4;
+  color: #fff;
+  font-size: 9.5pt;
+  font-weight: bold;
+  font-style: normal;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.pkg-heading {
+  font-size: 13pt;
+  font-weight: bold;
+  margin: 14px 0 4px 0;
+  line-height: 1.3;
+}
+.pkg-subheading {
+  font-size: 12pt;
+  font-weight: bold;
+  margin: 0 0 6px 0;
+  font-style: italic;
+  line-height: 1.35;
+  color: #2a5298;
+}
+
+.portfolio-link { margin: 12px 0 6px; }
+.portfolio-link a { color: #1155cc; text-decoration: underline; font-weight: bold; }
+.payment-section { margin-top: 10px; }
+.bank-block { margin: 6px 0 6px 20px; line-height: 1.5; }
+.closing { margin-top: 18px; font-weight: bold; font-size: 13pt; }
+
+/* ===== MOBILE EXPORT ===== */
+.mobile-export { display: none; }
+
+/* ===== PRINT ===== */
+@media print {
+  body { background: #fff; }
+  .form-panel, .preview-label, .mobile-tabs, .mobile-export { display: none !important; }
+  .app-wrap { display: block; }
+  .preview-area { padding: 0; }
+  .doc { box-shadow: none; margin: 0; padding: 15mm 20mm; width: 100%; }
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .mobile-tabs {
+    display: flex;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    background: #1e2a3a;
+    border-bottom: 2px solid #4a7fc1;
+    height: 50px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 0 10px;
+    background: transparent;
+    color: #8ba8c8;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-family: Arial, sans-serif;
+    font-size: 11pt;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab-btn.active { color: #fff; border-bottom-color: #4a7fc1; }
+  .app-wrap { display: block; padding-top: 50px; padding-bottom: 64px; }
+  .form-panel { width: 100%; height: auto; position: relative; overflow-y: visible; display: none; }
+  .form-panel.tab-active { display: block; }
+  .form-panel input[type="text"],
+  .form-panel input[type="number"],
+  .form-panel select { padding: 10px 10px; font-size: 13pt; min-height: 44px; }
+  .pkg-check-row input[type="checkbox"] { width: 20px; height: 20px; }
+  .pkg-check-row span { font-size: 12pt; }
+  .form-panel .btn-export { display: none; }
+  .preview-area { padding: 10px 8px 10px; overflow-x: hidden; display: none; }
+  .preview-area.tab-active { display: block; }
+  .doc { transform-origin: top left; }
+  .mobile-export {
+    display: block;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 10px 16px;
+    background: #1e2a3a;
+    border-top: 1px solid #3a5070;
+    z-index: 200;
+  }
+  .mobile-export button {
+    width: 100%;
+    padding: 13px;
+    background: #2a6fc9;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: Arial, sans-serif;
+    font-size: 13pt;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .preview-label { font-size: 8pt; margin-bottom: 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== MOBILE TAB BAR ===== -->
+<div class="mobile-tabs">
+  <button class="tab-btn active" id="tabForm" onclick="showTab('form')">📝 Nhập liệu</button>
+  <button class="tab-btn" id="tabPreview" onclick="showTab('preview')">👁 Xem trước</button>
+</div>
+
+<div class="app-wrap">
+
+  <!-- ===== FORM PANEL ===== -->
+  <div class="form-panel tab-active" id="formPanel">
+    <h2>🎬 Báo giá Quay phim TVC</h2>
+
+    <div class="form-section">
+      <div class="form-section-title">Thông tin chung</div>
+
+      <label>Tên khách hàng</label>
+      <input type="text" id="tenKH" placeholder="VD: Công ty ABC..." oninput="render()">
+
+      <label>Tháng thực hiện</label>
+      <input type="text" id="thang" placeholder="VD: 05" oninput="render()">
+
+      <label>Năm thực hiện</label>
+      <input type="text" id="nam" placeholder="VD: 2026" oninput="render()">
+
+      <label>Loại sản phẩm / dịch vụ</label>
+      <select id="loai" onchange="render()">
+        <option value="sản phẩm">Sản phẩm</option>
+        <option value="món ăn">Món ăn</option>
+        <option value="đồ uống">Đồ uống</option>
+        <option value="sản phẩm / món ăn">Sản phẩm / Món ăn</option>
+        <option value="sản phẩm / món ăn / đồ uống">Sản phẩm / Món ăn / Đồ uống</option>
+      </select>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Yêu cầu dự án</div>
+
+      <label>Số lượng video</label>
+      <input type="text" id="slVideoYC" value="1 video" oninput="render()">
+
+      <label>Thời lượng video</label>
+      <input type="text" id="thoiLuongYC" value="30 – 60 giây" oninput="render()">
+
+      <label>Số ngày quay dự kiến</label>
+      <input type="text" id="soNgayYC" value="1 ngày" oninput="render()">
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Chọn gói dịch vụ</div>
+
+      <!-- Gói 1 -->
+      <label class="pkg-check-row">
+        <input type="checkbox" id="chk1" onchange="togglePkg(1); render();" checked>
+        <span>Gói 1 – TVC Standard</span>
+      </label>
+      <div class="pkg-fields" id="fields1">
+        <label>Chi phí dịch vụ (vnđ)</label>
+        <input type="number" id="cp1" value="15000000" min="0" oninput="render()">
+        <label>Thời lượng video</label>
+        <input type="text" id="tl1" value="30 giây" oninput="render()">
+        <label>Số lượng video output</label>
+        <input type="text" id="sl1" value="1 video" oninput="render()">
+      </div>
+
+      <!-- Gói 2 -->
+      <label class="pkg-check-row">
+        <input type="checkbox" id="chk2" onchange="togglePkg(2); render();">
+        <span>Gói 2 – TVC PRO</span>
+      </label>
+      <div class="pkg-fields" id="fields2" style="display:none;">
+        <label>Chi phí dịch vụ (vnđ)</label>
+        <input type="number" id="cp2" value="25000000" min="0" oninput="render()">
+        <label>Thời lượng video</label>
+        <input type="text" id="tl2" value="dưới 50 giây" oninput="render()">
+        <label>Số lượng video output</label>
+        <input type="text" id="sl2" value="1 video" oninput="render()">
+      </div>
+
+      <!-- Gói 3 -->
+      <label class="pkg-check-row">
+        <input type="checkbox" id="chk3" onchange="togglePkg(3); render();">
+        <span>Gói 3 – TVC PREMIUM</span>
+      </label>
+      <div class="pkg-fields" id="fields3" style="display:none;">
+        <label>Chi phí dịch vụ (vnđ)</label>
+        <input type="number" id="cp3" value="50000000" min="0" oninput="render()">
+        <label>Thời lượng video</label>
+        <input type="text" id="tl3" value="dưới 50 giây" oninput="render()">
+        <label>Số lượng video output</label>
+        <input type="text" id="sl3" value="1 video chính + 2 video phụ" oninput="render()">
+      </div>
+
+      <div class="vat-note">VAT mặc định 8% — tự động tính cho từng gói.</div>
+    </div>
+
+    <button class="btn-export" onclick="exportWord()">📥 Xuất file Word (.doc)</button>
+  </div>
+
+  <!-- ===== PREVIEW AREA ===== -->
+  <div class="preview-area" id="previewArea">
+    <div class="preview-label">▸ Preview — cập nhật theo thời gian thực</div>
+    <div class="doc" id="doc"></div>
+  </div>
+
+</div>
+
+<!-- ===== MOBILE EXPORT ===== -->
+<div class="mobile-export">
+  <button onclick="exportWord()">📥 Xuất file Word (.doc)</button>
+</div>
+
+<!-- ===== SCRIPT ===== -->
+<script>
+const VAT = 0.08;
+
+function v(id)   { return document.getElementById(id).value.trim(); }
+function chk(id) { return document.getElementById(id).checked; }
+function num(id) { return parseFloat(document.getElementById(id).value) || 0; }
+function fmt(n)  { return n.toLocaleString('vi-VN'); }
+
+function calcPkg(cp) {
+  const chiPhi = Math.round(cp);
+  const vat    = Math.round(chiPhi * VAT);
+  const total  = chiPhi + vat;
+  return { chiPhi, vat, total };
+}
+
+function togglePkg(n) {
+  document.getElementById('fields' + n).style.display =
+    document.getElementById('chk' + n).checked ? 'block' : 'none';
+}
+
+// ──────────────────────────────────────────────
+// BUILD PACKAGE TABLE
+// ──────────────────────────────────────────────
+function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
+  const { chiPhi: cp, vat, total } = calcPkg(chiPhi);
+  let heading = '', subheading = '', col1Content = '', extraRows = '';
+
+  const socialRow = `
+    <tr class="row-gift">
+      <td class="col-stt" style="text-align:center;"><strong>${pkgNum === 2 ? 2 : 3}</strong></td>
+      <td class="col-nd">
+        <span class="gift-badge">TẶNG</span>
+        <strong>Đăng bài video ngắn – tăng độ nhận diện thương hiệu</strong>
+        <ul class="cell-list">
+          <li>Youtube: 101 nghìn follow</li>
+          <li>Tiktok: 53 nghìn follow</li>
+          <li>Facebook: 76 nghìn follow</li>
+        </ul>
+      </td>
+      <td class="col-dvt" style="text-align:center;">01</td>
+      <td class="col-dg" style="text-align:right;">10.000.000</td>
+      <td class="col-sl" style="text-align:center;">01</td>
+      <td class="col-tt" style="text-align:center;font-weight:bold;color:#1e6a9e;">Tặng</td>
+    </tr>`;
+
+  // ── GÓI 1 ──
+  if (pkgNum === 1) {
+    heading = 'Gói 1: Gói quay phim TVC Standard';
+    col1Content = `
+      <strong>Gói quay phim quảng cáo</strong>
+      <ul class="cell-list">
+        <li>Quay phim tại studio</li>
+        <li>Tư vấn về bối cảnh, concept, hiệu ứng phù hợp với video</li>
+        <li>Thiết bị quay phim và dải ống kính Sony – Full HD</li>
+        <li>Thiết bị chiếu sáng</li>
+        <li>Bối cảnh theo kịch bản</li>
+        <li>Màn hình check hình ảnh</li>
+        <li>Đạo cụ, bối cảnh phù hợp với concept</li>
+      </ul>
+      <strong>Dạng phim quảng cáo</strong>
+      <ul class="cell-list">
+        <li>Số lượng: ${soLuong}</li>
+        <li>Thời lượng: ${thoiLuong}</li>
+        <li>Kích thước video: Full HD</li>
+        <li>Chèn thông tin và hiệu ứng đồ họa phù hợp</li>
+      </ul>`;
+    extraRows = '';
+  }
+
+  // ── GÓI 2 ──
+  if (pkgNum === 2) {
+    heading = 'Gói 2: Gói quay phim TVC PRO';
+    col1Content = `
+      <strong>Gói quay phim quảng cáo</strong>
+      <ul class="cell-list">
+        <li>Quay phim tại studio</li>
+        <li>Tư vấn về bối cảnh, concept, hiệu ứng phù hợp với video</li>
+        <li>Kịch bản video hoàn thiện</li>
+        <li>Thiết bị quay phim và dải ống kính Sony – Full HD 400 fps (chuyển động chậm)</li>
+        <li>Thiết bị chiếu sáng công suất lớn</li>
+        <li>Màn hình check cảnh quay</li>
+        <li>Bối cảnh, kỹ thuật máy thực hiện cầu kỳ hơn</li>
+        <li>Đạo cụ, bối cảnh phù hợp với concept</li>
+      </ul>
+      <strong>Dạng phim quảng cáo</strong>
+      <ul class="cell-list">
+        <li>Số lượng: ${soLuong}</li>
+        <li>Thời lượng: ${thoiLuong}</li>
+        <li>Kích thước video: Full HD</li>
+        <li>Chèn thông tin và hiệu ứng đồ họa phù hợp với ngân sách</li>
+      </ul>`;
+    extraRows = socialRow;
+  }
+
+  // ── GÓI 3 ──
+  if (pkgNum === 3) {
+    heading    = 'Gói 3: Gói quay phim TVC PREMIUM';
+    subheading = 'Nghiên cứu đối tượng khách hàng, phân tích insight – thiết kế câu chuyện cho video quảng cáo – Moodboard chi tiết cho dự án';
+    col1Content = `
+      <strong>Gói quay phim quảng cáo</strong>
+      <ul class="cell-list">
+        <li>Quay phim tại studio</li>
+        <li>Tư vấn về bối cảnh, concept, hiệu ứng phù hợp với video</li>
+        <li>Kịch bản video hoàn thiện</li>
+        <li>Thiết bị quay phim và dải ống kính Sony – <strong>4K 400 fps</strong> (chuyển động rất chậm – TVC chuyên nghiệp)</li>
+        <li>Thiết bị chiếu sáng công suất lớn</li>
+        <li>Màn hình check cảnh quay</li>
+        <li>Đạo cụ, bối cảnh phù hợp với concept</li>
+      </ul>
+      <strong>Dạng phim quảng cáo</strong>
+      <ul class="cell-list">
+        <li>Số lượng: ${soLuong}</li>
+        <li>Thời lượng: ${thoiLuong}</li>
+        <li>Kích thước video: <strong>4K</strong></li>
+        <li>Thiết kế chữ phù hợp với nội dung video</li>
+        <li>Voice off hoàn thiện cho video</li>
+        <li>Chèn thông tin và hiệu ứng đồ họa phù hợp</li>
+      </ul>`;
+    extraRows = `
+      <tr class="row-gift">
+        <td class="col-stt" style="text-align:center;"><strong>2</strong></td>
+        <td class="col-nd">
+          <span class="gift-badge">TẶNG</span>
+          <strong>Chụp ảnh sản phẩm bằng giải pháp độc quyền</strong>
+          <ul class="cell-list">
+            <li>Tặng bộ 20 ảnh concept bằng giải pháp hình ảnh độc quyền</li>
+            <li>Chụp ảnh nền trắng sản phẩm – tách phông mỗi sản phẩm 3 ảnh hoàn thiện</li>
+          </ul>
+        </td>
+        <td class="col-dvt" style="text-align:center;">01</td>
+        <td class="col-dg" style="text-align:right;">15.000.000</td>
+        <td class="col-sl" style="text-align:center;">01</td>
+        <td class="col-tt" style="text-align:center;font-weight:bold;color:#1e6a9e;">Tặng</td>
+      </tr>
+      <tr class="row-gift">
+        <td class="col-stt" style="text-align:center;"><strong>3</strong></td>
+        <td class="col-nd">
+          <span class="gift-badge">TẶNG</span>
+          <strong>Đăng bài video ngắn – tăng độ nhận diện thương hiệu</strong>
+          <ul class="cell-list">
+            <li>Youtube: 101 nghìn follow</li>
+            <li>Tiktok: 53 nghìn follow</li>
+            <li>Facebook: 76 nghìn follow</li>
+          </ul>
+        </td>
+        <td class="col-dvt" style="text-align:center;">01</td>
+        <td class="col-dg" style="text-align:right;">10.000.000</td>
+        <td class="col-sl" style="text-align:center;">01</td>
+        <td class="col-tt" style="text-align:center;font-weight:bold;color:#1e6a9e;">Tặng</td>
+      </tr>`;
+  }
+
+  // Row numbering for summary/vat/total
+  const summaryN = pkgNum === 1 ? 2 : pkgNum === 2 ? 3 : 4;
+  const vatN     = summaryN + 1;
+  const totalN   = vatN + 1;
+
+  return `
+    <p class="pkg-heading">${heading}</p>
+    ${subheading ? `<p class="pkg-subheading">${subheading}</p>` : ''}
+    <table class="baogia-table">
+      <thead>
+        <tr>
+          <th class="col-stt">STT</th>
+          <th class="col-nd">Nội dung</th>
+          <th class="col-dvt">ĐVT</th>
+          <th class="col-dg">Đơn giá<br><em>(vnđ)</em></th>
+          <th class="col-sl">Số lượng</th>
+          <th class="col-tt">Thành tiền<br>(vnđ)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-stt"><strong>1</strong></td>
+          <td class="col-nd">${col1Content}</td>
+          <td class="col-dvt">Trọn gói</td>
+          <td class="col-dg">${fmt(cp)}</td>
+          <td class="col-sl">${soLuong}</td>
+          <td class="col-tt">${fmt(cp)}</td>
+        </tr>
+        ${extraRows}
+        <tr class="row-summary">
+          <td class="col-stt"><strong>${summaryN}</strong></td>
+          <td class="col-nd"><strong>Chi phí dịch vụ</strong></td>
+          <td colspan="3" style="text-align:center;"><strong>${fmt(cp)}</strong></td>
+          <td class="col-tt"></td>
+        </tr>
+        <tr class="row-vat">
+          <td class="col-stt"><strong>${vatN}</strong></td>
+          <td colspan="4"><strong>Thuế giá trị gia tăng 08% VAT</strong></td>
+          <td class="col-tt"><strong>${fmt(vat)}</strong></td>
+        </tr>
+        <tr class="row-total">
+          <td class="col-stt"><strong>${totalN}</strong></td>
+          <td colspan="4"><strong>Tổng cộng</strong></td>
+          <td class="col-tt"><strong>${fmt(total)}</strong></td>
+        </tr>
+      </tbody>
+    </table>`;
+}
+
+// ──────────────────────────────────────────────
+// MAIN RENDER
+// ──────────────────────────────────────────────
+function render() {
+  const tenKH       = v('tenKH')       || '[Tên_khách_hàng]';
+  const thang       = v('thang')       || '....';
+  const nam         = v('nam')         || '....';
+  const loai        = v('loai');
+  const slVideoYC   = v('slVideoYC')   || '1 video';
+  const thoiLuongYC = v('thoiLuongYC') || '30 – 60 giây';
+  const soNgayYC    = v('soNgayYC')    || '1 ngày';
+
+  const show1 = chk('chk1');
+  const show2 = chk('chk2');
+  const show3 = chk('chk3');
+
+  let pkgsHTML = '';
+  if (show1) pkgsHTML += buildPkgTable(1, num('cp1'), v('tl1') || '30 giây',        v('sl1') || '1 video',                      loai);
+  if (show2) pkgsHTML += buildPkgTable(2, num('cp2'), v('tl2') || 'dưới 50 giây',   v('sl2') || '1 video',                      loai);
+  if (show3) pkgsHTML += buildPkgTable(3, num('cp3'), v('tl3') || 'dưới 50 giây',   v('sl3') || '1 video chính + 2 video phụ',  loai);
+
+  if (!show1 && !show2 && !show3) {
+    pkgsHTML = '<p style="color:#aaa;text-align:center;padding:20px;">[Chưa chọn gói dịch vụ]</p>';
+  }
+
+  document.getElementById('doc').innerHTML = `
+    <p class="doc-title">Báo giá chi phí quay phim quảng cáo TVC ${loai.toUpperCase()}</p>
+
+    <div class="doc-header-info">
+      <p><strong>Can Đăng Studio</strong></p>
+      <p><strong>Công ty TNHH Can Creative</strong></p>
+      <p>Điện thoại: 090 432 9595</p>
+      <p>Thời gian thực hiện: tháng ${thang} năm ${nam}</p>
+      <p>Email: Candangphoto@gmail.com</p>
+    </div>
+
+    <p><strong>Gửi ${tenKH}</strong></p>
+    <div class="doc-spacer"></div>
+
+    <p><strong>Yêu cầu:</strong></p>
+    <ul>
+      <li>Quay phim quảng cáo ${loai}</li>
+      <li>Số lượng: ${slVideoYC}</li>
+      <li>Thời lượng: ${thoiLuongYC}</li>
+      <li>Số ngày quay phim dự kiến: ${soNgayYC}</li>
+    </ul>
+    <div class="doc-spacer"></div>
+
+    <p><strong>Chúng tôi xác nhận thông tin và gửi báo giá quay phim quảng cáo TVC</strong></p>
+    <div class="note-box">
+      <strong>Lưu ý:</strong> Báo giá chưa bao gồm chi phí thực phẩm, chi phí thuê Voice off cho video và chi phí thuê người mẫu.
+    </div>
+    <div class="doc-spacer"></div>
+
+    ${pkgsHTML}
+
+    <div class="portfolio-link">
+      <p><strong>Portfolio</strong></p>
+      <p><a href="https://candangstudio.vn/" target="_blank">https://candangstudio.vn/</a></p>
+    </div>
+    <div class="doc-spacer"></div>
+
+    <div class="payment-section">
+      <p><strong>Thanh toán:</strong></p>
+      <ul>
+        <li>Khách hàng thanh toán trước 50% khi chốt thực hiện dự án</li>
+        <li>Thanh toán 50% còn lại sau khi kết thúc chỉnh sửa</li>
+        <li>Bàn giao video sau khi nhận thanh toán đầy đủ từ khách hàng</li>
+      </ul>
+    </div>
+
+    <div class="bank-block">
+      <p><strong>Thông tin tài khoản ngân hàng</strong><br>
+      Tên tài khoản: Công ty TNHH Can Creative<br>
+      Số tài khoản: 3638 6868 8888<br>
+      Ngân hàng TMCP Á Châu ACB – Chi nhánh Hoàng Cầu</p>
+    </div>
+    <div class="doc-spacer"></div>
+
+    <p class="closing">Trân trọng !</p>
+  `;
+}
+
+// ──────────────────────────────────────────────
+// CONVERT LISTS → WORD-COMPATIBLE BULLETS
+// ──────────────────────────────────────────────
+function convertListsForWord(html) {
+  // Bullet trong bảng (cell-list)
+  html = html.replace(
+    /<ul[^>]*class="cell-list"[^>]*>([\s\S]*?)<\/ul>/gi,
+    function(match, content) {
+      const items = [];
+      content.replace(/<li>([\s\S]*?)<\/li>/gi, function(m, text) {
+        items.push(
+          '<p style="margin:2px 0 3px 0; padding-left:14pt; text-indent:-14pt;' +
+          'font-family:\'Times New Roman\',serif;font-size:12pt;line-height:1.4;">' +
+          '&#8226;&nbsp;' + text.trim() + '</p>'
+        );
+      });
+      return items.join('');
+    }
+  );
+  // Bullet ngoài bảng
+  html = html.replace(
+    /<ul>([\s\S]*?)<\/ul>/gi,
+    function(match, content) {
+      const items = [];
+      content.replace(/<li>([\s\S]*?)<\/li>/gi, function(m, text) {
+        items.push(
+          '<p style="margin:2px 0 3px 0; padding-left:18pt; text-indent:-18pt;' +
+          'font-family:\'Times New Roman\',serif;font-size:13pt;line-height:1.4;">' +
+          '&#8226;&nbsp;&nbsp;' + text.trim() + '</p>'
+        );
+      });
+      return items.join('');
+    }
+  );
+  // Badge TẶNG cho Word
+  html = html.replace(/<span class="gift-badge">(.*?)<\/span>/g, '<strong>[$1]</strong>&nbsp;');
+  return html;
+}
+
+// ──────────────────────────────────────────────
+// EXPORT TO WORD
+// ──────────────────────────────────────────────
+function exportWord() {
+  const rawHTML  = document.getElementById('doc').innerHTML;
+  const wordBody = convertListsForWord(rawHTML);
+
+  const tenKH = v('tenKH') || 'KhachHang';
+  const thang = v('thang');
+  const nam   = v('nam');
+  const fname = 'BaoGia_QuayPhim_TVC'
+    + (tenKH !== '[Tên_khách_hàng]' ? '_' + tenKH.replace(/\s+/g,'_') : '')
+    + (thang ? '_T' + thang : '')
+    + (nam   ? '_'  + nam   : '')
+    + '.doc';
+
+  const wordDoc = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<meta name="ProgId" content="Word.Document">
+<!--[if gte mso 9]><xml>
+<w:WordDocument>
+  <w:View>Print</w:View>
+  <w:Zoom>100</w:Zoom>
+  <w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml><![endif]-->
+<style>
+  @page { size: A4; margin: 20mm 22mm 22mm 22mm; }
+  body { font-family:'Times New Roman',Times,serif; font-size:13pt; line-height:1.2; color:#000; }
+  .doc-title { text-align:center; font-size:15pt; font-weight:bold; text-transform:uppercase; margin-bottom:14px; line-height:1.3; }
+  .doc-header-info { text-align:right; margin-bottom:14px; }
+  .doc-header-info p { margin-bottom:3px; line-height:1.4; }
+  p { margin-bottom:6px; line-height:1.4; }
+  .doc-spacer { height:8px; }
+  .pkg-heading { font-size:13pt; font-weight:bold; margin:14px 0 4px 0; }
+  .pkg-subheading { font-size:12pt; font-weight:bold; font-style:italic; margin:0 0 6px 0; color:#2a5298; }
+  .note-box { background-color:#fdf6e3; border-left:3px solid #e6a817; padding:8px 12px; margin:10px 0; font-size:12pt; line-height:1.5; }
+  table { width:100%; border-collapse:collapse; margin-bottom:18px; font-size:12pt; }
+  th, td { border:1px solid #b8cce4; padding:7px 9px; vertical-align:top; text-align:left; line-height:1.3; }
+  thead th { text-align:center; font-weight:bold; background-color:#1e3a5f; color:#fff; vertical-align:middle; padding:9px; }
+  .col-stt { width:5%;  text-align:center; }
+  .col-nd  { width:46%; }
+  .col-dvt { width:9%;  text-align:center; }
+  .col-dg  { width:13%; text-align:right; }
+  .col-sl  { width:13%; text-align:center; }
+  .col-tt  { width:14%; text-align:right; }
+  .row-summary td { font-weight:bold; background-color:#eaf1fb; color:#1e3a5f; }
+  .row-vat td { font-weight:bold; background-color:#fdf6e3; color:#5a3e00; }
+  .row-total td { font-weight:bold; font-size:13pt; background-color:#1e3a5f; color:#fff; }
+  .row-gift td { background-color:#f0f7ff; border-left:3px solid #4a9ad4; }
+  .portfolio-link a { color:#1155cc; text-decoration:underline; font-weight:bold; }
+  .bank-block { margin:6px 0 6px 20px; line-height:1.5; }
+  .closing { font-weight:bold; font-size:13pt; margin-top:18px; }
+</style>
+</head>
+<body>
+${wordBody}
+</body>
+</html>`;
+
+  const blob = new Blob(['﻿', wordDoc], { type: 'application/msword' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ──────────────────────────────────────────────
+// MOBILE: TAB SWITCHING + SCALE
+// ──────────────────────────────────────────────
+function showTab(tab) {
+  const formPanel   = document.getElementById('formPanel');
+  const previewArea = document.getElementById('previewArea');
+  const btnForm     = document.getElementById('tabForm');
+  const btnPreview  = document.getElementById('tabPreview');
+
+  if (tab === 'form') {
+    formPanel.classList.add('tab-active');
+    previewArea.classList.remove('tab-active');
+    btnForm.classList.add('active');
+    btnPreview.classList.remove('active');
+  } else {
+    formPanel.classList.remove('tab-active');
+    previewArea.classList.add('tab-active');
+    btnForm.classList.remove('active');
+    btnPreview.classList.add('active');
+    scaleDoc();
+  }
+}
+
+function scaleDoc() {
+  if (window.innerWidth > 768) return;
+  const area  = document.getElementById('previewArea');
+  const doc   = document.getElementById('doc');
+  const avail = area.clientWidth - 16;
+  const docW  = 794;
+  const scale = Math.min(1, avail / docW);
+  doc.style.transform       = `scale(${scale})`;
+  doc.style.transformOrigin = 'top left';
+  doc.style.marginBottom    = `-${docW * (1 - scale) * 0.8}px`;
+}
+
+window.addEventListener('resize', function () {
+  if (window.innerWidth <= 768) scaleDoc();
+  else {
+    const doc = document.getElementById('doc');
+    doc.style.transform = doc.style.transformOrigin = doc.style.marginBottom = '';
+  }
+});
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function () {
+  const now = new Date();
+  document.getElementById('thang').value = String(now.getMonth() + 1).padStart(2, '0');
+  document.getElementById('nam').value   = now.getFullYear();
+
+  if (window.innerWidth <= 768) {
+    showTab('form');
+  } else {
+    document.getElementById('formPanel').classList.add('tab-active');
+    document.getElementById('previewArea').classList.add('tab-active');
+  }
+
+  render();
+});
+</script>
+
+</body>
+</html>
