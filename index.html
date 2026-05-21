@@ -595,6 +595,11 @@ const DEFAULT_APPS = [
 ];
 
 let APPS = JSON.parse(localStorage.getItem('cd_apps') || JSON.stringify(DEFAULT_APPS));
+// Migrate stale default names without losing custom apps
+const _nameMap = {'app-contract-v2':'Hợp đồng chụp ảnh'};
+let _migrated = false;
+APPS.forEach(a => { if(_nameMap[a.id] && a.name !== _nameMap[a.id]){ a.name = _nameMap[a.id]; _migrated = true; } });
+if(_migrated) localStorage.setItem('cd_apps', JSON.stringify(APPS));
 let GH_BASE = localStorage.getItem('cd_gh_base') || '';
 let selIcon = '📊';
 let selColor = '#f5edd8';
