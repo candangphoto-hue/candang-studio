@@ -2,7 +2,7 @@
 
 Bộ công cụ HTML cho Can Đăng Studio, hoạt động trực tiếp trên trình duyệt, không cần cài đặt.
 
-🌐 **Live:** https://candangphoto.github.io/candang-studio/
+🌐 **Live:** https://candangphoto-hue.github.io/candang-studio/
 
 ---
 
