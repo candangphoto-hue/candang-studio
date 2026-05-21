@@ -796,31 +796,31 @@ function render() {
 // CONVERT LISTS → WORD-COMPATIBLE BULLETS
 // ──────────────────────────────────────────────
 function convertListsForWord(html) {
-  // Bullet trong bảng (cell-list)
+  // Bullet trong bảng (cell-list) — dùng padding-left đơn giản, KHÔNG text-indent (WPS bug)
   html = html.replace(
     /<ul[^>]*class="cell-list"[^>]*>([\s\S]*?)<\/ul>/gi,
     function(match, content) {
       const items = [];
       content.replace(/<li>([\s\S]*?)<\/li>/gi, function(m, text) {
         items.push(
-          '<p style="margin:2px 0 3px 0; padding-left:14pt; text-indent:-14pt;' +
+          '<p style="margin-top:2px;margin-bottom:3px;margin-left:12pt;' +
           'font-family:\'Times New Roman\',serif;font-size:12pt;line-height:1.4;">' +
-          '&#8226;&nbsp;' + text.trim() + '</p>'
+          '• ' + text.trim() + '</p>'
         );
       });
       return items.join('');
     }
   );
-  // Bullet ngoài bảng
+  // Bullet ngoài bảng (ul thường)
   html = html.replace(
     /<ul>([\s\S]*?)<\/ul>/gi,
     function(match, content) {
       const items = [];
       content.replace(/<li>([\s\S]*?)<\/li>/gi, function(m, text) {
         items.push(
-          '<p style="margin:2px 0 3px 0; padding-left:18pt; text-indent:-18pt;' +
+          '<p style="margin-top:2px;margin-bottom:3px;margin-left:16pt;' +
           'font-family:\'Times New Roman\',serif;font-size:13pt;line-height:1.4;">' +
-          '&#8226;&nbsp;&nbsp;' + text.trim() + '</p>'
+          '• ' + text.trim() + '</p>'
         );
       });
       return items.join('');
