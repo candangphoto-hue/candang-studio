@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Can Creative - Tạo Bộ Văn Bản v2</title>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<script>if(typeof docx==='undefined'){document.write('<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"><\/script>')}</script>
+<script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; -webkit-text-size-adjust: 100%; }
+  .header { background: #111; color: #fff; padding: 20px 16px; text-align: center; position: sticky; top: 0; z-index: 10; }
+  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: 1.5px; }
+  .header p { font-size: 12px; color: #888; margin-top: 2px; }
+  .container { max-width: 640px; margin: 16px auto; padding: 0 12px; }
+  .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .card-title { font-size: 13px; font-weight: 700; color: #111; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #111; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+  .form-group { display: flex; flex-direction: column; }
+  .form-group label { font-size: 12px; font-weight: 600; color: #555; margin-bottom: 4px; }
+  .form-group input, .form-group textarea, .form-group select {
+    padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px;
+    font-family: inherit; transition: border-color 0.2s; background: #fff;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #111; }
+  .form-group textarea { resize: vertical; min-height: 50px; }
+  .form-group .hint { font-size: 10px; color: #aaa; margin-top: 2px; }
+  .form-group .opt { font-size: 10px; color: #bbb; font-style: italic; }
+  .type-select { border-width: 2px; border-color: #111; font-weight: 600; }
+  .price-summary { background: #f8f9fa; border-radius: 8px; padding: 14px 16px; margin-top: 8px; }
+  .price-line { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+  .price-line.total { font-weight: 700; font-size: 15px; border-top: 2px solid #111; padding-top: 8px; margin-top: 4px; }
+  .price-line .label { color: #555; }
+  .price-line.total .label, .price-line.total .value { color: #111; }
+  .contract-display { font-size: 14px; font-weight: 600; color: #111; background: #f0f0f0; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 12px; font-family: monospace; }
+  .btn-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
+  .btn {
+    display: block; width: 100%; padding: 14px; color: #fff;
+    border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.3px;
+  }
+  .btn:active { opacity: 0.8; }
+  .btn-all { background: #111; }
+  .btn-single { background: #555; font-size: 13px; padding: 11px; }
+  .btn-info { background: none; color: #888; font-size: 12px; text-align: center; padding: 4px; font-weight: 400; }
+  .section-sep { font-size: 11px; color: #aaa; text-align: center; margin: 4px 0 10px; text-transform: uppercase; letter-spacing: 1px; }
+  @media (max-width: 500px) {
+    .form-row { grid-template-columns: 1fr; }
+    .form-row.triple { grid-template-columns: 1fr; }
+    .card { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>CAN CREATIVE</h1>
+  <p id="headerSubtitle">Tạo Bộ Văn Bản — Chọn loại hợp đồng bên dưới</p>
+</div>
+
+<div class="container">
+
+  <!-- LOẠI HỢP ĐỒNG -->
+  <div class="card">
+    <div class="card-title">Loại hợp đồng</div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label>Chọn loại dịch vụ chụp ảnh</label>
+        <select id="contractType" class="type-select" onchange="onTypeChange()">
+          <option value="co_ban">Chụp ảnh Món ăn cơ bản</option>
+          <option value="san_pham">Chụp ảnh Sản phẩm</option>
+          <option value="tong_hop">Chụp ảnh Tổng hợp</option>
+          <option value="cao_cap">Chụp ảnh Món ăn cao cấp</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÃ HỢP ĐỒNG -->
+  <div class="card">
+    <div class="card-title">Mã hợp đồng & Ngày ký</div>
+    <div class="contract-display" id="contractDisplay">____/____/CC-__</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Ngày ký hợp đồng</label>
+        <input type="date" id="signDate">
+      </div>
+      <div class="form-group">
+        <label>Viết tắt Bên A</label>
+        <input type="text" id="clientAbbr" placeholder="VD: LL" style="text-transform:uppercase">
+        <span class="hint">Lam Lam → LL, Phong Vũ → PV</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BÊN A -->
+  <div class="card">
+    <div class="card-title">Thông tin Bên A (Khách hàng)</div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label>Tên công ty / Tổ chức</label>
+        <input type="text" id="clientName" placeholder="VD: CÔNG TY TNHH LAM LAM">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Người đại diện</label>
+        <input type="text" id="clientRep" placeholder="Họ và tên">
+      </div>
+      <div class="form-group">
+        <label>Chức vụ</label>
+        <input type="text" id="clientPosition" value="Giám đốc">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>MST</label>
+        <input type="text" id="clientTax" placeholder="Mã số thuế">
+      </div>
+      <div class="form-group">
+        <label>Điện thoại</label>
+        <input type="text" id="clientPhone" placeholder="Số điện thoại">
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label>Địa chỉ</label>
+        <input type="text" id="clientAddress" placeholder="Địa chỉ đầy đủ">
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label>Email <span class="opt">(không bắt buộc)</span></label>
+        <input type="email" id="clientEmail" placeholder="email@congty.vn">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Số tài khoản <span class="opt">(không bắt buộc)</span></label>
+        <input type="text" id="clientBankAccount" placeholder="Số TK ngân hàng">
+      </div>
+      <div class="form-group">
+        <label>Ngân hàng <span class="opt">(không bắt buộc)</span></label>
+        <input type="text" id="clientBankName" placeholder="VD: Vietcombank - CN HN">
+      </div>
+    </div>
+  </div>
+
+  <!-- NỘI DUNG -->
+  <div class="card">
+    <div class="card-title">Nội dung công việc</div>
+
+    <!-- Chỉ hiện cho Tổng hợp -->
+    <div id="rowServiceDesc" class="form-row full" style="display:none">
+      <div class="form-group">
+        <label>Mô tả dịch vụ <span class="hint" style="display:inline">(điền tiếp sau "Chụp ảnh quảng cáo...")</span></label>
+        <input type="text" id="serviceDesc" placeholder="VD: sản phẩm và món ăn">
+      </div>
+    </div>
+
+    <!-- Phong cách: ẩn cho Tổng hợp -->
+    <div id="rowPhongCach" class="form-row full">
+      <div class="form-group">
+        <label>Phong cách</label>
+        <input type="text" id="phongCach" placeholder="VD: Studio nền trắng, lifestyle">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Số lượng</label>
+        <input type="text" id="itemCount" placeholder="VD: 30">
+        <span class="hint" id="itemUnitHint">món ăn hoặc set món ăn</span>
+      </div>
+      <div class="form-group">
+        <label>Số ảnh chỉnh sửa</label>
+        <input type="text" id="editPhotoCount" placeholder="VD: 80">
+      </div>
+    </div>
+
+    <!-- Chỉ hiện cho Cao cấp -->
+    <div id="rowTachPhong" class="form-row full" style="display:none">
+      <div class="form-group">
+        <label>Số ảnh tách phông</label>
+        <input type="text" id="tachPhong" placeholder="VD: 25">
+        <span class="hint">Số ảnh tách phông hoàn thiện bàn giao</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- THỜI GIAN -->
+  <div class="card">
+    <div class="card-title">Thời gian & Địa điểm</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Ngày chụp</label>
+        <input type="date" id="shootDate">
+      </div>
+      <div class="form-group">
+        <label>Giờ chụp</label>
+        <input type="text" id="shootTime" value="từ 09h30 đến 18h">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Số ngày chụp</label>
+        <input type="text" id="shootDays" value="một (01)">
+      </div>
+      <div class="form-group">
+        <label>Địa điểm</label>
+        <input type="text" id="shootLocation" placeholder="Địa chỉ chụp">
+      </div>
+    </div>
+  </div>
+
+  <!-- CHI PHÍ -->
+  <div class="card">
+    <div class="card-title">Chi phí dịch vụ</div>
+    <div class="form-row full">
+      <div class="form-group">
+        <label>Đơn giá (VNĐ, chưa VAT)</label>
+        <input type="text" id="servicePrice" placeholder="15000000" inputmode="numeric" oninput="calculatePrices()">
+      </div>
+    </div>
+    <div class="price-summary">
+      <div class="price-line"><span class="label">Chi phí dịch vụ</span><span class="value" id="dispSvc">0</span></div>
+      <div class="price-line"><span class="label">VAT 8%</span><span class="value" id="dispVAT">0</span></div>
+      <div class="price-line total"><span class="label">Tổng cộng</span><span class="value" id="dispTotal">0</span></div>
+      <div class="price-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed #ccc"><span class="label">Tạm ứng 50%</span><span class="value" id="dispDep">0</span></div>
+      <div class="price-line"><span class="label">Còn lại 50%</span><span class="value" id="dispRem">0</span></div>
+    </div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="btn-group">
+    <button class="btn btn-all" onclick="generateAll()">⬇ Tạo Bộ 3 Văn Bản</button>
+    <div class="section-sep">hoặc tạo riêng từng file</div>
+    <button class="btn btn-single" onclick="generateSingle('contract')">Hợp đồng dịch vụ</button>
+    <button class="btn btn-single" onclick="generateSingle('payment')">Giấy đề nghị thanh toán 50%</button>
+    <button class="btn btn-single" onclick="generateSingle('settlement')">Biên bản nghiệm thu & thanh lý</button>
+    <div class="btn-info">File .docx tải về máy. Mã HĐ = DDMM/YYYY/CC-[viết tắt Bên A]</div>
+  </div>
+
+</div>
+
+<script>
+if(typeof docx === 'undefined') {
+  document.querySelector('.container').innerHTML = '<div class="card" style="text-align:center;padding:40px"><div class="card-title" style="color:red;border-color:red">Lỗi tải thư viện</div><p style="margin:10px 0">Không tải được thư viện tạo file .docx.</p><p style="margin:10px 0"><b>Cách khắc phục:</b> Kiểm tra kết nối mạng, sau đó tải lại trang (F5).</p><p style="font-size:12px;color:#999;margin-top:16px">File này cần internet lần đầu mở để tải thư viện docx từ CDN.</p></div>';
+  throw new Error('docx library not loaded');
+}
+const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+        AlignmentType, BorderStyle, WidthType, ShadingType, UnderlineType } = docx;
+
+// ===== TYPE CONFIG =====
+const TYPE_CONFIG = {
+  co_ban: {
+    label: 'Món ăn cơ bản',
+    contractTitle: 'HỢP ĐỒNG DỊCH VỤ CHỤP ẢNH MÓN ĂN',
+    shootTime: 'từ 09h30 đến 18h',
+    showPhongCach: true,
+    showTachPhong: false,
+    showServiceDesc: false,
+    itemUnit: 'món ăn hoặc set món ăn',
+  },
+  san_pham: {
+    label: 'Sản phẩm',
+    contractTitle: 'HỢP ĐỒNG DỊCH VỤ CHỤP ẢNH SẢN PHẨM',
+    shootTime: 'từ 09h30 đến 17h30',
+    showPhongCach: true,
+    showTachPhong: false,
+    showServiceDesc: false,
+    itemUnit: 'sản phẩm',
+  },
+  tong_hop: {
+    label: 'Tổng hợp',
+    contractTitle: 'HỢP ĐỒNG DỊCH VỤ CHỤP ẢNH TỔNG HỢP',
+    shootTime: 'từ 09h30 đến 18h',
+    showPhongCach: false,
+    showTachPhong: false,
+    showServiceDesc: true,
+    itemUnit: '',
+  },
+  cao_cap: {
+    label: 'Món ăn cao cấp',
+    contractTitle: 'HỢP ĐỒNG DỊCH VỤ CHỤP ẢNH MÓN ĂN CAO CẤP',
+    shootTime: 'từ 09h30 đến 18h',
+    showPhongCach: true,
+    showTachPhong: true,
+    showServiceDesc: false,
+    itemUnit: 'món ăn hoặc set món ăn',
+  },
+};
+
+// ===== HELPERS =====
+const $ = id => document.getElementById(id);
+const DEFAULT_TIMES = ['từ 09h30 đến 18h', 'từ 09h30 đến 17h30'];
+
+function onTypeChange() {
+  const type = $('contractType').value;
+  const cfg = TYPE_CONFIG[type];
+  $('rowServiceDesc').style.display = cfg.showServiceDesc ? '' : 'none';
+  $('rowPhongCach').style.display = cfg.showPhongCach ? '' : 'none';
+  $('rowTachPhong').style.display = cfg.showTachPhong ? '' : 'none';
+  $('itemUnitHint').textContent = cfg.itemUnit;
+  $('headerSubtitle').textContent = `Tạo Bộ Văn Bản — Chụp ảnh ${cfg.label}`;
+  if(DEFAULT_TIMES.includes($('shootTime').value)) $('shootTime').value = cfg.shootTime;
+}
+
+function getContractNumber() {
+  const d = $('signDate').value ? new Date($('signDate').value) : null;
+  const abbr = $('clientAbbr').value.toUpperCase().trim();
+  if(!d) return { display: '____/____/CC-__', code: '' };
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const code = `${dd}${mm}/${d.getFullYear()}/CC-${abbr||'__'}`;
+  return { display: code, code };
+}
+
+function updateDisplay() { $('contractDisplay').textContent = getContractNumber().display; }
+$('signDate').addEventListener('input', updateDisplay);
+$('clientAbbr').addEventListener('input', updateDisplay);
+
+const today = new Date();
+$('signDate').value = today.toISOString().split('T')[0];
+const sd = new Date(today); sd.setDate(sd.getDate()+14);
+$('shootDate').value = sd.toISOString().split('T')[0];
+updateDisplay();
+onTypeChange(); // init
+
+function fmt(n) { return n.toLocaleString('vi-VN'); }
+function parseNum(s) { return parseInt(String(s).replace(/\D/g,''))||0; }
+
+function calculatePrices() {
+  const p = parseNum($('servicePrice').value);
+  const v = Math.round(p*0.08), tot = p+v, dep = Math.round(tot/2);
+  $('dispSvc').textContent = fmt(p);
+  $('dispVAT').textContent = fmt(v);
+  $('dispTotal').textContent = fmt(tot);
+  $('dispDep').textContent = fmt(dep);
+  $('dispRem').textContent = fmt(tot-dep);
+}
+
+function numToVi(n) {
+  if(n===0) return 'Không';
+  const u=['','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+  const g=['','nghìn','triệu','tỷ'];
+  function r3(num,zH){
+    let s='',h=Math.floor(num/100),t=Math.floor(num%100/10),d=num%10;
+    if(h>0) s+=u[h]+' trăm '; else if(zH) s+='không trăm ';
+    if(t>1){s+=u[t]+' mươi ';if(d===1)s+='mốt ';else if(d===4)s+='tư ';else if(d===5)s+='lăm ';else if(d>0)s+=u[d]+' ';}
+    else if(t===1){s+='mười ';if(d===5)s+='lăm ';else if(d>0)s+=u[d]+' ';}
+    else if(t===0&&d>0){if(h>0||zH)s+='lẻ ';s+=u[d]+' ';}
+    return s.trim();
+  }
+  const c=[];let tmp=n;while(tmp>0){c.push(tmp%1000);tmp=Math.floor(tmp/1000);}
+  let res='';
+  for(let i=c.length-1;i>=0;i--){if(c[i]===0)continue;res+=r3(c[i],i<c.length-1)+' '+g[i]+' ';}
+  res=res.trim().replace(/\s+/g,' ');
+  return res.charAt(0).toUpperCase()+res.slice(1)+' đồng';
+}
+
+function viDate(s) {
+  if(!s) return {d:'...',m:'...',y:'2026'};
+  const x=new Date(s);
+  return {d:String(x.getDate()).padStart(2,'0'),m:String(x.getMonth()+1).padStart(2,'0'),y:String(x.getFullYear())};
+}
+
+// ===== SHARED DOC HELPERS =====
+const DF='Times New Roman', FS=26;
+const noBdr={style:BorderStyle.NONE};
+const noBorders={top:noBdr,bottom:noBdr,left:noBdr,right:noBdr};
+const tBdr={style:BorderStyle.SINGLE,size:1,color:"000000"};
+const borders={top:tBdr,bottom:tBdr,left:tBdr,right:tBdr};
+
+function P(children,o={}){return new Paragraph({alignment:o.align||AlignmentType.JUSTIFIED,spacing:{after:o.after!==undefined?o.after:120,before:o.before||0,line:o.line||276},indent:o.indent||undefined,children});}
+function T(text,o={}){return new TextRun({text,font:DF,size:o.size||FS,bold:!!o.bold,italics:!!o.italics,underline:o.underline?{type:UnderlineType.SINGLE}:undefined});}
+function emptyLines(n){const a=[];for(let i=0;i<n;i++)a.push(new Paragraph({spacing:{after:0},children:[new TextRun({text:'',font:DF,size:FS})]}));return a;}
+function hCell(t,w){return new TableCell({borders,width:{size:w,type:WidthType.DXA},shading:{fill:"D9E2F3",type:ShadingType.CLEAR},margins:{top:60,bottom:60,left:80,right:80},verticalAlign:"center",children:[new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:t,font:DF,size:22,bold:true})]})]});}
+function dCell(t,w,o={}){return new TableCell({borders,width:{size:w,type:WidthType.DXA},margins:{top:50,bottom:50,left:80,right:80},verticalAlign:"center",columnSpan:o.span||undefined,children:[new Paragraph({alignment:o.align||AlignmentType.CENTER,children:[new TextRun({text:t,font:DF,size:22,bold:!!o.bold,italics:!!o.italics})]})]});}
+
+function sigBlock(leftName,rightName){
+  return new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[4513,4513],rows:[new TableRow({children:[
+    new TableCell({borders:noBorders,width:{size:4513,type:WidthType.DXA},children:[
+      new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:'ĐẠI DIỆN BÊN A',font:DF,size:FS,bold:true})]}),
+      ...emptyLines(4),
+      new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:leftName||'...............',font:DF,size:FS,bold:true,italics:true})]})
+    ]}),
+    new TableCell({borders:noBorders,width:{size:4513,type:WidthType.DXA},children:[
+      new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:'ĐẠI DIỆN BÊN B',font:DF,size:FS,bold:true})]}),
+      ...emptyLines(4),
+      new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:rightName||'Mai Hải Đăng',font:DF,size:FS,bold:true,italics:true})]})
+    ]})
+  ]})]});
+}
+
+function docHeader(){
+  return [
+    P([T('CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM',{bold:true,size:26})],{align:AlignmentType.CENTER,after:0}),
+    P([T('Độc lập - Tự do - Hạnh phúc',{bold:true})],{align:AlignmentType.CENTER,after:0}),
+    P([T('----***----')],{align:AlignmentType.CENTER,after:200}),
+  ];
+}
+
+function makeDoc(content){
+  return new Document({styles:{default:{document:{run:{font:DF,size:FS}}}},sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:1134,right:1134,bottom:1134,left:1418}}},children:content}]});
+}
+
+function priceTable(fP,fV,fT,totalWords){
+  const tw=9026,cw=[560,2700,1100,1400,960,2306];
+  return new Table({width:{size:tw,type:WidthType.DXA},columnWidths:cw,rows:[
+    new TableRow({children:[hCell('STT',cw[0]),hCell('Nội dung',cw[1]),hCell('ĐVT',cw[2]),hCell('Đơn giá',cw[3]),hCell('Số lượng',cw[4]),hCell('Thành tiền',cw[5])]}),
+    new TableRow({children:[dCell('1.',cw[0]),dCell('Chụp ảnh quảng cáo',cw[1],{bold:true,align:AlignmentType.LEFT}),dCell('Trọn gói',cw[2]),dCell(fP,cw[3]),dCell('01',cw[4]),dCell(fP,cw[5])]}),
+    new TableRow({children:[dCell('2.',cw[0]),dCell('Tổng tiền dịch vụ',cw[1]+cw[2]+cw[3]+cw[4],{span:4,bold:true,align:AlignmentType.LEFT}),dCell(fP,cw[5],{bold:true})]}),
+    new TableRow({children:[dCell('3.',cw[0]),dCell('Thuế giá trị gia tăng (08% VAT)',cw[1]+cw[2]+cw[3]+cw[4],{span:4,bold:true,align:AlignmentType.LEFT}),dCell(fV,cw[5],{bold:true})]}),
+    new TableRow({children:[dCell('4.',cw[0]),dCell('Tổng cộng',cw[1]+cw[2]+cw[3]+cw[4],{span:4,bold:true,align:AlignmentType.LEFT}),dCell(fT,cw[5],{bold:true})]}),
+    new TableRow({children:[dCell('5.',cw[0]),dCell(`Bằng chữ: ${totalWords}./.`,cw[1]+cw[2]+cw[3]+cw[4]+cw[5],{span:5,bold:true,italics:true,align:AlignmentType.LEFT})]}),
+  ]});
+}
+
+// ===== COLLECT FORM DATA =====
+function getData(){
+  const cn = getContractNumber();
+  const type = $('contractType').value;
+  const cfg = TYPE_CONFIG[type];
+  const price = parseNum($('servicePrice').value);
+  const vat = Math.round(price*0.08), total = price+vat, dep = Math.round(total/2), rem = total-dep;
+  return {
+    contractType: type,
+    contractTitle: cfg.contractTitle,
+    contractNumber: cn.code,
+    signD: viDate($('signDate').value),
+    shootD: viDate($('shootDate').value),
+    clientName: $('clientName').value||'.....................',
+    clientRep: $('clientRep').value||'.....................',
+    clientPosition: $('clientPosition').value||'Giám đốc',
+    clientTax: $('clientTax').value||'.....................',
+    clientPhone: $('clientPhone').value||'',
+    clientAddress: $('clientAddress').value||'.....................',
+    clientEmail: $('clientEmail').value||'',
+    clientBankAccount: $('clientBankAccount').value||'',
+    clientBankName: $('clientBankName').value||'',
+    serviceDesc: $('serviceDesc').value||'...',
+    phongCach: $('phongCach').value||'.....',
+    itemCount: $('itemCount').value||'...',
+    editPhotoCount: $('editPhotoCount').value||'.....',
+    tachPhong: $('tachPhong').value||'...',
+    shootTime: $('shootTime').value||cfg.shootTime,
+    shootDays: $('shootDays').value||'một (01)',
+    shootLocation: $('shootLocation').value||'.....................',
+    price, vat, total, dep, rem,
+    fP: fmt(price), fV: fmt(vat), fT: fmt(total), fD: fmt(dep), fR: fmt(rem),
+    totalWords: numToVi(total), depWords: numToVi(dep), remWords: numToVi(rem),
+  };
+}
+
+// ===== ĐIỀU 1: TYPE-SPECIFIC =====
+function buildDieu1(d, c) {
+  const type = d.contractType;
+  c.push(P([T('ĐIỀU 1: ',{bold:true,underline:true}),T('PHẠM VI DỊCH VỤ',{bold:true})],{before:200}));
+  c.push(P([T('1.1  Bên A đồng ý với bên B với kế hoạch chụp ảnh quảng cáo. Và các điều khoản đi kèm theo Khoản 1.2')]));
+
+  // 1.2 + bullets (type-specific)
+  if(type==='co_ban') {
+    c.push(P([T('1.2  Chụp ảnh quảng cáo món ăn')]));
+    c.push(P([T(`- Phong cách: ${d.phongCach}`)],{indent:{left:720}}));
+    c.push(P([T(`- Số lượng: ${d.itemCount} món ăn hoặc set món ăn`)],{indent:{left:720}}));
+  } else if(type==='san_pham') {
+    c.push(P([T('1.2  Chụp ảnh quảng cáo sản phẩm')]));
+    c.push(P([T(`- Phong cách: ${d.phongCach}`)],{indent:{left:720}}));
+    c.push(P([T(`- Số lượng: ${d.itemCount} sản phẩm`)],{indent:{left:720}}));
+  } else if(type==='tong_hop') {
+    c.push(P([T(`1.2  Chụp ảnh quảng cáo ${d.serviceDesc}`)]));
+    c.push(P([T(`- Số lượng: ${d.itemCount}`)],{indent:{left:720}}));
+  } else if(type==='cao_cap') {
+    c.push(P([T('1.2  Chụp ảnh quảng cáo món ăn cao cấp')]));
+    c.push(P([T(`- Phong cách: ${d.phongCach}`)],{indent:{left:720}}));
+    c.push(P([T(`- Số lượng: ${d.itemCount} món ăn hoặc set món ăn`)],{indent:{left:720}}));
+  }
+
+  // 1.3
+  c.push(P([T('1.3  Gói chụp ảnh bao gồm:')]));
+  c.push(P([T('a. Trong buổi chụp:')]));
+
+  const inBuoiChup = [
+    'Thiết bị máy móc chụp ảnh và dải ống kính Canon',
+    'Hệ thống thiết bị chiếu sáng và các thiết bị hỗ trợ khác',
+  ];
+  if(type==='co_ban') inBuoiChup.push('Food stylist chuẩn bị phông nền, trang trí trên set chụp hình');
+  if(type==='cao_cap') {
+    inBuoiChup.push('Food stylist chuẩn bị phông nền, đạo cụ, trang trí trên set chụp hình');
+    inBuoiChup.push('Can Đăng trực tiếp thực hiện bộ ảnh');
+  }
+  inBuoiChup.push('Macbook check file hình ảnh');
+  inBuoiChup.forEach(x => c.push(P([T(`- ${x}`)],{indent:{left:720}})));
+
+  c.push(P([T('b. Tiêu chuẩn hình ảnh: kích thước ảnh 5000 x 3000 px')]));
+  c.push(P([T('c. Hình ảnh bàn giao:')]));
+
+  const bangGiao = ['Toàn bộ file gốc của buổi chụp'];
+  bangGiao.push(`Chỉnh sửa ${d.editPhotoCount} ảnh hoàn thiện`);
+  if(type==='cao_cap') bangGiao.push(`Tách phông ${d.tachPhong} ảnh hoàn thiện`);
+  bangGiao.push(
+    'Hình ảnh chỉnh sửa lần 1 sau 3 ngày kể từ ngày khách hàng hoàn thiện chọn ảnh',
+    'Khách hàng được chỉnh sửa tối đa 3 lần',
+    'Sau khi 2 bên duyệt hình ảnh cuối cùng, bên B sẽ bàn giao hình ảnh không có watermark và chèn logo theo yêu cầu của khách hàng.',
+    'Hình ảnh được tổng hợp và gửi qua Drive để đảm bảo không giảm chất lượng của ảnh chụp',
+    'Hình ảnh được lưu giữ trên drive của studio tối thiểu 20 ngày kể từ ngày bàn giao'
+  );
+  bangGiao.forEach(x => c.push(P([T(`- ${x}`)],{indent:{left:720}})));
+
+  // 1.4
+  c.push(P([T('1.4  Địa điểm và thời gian chụp hình:')]));
+  c.push(P([T(`- Thời gian chụp ảnh: Trong ${d.shootDays} ngày, ${d.shootTime}, ngày ${d.shootD.d} tháng ${d.shootD.m} năm ${d.shootD.y}`)],{indent:{left:720}}));
+  c.push(P([T(`- Địa điểm: ${d.shootLocation}`)],{indent:{left:720}}));
+}
+
+// ===== ĐIỀU 2–7: DÙNG CHUNG =====
+function buildDieu2to7(d, c) {
+  // ĐIỀU 2
+  c.push(P([T('ĐIỀU 2: ',{bold:true,underline:true}),T('NGHĨA VỤ VÀ QUYỀN LỢI CỦA CÁC BÊN.',{bold:true})],{before:200}));
+  c.push(P([T('2.1  Nghĩa vụ và quyền lợi của bên B')]));
+  c.push(P([T('Ngoài những nghĩa vụ khác được quy định trong Hợp đồng này, bên B còn các nghĩa vụ, quyền lợi sau:')]));
+  ['Đảm bảo việc chụp ảnh đúng thời gian, hình ảnh và nội dung không sai với yêu cầu những gì bên A mong muốn. Trong trường hợp có sự thay đổi bên B phải thông báo cho bên A trước khi thực hiện chụp ảnh.',
+   'Bên B không được dùng hình ảnh mà bên B chụp cho bên A để quảng cáo hoặc sử dụng vì bất cứ mục đích nào nếu chưa được bên A cấp phép;',
+   'Bên B sẽ giữ bản quyền cho đến khi bàn giao sản phẩm cuối cùng cho bên A, ngay khi hình ảnh được chuyển giao lại cho bên A, bên A sẽ là chủ sở hữu duy nhất và toàn quyền sử dụng hình ảnh;',
+   'Bên B có nghĩa vụ giao lại toàn bộ hình ảnh đúng theo thời gian trong hợp đồng.',
+   'Có nghĩa vụ tôn trọng những ý tưởng, góp ý của bên A trong thời gian thực hiện;'
+  ].forEach(x => c.push(P([T(`- ${x}`)],{indent:{left:720}})));
+
+  c.push(P([T('2.2  Nghĩa vụ và quyền lợi của bên A (khách hàng)')]));
+  c.push(P([T('Ngoài những nghĩa vụ khác được quy định trong hợp đồng này, bên A còn có các nghĩa vụ, quyền lợi sau:')]));
+  ['Đảm bảo địa điểm chụp ảnh và đúng thời gian.',
+   'Có quyền giữ bản quyền đối với sản phẩm cuối cùng kể từ khi bên B chuyển giao;',
+   'Có quyền yêu cầu bên B gỡ những hình ảnh nếu bên B vi phạm quy định sử dụng hình ảnh theo quy định tại Điều 2 của Hợp đồng này;',
+   'Bên A có quyền được góp ý khi chụp ảnh, và trong quá trình chỉnh sửa;',
+   'Tạo điều kiện thuận lợi cho bên B hoàn thành bộ ảnh.'
+  ].forEach(x => c.push(P([T(`- ${x}`)],{indent:{left:720}})));
+
+  // ĐIỀU 3
+  c.push(P([T('ĐIỀU 3: ',{bold:true,underline:true}),T('PHÍ DỊCH VỤ ĐIỀU KHOẢN THANH TOÁN:',{bold:true})],{before:200}));
+  c.push(P([T('3.1  Chi phí chụp hình:')]));
+  c.push(P([T('Đơn vị tính: VNĐ',{italics:true})]));
+  c.push(priceTable(d.fP,d.fV,d.fT,d.totalWords));
+  c.push(P([T('3.2  Điều khoản đặt cọc và thanh toán')],{before:160}));
+  c.push(P([T('- Bên A sẽ đặt cọc cho bên B 50% giá trị hợp đồng trước khi buổi chụp diễn ra với số tiền: '),T(`${d.fD} VNĐ `,{bold:true}),T(`(${d.depWords})./.`,{bold:true,italics:true})]));
+  c.push(P([T('- Bên A sẽ thanh toán cho bên B 100% giá trị hợp đồng (Bao gồm số tiền bên A đã đặt cọc) sau khi bên B đã hoàn thiện toàn bộ công việc theo Điều 1 của hợp đồng, trong vòng 07 ngày kể từ khi bên B hoàn thành công việc và bên A nhận được hóa đơn giá trị gia tăng')]));
+  c.push(P([T('- Bên B sẽ gửi ảnh đã chỉnh sửa (không có watermark) để bên A tiến hành nghiệm thu. Sau khi bên A thanh toán đủ 100% giá trị hợp đồng, bên B có trách nhiệm bàn giao toàn bộ hình ảnh gốc và bản chỉnh sửa cuối cùng không chứa watermark, đúng theo yêu cầu đã thống nhất.')]));
+  c.push(P([T('3.3  Hình thức đặt cọc và thanh toán:')]));
+  c.push(P([T('Bên A đặt cọc và thanh toán cho bên B bằng hình thức chuyển khoản theo thông tin:')]));
+  ['Tài khoản công ty:','Tên tài khoản: Công ty TNHH Can Creative','Số tài khoản: 3638 6868 8888','Ngân hàng TMCP Á Châu ACB – Chi nhánh Hoàng Cầu'].forEach(x => c.push(P([T(x)],{indent:{left:720}})));
+
+  // ĐIỀU 4
+  c.push(P([T('ĐIỀU 4: ',{bold:true,underline:true}),T('VI PHẠM VÀ BỒI THƯỜNG THIỆT HẠI',{bold:true})],{before:200}));
+  c.push(P([T('4.1  Trường hợp Bên A không thanh toán hoặc thanh toán không đủ hoặc không đúng phí dịch vụ cho Bên B theo thỏa thuận tại Điều 3 của Hợp đồng này thì Bên B được quyền đơn phương chấm dứt hợp đồng và đồng thời không hoàn lại các chi phí mà Bên A đã thanh toán.')]));
+  c.push(P([T('4.2  Trường hợp Bên B không tiến hành thực hiện dịch vụ hoặc thực hiện dịch vụ không đúng như đã thỏa thuận thì bên A có quyền đơn phương chấm dứt hợp đồng mà không phải trả cho Bên B bất kỳ khoản phí nào đồng thời bên B sẽ phải hoàn lại toàn bộ chi phí mà bên A đã thanh toán.')]));
+  c.push(P([T('4.3  Nếu một trong hai bên đơn phương chấm dứt hợp đồng trái với các thỏa thuận trong Hợp đồng này thì bên đơn phương chấm dứt Hợp đồng đó phải chịu một khoản tiền phạt tương đương với số 08% (tám phần trăm) giá trị Hợp đồng.')]));
+
+  // ĐIỀU 5
+  c.push(P([T('ĐIỀU 5: ',{bold:true,underline:true}),T('LUẬT ÁP DỤNG VÀ GIẢI QUYẾT TRANH CHẤP.',{bold:true})],{before:200}));
+  c.push(P([T('5.1  Hợp Đồng này được điều chỉnh và giải thích theo pháp luật Việt Nam.')]));
+  c.push(P([T('5.2  Bất kỳ tranh chấp nào giữa các bên phát sinh từ hoặc liên quan đến Hợp Đồng này bao gồm nhưng không hạn chế các vấn đề liên quan đến hình thức, thực hiện hợp đồng, vi phạm, hiệu lực hay bất kỳ nội dung của hợp đồng này sẽ được giải quyết trước hết bằng thương lượng đàm phán giữa các bên trên tinh thần thiện chí, trung thực. Trong trường hợp, một bên không muốn hoặc các bên không thể giải quyết các tranh chấp bằng biện pháp thương lượng, hòa giải trong thời hạn (30) ngày kể từ ngày phát sinh tranh chấp, các bên đồng ý đưa tranh chấp ra giải quyết tại tòa án có thẩm quyền.')]));
+
+  // ĐIỀU 6
+  c.push(P([T('ĐIỀU 6: ',{bold:true,underline:true}),T('THỜI GIAN HIỆU LỰC HỢP ĐỒNG',{bold:true})],{before:200}));
+  c.push(P([T('6.1  Hợp đồng này có hiệu lực kể từ ngày ký và chấm dứt hiệu lực khi 2 bên đã hoàn thành các nghĩa vụ được thực hiện trên Hợp đồng.')]));
+  c.push(P([T('6.2  Trong trường hợp Hợp đồng chấm dứt trước thời hạn, Bên B sẽ được thanh toán cho những chi phí tính đến thời điểm kết thúc thỏa thuận. Đồng thời Bên B có nghĩa vụ hoàn trả tiền tạm ứng cho Bên A, nếu có vượt quá số tiền mà Bên B được nhận tính đến thời điểm chấm dứt Hợp đồng.')]));
+
+  // ĐIỀU 7
+  c.push(P([T('ĐIỀU 7: ',{bold:true,underline:true}),T('CÁC ĐIỀU KHOẢN CHUNG',{bold:true})],{before:200}));
+  c.push(P([T('7.1  Thỏa thuận trọn vẹn',{bold:true})]));
+  c.push(P([T('Hợp Đồng này, bao gồm tất cả các Phụ Lục tạo thành thỏa thuận trọn vẹn giữa Các Bên và thay thế mọi thỏa thuận bằng văn bản hoặc bằng lời, bản ghi nhớ hoặc trao đổi trước đây giữa Các Bên liên quan đến Hợp Đồng này.')]));
+  c.push(P([T('7.2  Sửa đổi',{bold:true})]));
+  c.push(P([T('Hợp Đồng này chỉ được sửa đổi, bổ sung bằng thoả thuận của Các Bên. Mọi sửa đổi bổ sung đối với Hợp Đồng này chỉ có hiệu lực khi được thực hiện bằng văn bản và được ký bởi đại diện có thẩm quyền của Các Bên.')]));
+  c.push(P([T('7.3  Ký kết',{bold:true})]));
+  c.push(P([T('Hợp đồng này được ký vào ngày nêu ở phần đầu của Hợp Đồng này. Hợp Đồng này được lập thành hai (02) bản gốc bằng tiếng Việt. Mỗi Bên giữ một (01) bản gốc bằng tiếng Việt. Hợp đồng này có hiệu lực kể từ ngày ký.')]));
+}
+
+// ===== DOC 1: HỢP ĐỒNG =====
+function buildContract(d) {
+  const c = [...docHeader()];
+  c.push(P([T(d.contractTitle,{bold:true,size:28})],{align:AlignmentType.CENTER,after:60}));
+  c.push(P([T(`(Số: ${d.contractNumber})`,{italics:true})],{align:AlignmentType.CENTER,after:200}));
+  c.push(P([T('Theo Bộ Luật Dân sự số 91/2015/QH13 được Quốc hội nước Cộng hòa Xã hội Chủ nghĩa Việt Nam thông qua ngày 24 tháng 11 năm 2015;')]));
+  c.push(P([T('Theo Luật Thương mại số 36/2005/QH11 được Quốc hội nước Cộng hòa Xã hội Chủ nghĩa Việt Nam thông qua ngày 14 tháng 6 năm 2005;')]));
+  c.push(P([T(`Hôm nay, ngày ${d.signD.d} tháng ${d.signD.m} năm ${d.signD.y} hai bên gồm:`)]));
+
+  // BÊN A
+  c.push(P([T('Bên SỬ DỤNG DỊCH VỤ (BÊN A): ',{bold:true}),T(d.clientName.toUpperCase(),{bold:true})],{before:120}));
+  c.push(P([T('Người đại diện: '),T(d.clientRep,{bold:true,italics:true}),T(`          Chức vụ: ${d.clientPosition}`)]));
+  c.push(P([T(`MST: ${d.clientTax}`)]));
+  c.push(P([T(`Địa chỉ: ${d.clientAddress}`)]));
+  if(d.clientEmail) c.push(P([T(`Email: ${d.clientEmail}`)]));
+  if(d.clientBankAccount) c.push(P([T(`Số TK: ${d.clientBankAccount}          Ngân hàng: ${d.clientBankName}`)]));
+
+  // BÊN B
+  c.push(P([T('Bên CUNG CẤP DỊCH VỤ (BÊN B): CÔNG TY TNHH CAN CREATIVE',{bold:true})],{before:120}));
+  c.push(P([T('Địa chỉ: số 219 – Đường Đặng Tiến Đông, phường Đống Đa, thành phố Hà Nội, Việt Nam')]));
+  c.push(P([T('MST: 0109534842')]));
+  c.push(P([T('Người đại diện: '),T('Mai Hải Đăng',{bold:true,italics:true}),T('          Chức Vụ: Giám Đốc')]));
+  c.push(P([T('Điện thoại: 0904329595')]));
+  c.push(P([T('Tài khoản số: 3638 6868 8888          Chủ tài khoản: Công ty TNHH Can Creative')]));
+  c.push(P([T('Ngân hàng TMCP Á Châu ACB – Chi nhánh Hoàng Cầu')]));
+  c.push(P([T('Hai bên cùng thỏa thuận ký kết hợp đồng với những nội dung sau:')],{before:120}));
+
+  buildDieu1(d, c);
+  buildDieu2to7(d, c);
+
+  c.push(...emptyLines(1));
+  c.push(sigBlock(d.clientRep,'Mai Hải Đăng'));
+  return makeDoc(c);
+}
+
+// ===== DOC 2: GIẤY ĐỀ NGHỊ THANH TOÁN (dùng chung) =====
+function buildPaymentRequest(d) {
+  const c = [...docHeader()];
+  c.push(P([T('GIẤY ĐỀ NGHỊ THANH TOÁN',{bold:true,size:28})],{align:AlignmentType.CENTER,after:0}));
+  c.push(P([T(`(Số: ${d.contractNumber})`,{italics:true})],{align:AlignmentType.CENTER,after:120}));
+  c.push(P([T(`Hà Nội, Ngày ${d.signD.d} tháng ${d.signD.m} năm ${d.signD.y}`,{italics:true})],{align:AlignmentType.RIGHT,after:200}));
+  c.push(P([T('Kính gửi: ',{bold:true}),T(d.clientName.toUpperCase(),{bold:true})],{indent:{left:720}}));
+  c.push(P([T('Người đại diện: '),T(d.clientRep,{bold:true,italics:true}),T(`          Chức vụ: ${d.clientPosition}`)]));
+  c.push(P([T(`MST: ${d.clientTax}`)]));
+  c.push(P([T(`Địa chỉ: ${d.clientAddress}`)]));
+  if(d.clientEmail) c.push(P([T(`Email: ${d.clientEmail}`)]));
+  c.push(P([T('Căn cứ theo khối lượng và giá trị dịch vụ đã được 2 bên thống nhất theo hợp đồng '),T(`Số: ${d.contractNumber}`,{italics:true}),T(` ngày ${d.signD.d} tháng ${d.signD.m} năm ${d.signD.y}, Công ty TNHH Can Creative đề nghị thanh toán 50% chi phí dịch vụ Chụp ảnh quảng cáo, số tiền là `),T(`${d.fD} VNĐ `,{bold:true}),T(`(Bằng chữ: ${d.depWords})./.`,{bold:true,italics:true})],{before:120}));
+  c.push(P([T('Số tiền trên gửi vào tài khoản của Công ty TNHH Can Creative theo thông tin:')],{before:120}));
+  ['Tên tài khoản: Công ty TNHH Can Creative','Số tài khoản: 3638 6868 8888','Ngân hàng TMCP Á Châu ACB – Chi nhánh Hoàng Cầu'].forEach(x => c.push(P([T(x)],{indent:{left:720}})));
+  c.push(...emptyLines(2));
+  const sigTbl = new Table({width:{size:9026,type:WidthType.DXA},columnWidths:[4513,4513],rows:[new TableRow({children:[
+    new TableCell({borders:noBorders,width:{size:4513,type:WidthType.DXA},children:[new Paragraph({children:[T('')]})] }),
+    new TableCell({borders:noBorders,width:{size:4513,type:WidthType.DXA},children:[
+      new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:'Giám đốc',font:DF,size:FS,bold:true})]}),
+      new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:'(Ký, Họ tên, đóng dấu)',font:DF,size:FS,italics:true})]}),
+      ...emptyLines(4),
+      new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:'Mai Hải Đăng',font:DF,size:FS,bold:true})]}),
+    ]})
+  ]})]});
+  c.push(sigTbl);
+  return makeDoc(c);
+}
+
+// ===== DOC 3: BIÊN BẢN NGHIỆM THU & THANH LÝ (dùng chung) =====
+function buildSettlement(d) {
+  const c = [...docHeader()];
+  c.push(P([T('BIÊN BẢN NGHIỆM THU VÀ THANH LÝ HỢP ĐỒNG',{bold:true,size:28})],{align:AlignmentType.CENTER,after:200}));
+  c.push(P([T(`Số: ${d.contractNumber}`,{italics:true})],{align:AlignmentType.CENTER}));
+
+  // BÊN NHẬN
+  c.push(P([T('BÊN NHẬN (BÊN A): ',{bold:true}),T(d.clientName.toUpperCase(),{bold:true})],{before:120}));
+  c.push(P([T('Người đại diện: '),T(d.clientRep,{bold:true,italics:true}),T(`          Chức vụ: ${d.clientPosition}`)]));
+  c.push(P([T(`Địa chỉ: ${d.clientAddress}`)]));
+  c.push(P([T(`MST: ${d.clientTax}`)]));
+  if(d.clientBankAccount) c.push(P([T(`Số TK: ${d.clientBankAccount}          Ngân hàng: ${d.clientBankName}`)]));
+
+  // BÊN GIAO
+  c.push(P([T('BÊN GIAO (BÊN B): CÔNG TY TNHH CAN CREATIVE',{bold:true})],{before:120}));
+  c.push(P([T('Mã số thuế: 0109534842')]));
+  c.push(P([T('Đại diện bên giao: Ông '),T('Mai Hải Đăng',{bold:true,italics:true}),T('          Chức vụ: Giám đốc')]));
+  c.push(P([T('Địa chỉ: Số 219 đường Đặng Tiến Đông, Phường Đống Đa, Thành phố Hà Nội, Việt Nam')]));
+
+  c.push(P([T('Hai bên nhất trí lập biên bản nghiệm thu sản phẩm/dịch vụ và thanh lý hợp đồng như sau:')],{before:120}));
+
+  // Điều 1
+  c.push(P([T('Điều 1: Nội dung',{bold:true})],{before:160}));
+  c.push(P([T('Bên B bàn giao cho bên A các hạng mục như sau:')]));
+  c.push(P([T('Đơn vị tính: VNĐ',{italics:true})]));
+  c.push(priceTable(d.fP,d.fV,d.fT,d.totalWords));
+  c.push(P([T('Bên A đã kiểm tra, thẩm định kỹ lưỡng chất lượng sản phẩm/ dịch vụ mà bên B thực hiện và bàn giao')],{before:120}));
+
+  // Điều 2
+  c.push(P([T('Điều 2: Thanh toán',{bold:true})],{before:160}));
+  c.push(P([T('+ Tổng số tiền cần thanh toán là '),T(`${d.fT} VNĐ `,{bold:true}),T(`(Bằng chữ: ${d.totalWords})./.`,{italics:true}),T(' (bao gồm 08% thuế VAT).')]));
+  c.push(P([T('+ Bên A đã thanh toán cho bên B số tiền là '),T(`${d.fD} VNĐ `,{bold:true}),T(`(Bằng chữ: ${d.depWords})./.`,{italics:true})]));
+  c.push(P([T('+ Bên A cần phải thanh toán nốt cho Bên B số tiền còn lại là '),T(`${d.fR} VNĐ `,{bold:true}),T(`(Bằng chữ: ${d.remWords})./.`,{italics:true})]));
+  c.push(P([T('+ Bên B xuất hóa đơn GTGT cho Bên A theo thông tin trên.')]));
+
+  c.push(P([T(`Biên bản được lập vào hồi 11 giờ 00 phút, ngày ${d.signD.d} tháng ${d.signD.m} năm ${d.signD.y}.`)],{before:120}));
+  c.push(...emptyLines(1));
+  c.push(sigBlock(d.clientRep,'Mai Hải Đăng'));
+  c.push(P([T('Biên bản này được lập thành 02 bản, mỗi bên giữ 01 bản có giá trị pháp lý như nhau.')],{before:120}));
+  return makeDoc(c);
+}
+
+// ===== GENERATE & SAVE =====
+async function saveSingle(docObj, name) {
+  const blob = await Packer.toBlob(docObj);
+  saveAs(blob, name);
+}
+
+function validate() {
+  const cn = getContractNumber();
+  if(!cn.code){ alert('Chọn ngày ký hợp đồng.'); return null; }
+  if(!$('clientAbbr').value.trim()){ alert('Nhập tên viết tắt Bên A.'); return null; }
+  return getData();
+}
+
+function contractFileName(type) {
+  const names = { co_ban:'Mon-an', san_pham:'San-pham', tong_hop:'Tong-hop', cao_cap:'Mon-an-cao-cap' };
+  return names[type]||type;
+}
+
+async function generateAll() {
+  const d = validate(); if(!d) return;
+  const safe = d.contractNumber.replace(/\//g,'-');
+  const typeName = contractFileName(d.contractType);
+  await saveSingle(buildContract(d), `1-HD-${typeName}-${safe}.docx`);
+  await saveSingle(buildPaymentRequest(d), `2-DNTT-${safe}.docx`);
+  await saveSingle(buildSettlement(d), `3-BBTL-${safe}.docx`);
+}
+
+async function generateSingle(type) {
+  const d = validate(); if(!d) return;
+  const safe = d.contractNumber.replace(/\//g,'-');
+  const typeName = contractFileName(d.contractType);
+  if(type==='contract') await saveSingle(buildContract(d), `HD-${typeName}-${safe}.docx`);
+  if(type==='payment') await saveSingle(buildPaymentRequest(d), `DNTT-${safe}.docx`);
+  if(type==='settlement') await saveSingle(buildSettlement(d), `BBTL-${safe}.docx`);
+}
+</script>
+</body>
+</html>
