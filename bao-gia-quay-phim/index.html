@@ -514,7 +514,7 @@ const VAT = 0.08;
 function v(id)   { return document.getElementById(id).value.trim(); }
 function chk(id) { return document.getElementById(id).checked; }
 function num(id) { return parseFloat(document.getElementById(id).value) || 0; }
-function fmt(n)  { return n.toLocaleString('vi-VN'); }
+function fmt(n)  { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
 
 function calcPkg(cp) {
   const chiPhi = Math.round(cp);
@@ -537,7 +537,7 @@ function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
 
   const socialRow = `
     <tr class="row-gift">
-      <td class="col-stt" style="text-align:center;"><strong>${pkgNum === 2 ? 2 : 3}</strong></td>
+      <td class="col-stt" style="text-align:center;vertical-align:middle;"><strong>${pkgNum === 2 ? 2 : 3}</strong></td>
       <td class="col-nd">
         <span class="gift-badge">TẶNG</span>
         <strong>Đăng bài video ngắn – tăng độ nhận diện thương hiệu</strong>
@@ -547,10 +547,10 @@ function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
           <li>Facebook: 76 nghìn follow</li>
         </ul>
       </td>
-      <td class="col-dvt" style="text-align:center;">01</td>
-      <td class="col-dg" style="text-align:right;">10.000.000</td>
-      <td class="col-sl" style="text-align:center;">01</td>
-      <td class="col-tt" style="text-align:center;font-weight:bold;color:#1e6a9e;">Tặng</td>
+      <td class="col-dvt" style="text-align:center;vertical-align:middle;">01</td>
+      <td class="col-dg" style="text-align:right;vertical-align:middle;">10.000.000</td>
+      <td class="col-sl" style="text-align:center;vertical-align:middle;">01</td>
+      <td class="col-tt" style="text-align:center;vertical-align:middle;font-weight:bold;color:#1e6a9e;">Tặng</td>
     </tr>`;
 
   // ── GÓI 1 ──
@@ -628,7 +628,7 @@ function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
       </ul>`;
     extraRows = `
       <tr class="row-gift">
-        <td class="col-stt" style="text-align:center;"><strong>2</strong></td>
+        <td class="col-stt" style="text-align:center;vertical-align:middle;"><strong>2</strong></td>
         <td class="col-nd">
           <span class="gift-badge">TẶNG</span>
           <strong>Chụp ảnh sản phẩm bằng giải pháp độc quyền</strong>
@@ -637,13 +637,13 @@ function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
             <li>Chụp ảnh nền trắng sản phẩm – tách phông mỗi sản phẩm 3 ảnh hoàn thiện</li>
           </ul>
         </td>
-        <td class="col-dvt" style="text-align:center;">01</td>
-        <td class="col-dg" style="text-align:right;">15.000.000</td>
-        <td class="col-sl" style="text-align:center;">01</td>
-        <td class="col-tt" style="text-align:center;font-weight:bold;color:#1e6a9e;">Tặng</td>
+        <td class="col-dvt" style="text-align:center;vertical-align:middle;">01</td>
+        <td class="col-dg" style="text-align:right;vertical-align:middle;">15.000.000</td>
+        <td class="col-sl" style="text-align:center;vertical-align:middle;">01</td>
+        <td class="col-tt" style="text-align:center;vertical-align:middle;font-weight:bold;color:#1e6a9e;">Tặng</td>
       </tr>
       <tr class="row-gift">
-        <td class="col-stt" style="text-align:center;"><strong>3</strong></td>
+        <td class="col-stt" style="text-align:center;vertical-align:middle;"><strong>3</strong></td>
         <td class="col-nd">
           <span class="gift-badge">TẶNG</span>
           <strong>Đăng bài video ngắn – tăng độ nhận diện thương hiệu</strong>
@@ -653,10 +653,10 @@ function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
             <li>Facebook: 76 nghìn follow</li>
           </ul>
         </td>
-        <td class="col-dvt" style="text-align:center;">01</td>
-        <td class="col-dg" style="text-align:right;">10.000.000</td>
-        <td class="col-sl" style="text-align:center;">01</td>
-        <td class="col-tt" style="text-align:center;font-weight:bold;color:#1e6a9e;">Tặng</td>
+        <td class="col-dvt" style="text-align:center;vertical-align:middle;">01</td>
+        <td class="col-dg" style="text-align:right;vertical-align:middle;">10.000.000</td>
+        <td class="col-sl" style="text-align:center;vertical-align:middle;">01</td>
+        <td class="col-tt" style="text-align:center;vertical-align:middle;font-weight:bold;color:#1e6a9e;">Tặng</td>
       </tr>`;
   }
 
@@ -681,29 +681,29 @@ function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
       </thead>
       <tbody>
         <tr>
-          <td class="col-stt"><strong>1</strong></td>
+          <td class="col-stt" style="text-align:center;vertical-align:middle;"><strong>1</strong></td>
           <td class="col-nd">${col1Content}</td>
-          <td class="col-dvt">Trọn gói</td>
-          <td class="col-dg">${fmt(cp)}</td>
-          <td class="col-sl">${soLuong}</td>
-          <td class="col-tt">${fmt(cp)}</td>
+          <td class="col-dvt" style="text-align:center;vertical-align:middle;">Trọn gói</td>
+          <td class="col-dg" style="text-align:right;vertical-align:middle;">${fmt(cp)}</td>
+          <td class="col-sl" style="text-align:center;vertical-align:middle;">${soLuong}</td>
+          <td class="col-tt" style="text-align:right;vertical-align:middle;">${fmt(cp)}</td>
         </tr>
         ${extraRows}
         <tr class="row-summary">
-          <td class="col-stt"><strong>${summaryN}</strong></td>
-          <td class="col-nd"><strong>Chi phí dịch vụ</strong></td>
-          <td colspan="3" style="text-align:center;"><strong>${fmt(cp)}</strong></td>
-          <td class="col-tt"></td>
+          <td class="col-stt" style="text-align:center;vertical-align:middle;"><strong>${summaryN}</strong></td>
+          <td class="col-nd" style="vertical-align:middle;"><strong>Chi phí dịch vụ</strong></td>
+          <td colspan="3" style="text-align:center;vertical-align:middle;"><strong>${fmt(cp)}</strong></td>
+          <td style="text-align:right;vertical-align:middle;"></td>
         </tr>
         <tr class="row-vat">
-          <td class="col-stt"><strong>${vatN}</strong></td>
-          <td colspan="4"><strong>Thuế giá trị gia tăng 08% VAT</strong></td>
-          <td class="col-tt"><strong>${fmt(vat)}</strong></td>
+          <td class="col-stt" style="text-align:center;vertical-align:middle;"><strong>${vatN}</strong></td>
+          <td colspan="4" style="vertical-align:middle;"><strong>Thuế giá trị gia tăng 08% VAT</strong></td>
+          <td style="text-align:right;vertical-align:middle;"><strong>${fmt(vat)}</strong></td>
         </tr>
         <tr class="row-total">
-          <td class="col-stt"><strong>${totalN}</strong></td>
-          <td colspan="4"><strong>Tổng cộng</strong></td>
-          <td class="col-tt"><strong>${fmt(total)}</strong></td>
+          <td class="col-stt" style="text-align:center;vertical-align:middle;"><strong>${totalN}</strong></td>
+          <td colspan="4" style="vertical-align:middle;"><strong>Tổng cộng</strong></td>
+          <td style="text-align:right;vertical-align:middle;"><strong>${fmt(total)}</strong></td>
         </tr>
       </tbody>
     </table>`;
