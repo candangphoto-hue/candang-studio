@@ -248,10 +248,10 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
 .mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .mcell{background:var(--white);border:1px solid var(--bl);border-radius:6px;padding:5px 7px;min-height:90px;font-size:11px;cursor:pointer;position:relative}
 .mcell:hover{border-color:var(--ac)}
-.mcell-out{background:var(--bg);opacity:.45}
-.mcell-today{border-color:var(--ac);background:var(--al)}
+.mcell-out{background:transparent;border-color:transparent;pointer-events:none}
+.mcell-today{border-color:var(--bl2);background:var(--bll)}
 .mday{font-size:13px;font-weight:600;margin-bottom:4px}
-.mcell-today .mday{color:var(--ad)}
+.mcell-today .mday{color:var(--bl2)}
 .mev{padding:3px 6px;border-radius:3px;font-size:11px;font-weight:500;background:var(--al);color:var(--ad);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;display:block}
 .mev:hover{opacity:.8}
 .mev-debt{background:var(--rl);color:var(--rd)}
@@ -2084,7 +2084,7 @@ function copyZaloDebt(){
 function localDate(str){if(!str)return null;const[y,m,d]=str.split('-');return new Date(+y,+m-1,+d);}
 function localYMD(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 // so sánh ngày: d nằm trong range [s,e] (đều là local Date)
-function inRange(d,s,e){const dn=localYMD(d);return dn>=s&&dn<=e;}
+function inRange(d,s,e){const dn=localYMD(d);const ss=String(s).split('T')[0];const ee=String(e).split('T')[0];return dn>=ss&&dn<=ee;}
 
 // ═══════════════════════════════════════════════
 // WEEKLY / MONTHLY VIEW
@@ -2147,11 +2147,12 @@ function renderMonthly(){
     const isCurrentMonth=cellDate.getMonth()===dispM;
     const ds=localYMD(cellDate);
     const isToday=ds===todStr;
-    const evs=isCurrentMonth?PROJECTS.filter(p=>{
+    if(!isCurrentMonth){cells+=`<div class="mcell mcell-out"></div>`;continue;}
+    const evs=PROJECTS.filter(p=>{
       if(!p.dateStart)return false;
       return inRange(cellDate,p.dateStart,p.dateEnd||p.dateStart);
-    }):[];
-    cells+=`<div class="mcell ${isCurrentMonth?'':'mcell-out'} ${isToday?'mcell-today':''}">
+    });
+    cells+=`<div class="mcell ${isToday?'mcell-today':''}">
       <div class="mday">${cellDate.getDate()}</div>
       ${evs.map(e=>`<div class="mev ${getDebt(e)>0?'mev-debt':''}" onclick="event.stopPropagation();showCalPopup([getProjectById('${e.id}')],event.clientX,event.clientY)" title="${e.client}">${e.client}</div>`).join('')}
       ${evs.length>2?`<div class="mev-more">+${evs.length-2} dự án</div>`:''}
