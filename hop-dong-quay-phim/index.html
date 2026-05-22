@@ -846,7 +846,19 @@ function showToast(msg, dur) {
 
 // ===== GENERATE & SAVE =====
 // Fallback download nếu FileSaver không load được
-function _dlBlob(blob, name) {
+async function _dlBlob(blob, name) {
+  // Android Chrome: Web Share API → share sheet (Zalo / lưu Files)
+  if (navigator.share && navigator.canShare) {
+    try {
+      var sf = new File([blob], name, {type: blob.type || 'application/octet-stream'});
+      if (navigator.canShare({files: [sf]})) {
+        await navigator.share({files: [sf], title: name});
+        return;
+      }
+    } catch(serr) {
+      if (serr.name === 'AbortError') return;
+    }
+  }
   if (typeof saveAs !== 'undefined') { saveAs(blob, name); return; }
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
@@ -857,7 +869,7 @@ function _dlBlob(blob, name) {
 
 async function saveSingle(docObj, name) {
   const blob = await Packer.toBlob(docObj);
-  _dlBlob(blob, name);
+  await _dlBlob(blob, name);
 }
 
 function setAllBtnsLoading(on, msg) {
@@ -894,7 +906,7 @@ async function generateAll() {
     setAllBtnsLoading(true, '⏳ Đang tạo file 3/3...');
     await new Promise(function(r){ setTimeout(r, 1200); });
     await saveSingle(buildSettlement(d), '3-BBTL-' + safe + '.docx');
-    showToast('✅ Đã tải đủ bộ 3 văn bản!', 3500);
+    showToast('✅ Đã gửi đủ bộ 3 văn bản — kiểm tra Zalo hoặc mục Tải về!', 3500);
   } catch(e) {
     showToast('❌ Lỗi tạo file — kiểm tra mạng và thử lại', 4000);
     console.error('generateAll error:', e);

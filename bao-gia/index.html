@@ -858,9 +858,35 @@ function showToast(msg, dur) {
 }
 
 // ──────────────────────────────────────────────
+// DOWNLOAD HELPER – Web Share API (Android) → FileSaver → blob URL
+// ──────────────────────────────────────────────
+async function _dlBlob(blob, name) {
+  // Android Chrome: mở share sheet → người dùng chọn Zalo / Lưu vào Files
+  if (navigator.share && navigator.canShare) {
+    try {
+      var sf = new File([blob], name, {type: blob.type || 'application/octet-stream'});
+      if (navigator.canShare({files: [sf]})) {
+        await navigator.share({files: [sf], title: name});
+        return;
+      }
+    } catch(serr) {
+      if (serr.name === 'AbortError') return; // người dùng bấm Huỷ
+      // lỗi khác → fallback
+    }
+  }
+  // Desktop / fallback
+  if (typeof saveAs !== 'undefined') { saveAs(blob, name); return; }
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+}
+
+// ──────────────────────────────────────────────
 // EXPORT TO WORD
 // ──────────────────────────────────────────────
-function exportWord() {
+async function exportWord() {
   // Loading state on buttons
   var btnM = document.querySelector('.mobile-export button');
   var btnD = document.querySelector('.btn-export');
@@ -938,17 +964,10 @@ ${wordBody}
 </html>`;
 
   const blob = new Blob(['﻿', wordDoc], { type: 'application/msword' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = fname;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  // Android Chrome cần thời gian đọc URL trước khi revoke
-  setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+  await _dlBlob(blob, fname);
 
   setDone();
-  showToast('📥 File đang tải về máy!');
+  showToast('📥 File đã tải — kiểm tra mục Tải về hoặc Zalo!');
   } catch(e) {
     setLoading(false);
     showToast('❌ Lỗi xuất file — thử lại!', 4000);
