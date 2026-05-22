@@ -392,9 +392,20 @@ body {
   }
   .preview-label { font-size: 8pt; margin-bottom: 8px; }
 }
+
+/* ===== TOAST ===== */
+#cd-toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: #111; color: #fff; padding: 10px 20px; border-radius: 8px;
+  font-size: 14px; font-family: Arial, sans-serif; font-weight: 600;
+  z-index: 999; display: none; white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25); pointer-events: none;
+  transition: opacity 0.3s;
+}
 </style>
 </head>
 <body>
+<div id="cd-toast"></div>
 
 <!-- ===== MOBILE TAB BAR ===== -->
 <div class="mobile-tabs">
@@ -832,9 +843,40 @@ function convertListsForWord(html) {
 }
 
 // ──────────────────────────────────────────────
+// TOAST
+// ──────────────────────────────────────────────
+function showToast(msg, dur) {
+  dur = dur || 2800;
+  var t = document.getElementById('cd-toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(function() {
+    t.style.opacity = '0';
+    setTimeout(function() { t.style.display = 'none'; }, 300);
+  }, dur);
+}
+
+// ──────────────────────────────────────────────
 // EXPORT TO WORD
 // ──────────────────────────────────────────────
 function exportWord() {
+  var btnM = document.querySelector('.mobile-export button');
+  var btnD = document.querySelector('.btn-export');
+  var origM = btnM ? btnM.innerHTML : '';
+  var origD = btnD ? btnD.innerHTML : '';
+  function setLoading(on) {
+    if (btnM) { btnM.innerHTML = on ? '⏳ Đang tạo file...' : origM; btnM.disabled = on; }
+    if (btnD) { btnD.innerHTML = on ? '⏳ Đang tạo...' : origD;    btnD.disabled = on; }
+  }
+  function setDone() {
+    if (btnM) { btnM.innerHTML = '✅ Đã tải file!'; btnM.disabled = false; setTimeout(function(){ btnM.innerHTML = origM; }, 3000); }
+    if (btnD) { btnD.innerHTML = '✅ Tải xong!';   btnD.disabled = false; setTimeout(function(){ btnD.innerHTML = origD; }, 3000); }
+  }
+  setLoading(true);
+
+  try {
   const rawHTML  = document.getElementById('doc').innerHTML;
   const wordBody = convertListsForWord(rawHTML);
 
@@ -902,7 +944,15 @@ ${wordBody}
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+
+  setDone();
+  showToast('📥 File đang tải về máy!');
+  } catch(e) {
+    setLoading(false);
+    showToast('❌ Lỗi xuất file — thử lại!', 4000);
+    console.error('exportWord error:', e);
+  }
 }
 
 // ──────────────────────────────────────────────
@@ -932,12 +982,15 @@ function scaleDoc() {
   if (window.innerWidth > 768) return;
   const area  = document.getElementById('previewArea');
   const doc   = document.getElementById('doc');
+  if (!area || !doc) return;
   const avail = area.clientWidth - 16;
   const docW  = 794;
   const scale = Math.min(1, avail / docW);
-  doc.style.transform       = `scale(${scale})`;
+  doc.style.width = docW + 'px';
+  doc.style.transform = 'scale(' + scale + ')';
   doc.style.transformOrigin = 'top left';
-  doc.style.marginBottom    = `-${docW * (1 - scale) * 0.8}px`;
+  const docH = doc.offsetHeight;
+  doc.style.marginBottom = '-' + Math.round(docH * (1 - scale)) + 'px';
 }
 
 window.addEventListener('resize', function () {
