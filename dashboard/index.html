@@ -891,7 +891,26 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
     <!-- SETTINGS -->
     <div id="v-settings" class="view">
       <div class="sh"><div class="st">Cài đặt</div></div>
-      <!-- Owner salary card -->
+
+      <!-- 1. Danh sách nhân sự -->
+      <div class="card" style="max-width:680px;margin-bottom:16px">
+        <div class="ch"><div class="ct">👥 Danh sách nhân sự thường xuyên</div><button class="btn btn-gn btn-s" onclick="addDefaultStaffRow()">+ Thêm người</button></div>
+        <div class="cb">
+          <div style="font-size:12px;color:var(--t3);margin-bottom:14px">Danh sách này sẽ xuất hiện dưới dạng gợi ý khi thêm nhân sự vào dự án. Lương/ngày là mặc định, có thể sửa theo từng dự án.</div>
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="background:var(--bg)">
+              <th style="padding:8px 12px;text-align:left;color:var(--t3);font-size:11px;border-bottom:1px solid var(--bl)">#</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--t3);font-size:11px;border-bottom:1px solid var(--bl)">Họ tên</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--t3);font-size:11px;border-bottom:1px solid var(--bl)">Vai trò</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--t3);font-size:11px;border-bottom:1px solid var(--bl)">Lương/ngày</th>
+              <th style="border-bottom:1px solid var(--bl)"></th>
+            </tr></thead>
+            <tbody id="defaultStaffTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. Lương chủ studio -->
       <div class="card" style="max-width:680px;margin-bottom:16px">
         <div class="ch"><div class="ct">💼 Lương chủ studio (Can Đăng)</div></div>
         <div class="cb">
@@ -907,35 +926,14 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
           <div class="hint">Hiển thị trong Nhân sự &amp; Lương — không gắn với dự án nào</div>
         </div>
       </div>
-      <!-- Google Calendar card -->
+
+      <!-- 3. Google Calendar (gọn) -->
       <div class="card" style="max-width:680px;margin-bottom:16px">
         <div class="ch">
-          <div><div class="ct">📅 Đồng bộ Google Calendar</div><div class="cs">Tự động tạo sự kiện khi thêm/sửa/xóa dự án — không hiển thị chi phí</div></div>
+          <div><div class="ct">📅 Google Calendar</div><div class="cs">Tự động đồng bộ lịch dự án — không hiển thị chi phí</div></div>
         </div>
-        <div class="cb">
-          <div class="steps" style="margin-bottom:16px">
-            <div class="step"><div class="sn">1</div><div class="sc">Vào <a href="https://console.cloud.google.com" target="_blank" style="color:var(--ac)">console.cloud.google.com</a> → tạo project mới → <strong>Enable Google Calendar API</strong></div></div>
-            <div class="step"><div class="sn">2</div><div class="sc"><strong>APIs &amp; Services → Credentials → Create OAuth 2.0 Client ID</strong> → loại: <em>Web application</em></div></div>
-            <div class="step"><div class="sn">3</div><div class="sc">Thêm <span class="ci">https://candangphoto-hue.github.io</span> vào <strong>Authorized JavaScript origins</strong></div></div>
-            <div class="step"><div class="sn">4</div><div class="sc">Copy <strong>Client ID</strong> → paste vào ô dưới → Lưu → Kết nối Google</div></div>
-          </div>
+        <div class="cb" style="padding:14px 18px">
           <div id="gcalSettingsBox"></div>
-        </div>
-      </div>
-      <div class="card" style="max-width:680px">
-        <div class="ch"><div class="ct">👥 Danh sách nhân sự thường xuyên</div><button class="btn btn-gn btn-s" onclick="addDefaultStaffRow()">+ Thêm người</button></div>
-        <div class="cb">
-          <div style="font-size:12px;color:var(--t3);margin-bottom:14px">Danh sách này sẽ xuất hiện dưới dạng gợi ý khi thêm nhân sự vào dự án. Lương/ngày là mặc định, có thể sửa theo từng dự án.</div>
-          <table style="width:100%;border-collapse:collapse;font-size:13px">
-            <thead><tr style="background:var(--bg)">
-              <th style="padding:8px 12px;text-align:left;color:var(--t3);font-size:11px;border-bottom:1px solid var(--bl)">#</th>
-              <th style="padding:8px 12px;text-align:left;color:var(--t3);font-size:11px;border-bottom:1px solid var(--bl)">Họ tên</th>
-              <th style="padding:8px 12px;text-align:left;color:var(--t3);font-size:11px;border-bottom:1px solid var(--bl)">Vai trò</th>
-              <th style="padding:8px 12px;text-align:right;color:var(--t3);font-size:11px;border-bottom:1px solid var(--bl)">Lương/ngày</th>
-              <th style="border-bottom:1px solid var(--bl)"></th>
-            </tr></thead>
-            <tbody id="defaultStaffTable"></tbody>
-          </table>
         </div>
       </div>
     </div>
@@ -3307,7 +3305,7 @@ function gcalDesc(p){
   lines.push('— Can Đăng Studio');
   return lines.join('\n');
 }
-function gcalTitle(p){ return (p.service||'Chụp ảnh')+' · '+(p.client||''); }
+function gcalTitle(p){ return p.client||'Dự án'; }
 
 function _gcalNextDay(d){
   // Dùng constructor local (không UTC) để tránh lệch múi giờ UTC+7
@@ -3322,8 +3320,13 @@ function initGCalClient(){
   _gcalTokenClient=google.accounts.oauth2.initTokenClient({
     client_id: GCAL_CLIENT_ID,
     scope: GCAL_SCOPE,
+    hint: 'candangphoto@gmail.com',
     callback:(resp)=>{
-      if(resp.error){toast('⚠️ Google: '+resp.error);_gcalPendingCBs=[];return;}
+      if(resp.error){
+        // Nếu lỗi khi tự kết nối lại thì im lặng, không toast
+        if(!resp._silent) toast('⚠️ Google: '+resp.error);
+        _gcalPendingCBs=[];return;
+      }
       _gcalToken=resp.access_token;
       _gcalTokenExp=Date.now()+(Number(resp.expires_in)-60)*1000;
       localStorage.setItem('cd_gcal_connected','1');
@@ -3332,6 +3335,10 @@ function initGCalClient(){
       cbs.forEach(cb=>cb());
     },
   });
+  // Tự kết nối lại lặng lẽ nếu đã từng kết nối
+  if(localStorage.getItem('cd_gcal_connected')){
+    _gcalTokenClient.requestAccessToken({prompt:''});
+  }
 }
 
 function gcalEnsureToken(cb){
@@ -3453,45 +3460,46 @@ function saveGCalCalendar(){
 function renderGCalSettings(){
   const box=$('gcalSettingsBox'); if(!box)return;
   const connected=!!localStorage.getItem('cd_gcal_connected');
-  box.innerHTML=`
+  box.innerHTML= connected ? `
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+      <span style="font-size:12.5px;color:var(--gn);font-weight:600">✅ Đã kết nối · candangphoto@gmail.com</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-gn btn-s" onclick="gcalSyncAll()">🔄 Đồng bộ tất cả</button>
+        <button class="btn btn-d btn-s" onclick="gcalDisconnect()">Ngắt kết nối</button>
+      </div>
+    </div>
+    <div class="fg2" style="align-items:end;margin-bottom:8px">
+      <div>
+        <label class="fl">Lịch đồng bộ vào</label>
+        <select class="fs" id="gcalCalSel" onchange="saveGCalCalendar()">
+          <option value="primary">Lịch chính (primary)</option>
+        </select>
+      </div>
+      <div><button class="btn btn-g btn-s" onclick="loadGCalCalendars()">↻ Tải lịch</button></div>
+    </div>
+    <div style="font-size:11px;color:var(--t3)">
+      🔵 Liên hệ mới &nbsp;·&nbsp; 🟡 Đã báo giá &nbsp;·&nbsp; 🟠 Đang chụp &nbsp;·&nbsp; 🟣 Hậu kỳ &nbsp;·&nbsp; 🟢 Hoàn thành
+    </div>
+  ` : `
+    ${!GCAL_CLIENT_ID ? `
+    <details style="margin-bottom:12px">
+      <summary style="font-size:12px;color:var(--ac);cursor:pointer;font-weight:500">📖 Hướng dẫn lấy Client ID</summary>
+      <div class="steps" style="margin-top:10px">
+        <div class="step"><div class="sn">1</div><div class="sc">Vào <a href="https://console.cloud.google.com" target="_blank" style="color:var(--ac)">console.cloud.google.com</a> → Enable <strong>Google Calendar API</strong></div></div>
+        <div class="step"><div class="sn">2</div><div class="sc"><strong>Credentials → Create OAuth 2.0 Client ID</strong> → loại: Web application</div></div>
+        <div class="step"><div class="sn">3</div><div class="sc">Thêm <span class="ci">https://candangphoto-hue.github.io</span> vào Authorized JavaScript origins</div></div>
+      </div>
+    </details>` : ''}
     <div class="fg2" style="margin-bottom:12px;align-items:end">
       <div>
         <label class="fl">Google OAuth Client ID</label>
         <input class="fi" id="gcalClientInput" value="${GCAL_CLIENT_ID}" placeholder="xxxxxxxx.apps.googleusercontent.com">
-        <div class="hint">Lấy từ Google Cloud Console → Credentials</div>
       </div>
       <div><button class="btn btn-g btn-s" onclick="saveGCalClientId()">Lưu</button></div>
     </div>
-    ${connected ? `
-      <div class="fg2" style="margin-bottom:12px;align-items:end">
-        <div>
-          <label class="fl">Đồng bộ vào lịch</label>
-          <select class="fs" id="gcalCalSel" onchange="saveGCalCalendar()">
-            <option value="primary">Lịch chính (primary)</option>
-          </select>
-        </div>
-        <div><button class="btn btn-g btn-s" onclick="loadGCalCalendars()">↻ Tải lịch</button></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
-        <span style="font-size:12.5px;color:var(--gn);font-weight:600">✅ Đã kết nối Google Calendar</span>
-        <button class="btn btn-d btn-s" onclick="gcalDisconnect()">Ngắt kết nối</button>
-      </div>
-    ` : `
-      <div style="margin-bottom:12px">
-        <button class="btn btn-p btn-s" onclick="gcalConnect()" ${!GCAL_CLIENT_ID?'disabled':''}>🔗 Đăng nhập Google & Kết nối</button>
-        ${!GCAL_CLIENT_ID?'<span style="font-size:11.5px;color:var(--t3);margin-left:8px">Nhập Client ID trước</span>':''}
-      </div>
-    `}
-    ${connected?`
-    <div style="margin-bottom:10px">
-      <button class="btn btn-gn btn-s" onclick="gcalSyncAll()">🔄 Đồng bộ tất cả dự án cũ</button>
-      <div class="hint" style="margin-top:4px">Đẩy toàn bộ dự án hiện có lên Google Calendar một lần</div>
-    </div>`:''}
-    <div style="background:var(--bg);border-radius:var(--rs);padding:10px 12px;font-size:11.5px;color:var(--t3);line-height:1.8">
-      <span style="font-weight:600;color:var(--t2)">Màu theo trạng thái:</span>
-      🔵 Liên hệ mới &nbsp;·&nbsp; 🟡 Đã báo giá &nbsp;·&nbsp; 🟠 Đang chụp &nbsp;·&nbsp; 🟣 Hậu kỳ &nbsp;·&nbsp; 🟢 Hoàn thành<br>
-      <span style="font-weight:600;color:var(--t2)">Hiển thị:</span> Khách hàng · Dịch vụ · Ê-kíp · Phụ trách · Ghi chú — <strong style="color:var(--rd)">không có chi phí</strong>
-    </div>`;
+    <button class="btn btn-p btn-s" onclick="gcalConnect()" ${!GCAL_CLIENT_ID?'disabled':''}>🔗 Kết nối Google Calendar</button>
+    ${!GCAL_CLIENT_ID?'<span style="font-size:11.5px;color:var(--t3);margin-left:8px">Nhập Client ID trước</span>':''}
+  `;
   if(connected) setTimeout(loadGCalCalendars, 200);
 }
 
