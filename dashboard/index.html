@@ -255,6 +255,7 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
 .mev{padding:3px 6px;border-radius:3px;font-size:11px;font-weight:500;background:var(--al);color:var(--ad);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;display:block}
 .mev:hover{opacity:.8}
 .mev-debt{background:var(--rl);color:var(--rd)}
+.mev-done{background:#dcfce7!important;color:#15803d!important}
 .mev-more{font-size:10px;color:var(--t3);padding-left:2px;margin-top:2px}
 
 /* CALENDAR POPUP */
@@ -660,14 +661,33 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
     </div>
 
     <!-- DATES -->
-    <div class="fg2" style="margin-bottom:14px">
-      <div class="fr" style="margin:0">
-        <label class="fl">Ngày bắt đầu chụp</label>
-        <input class="fi" id="f-ds" type="date" onchange="calcDays()">
+    <div style="margin-bottom:14px">
+      <label class="fl">📅 Ngày làm việc</label>
+      <div style="display:flex;gap:10px;margin-bottom:8px;align-items:center">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer">
+          <input type="radio" name="dateMode" value="range" checked onchange="switchDateMode('range')"> Từ ngày → đến ngày
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer">
+          <input type="radio" name="dateMode" value="pick" onchange="switchDateMode('pick')"> Tích từng ngày riêng lẻ
+        </label>
       </div>
-      <div class="fr" style="margin:0">
-        <label class="fl">Ngày kết thúc chụp</label>
-        <input class="fi" id="f-de" type="date" onchange="calcDays()">
+      <!-- Mode: range -->
+      <div id="dateRangeMode">
+        <div class="fg2" style="margin:0">
+          <div class="fr" style="margin:0">
+            <label class="fl">Ngày bắt đầu</label>
+            <input class="fi" id="f-ds" type="date" onchange="calcDays()">
+          </div>
+          <div class="fr" style="margin:0">
+            <label class="fl">Ngày kết thúc</label>
+            <input class="fi" id="f-de" type="date" onchange="calcDays()">
+          </div>
+        </div>
+      </div>
+      <!-- Mode: pick individual days -->
+      <div id="datePickMode" style="display:none">
+        <div id="dayPickCal" style="border:1px solid var(--bl);border-radius:var(--rs);padding:10px;background:var(--bg);user-select:none"></div>
+        <div id="selDaysList" style="margin-top:8px;font-size:12px;color:var(--t2);min-height:20px"></div>
       </div>
     </div>
     <div id="daysPreview" style="display:none;margin-bottom:14px;padding:8px 12px;background:var(--al);border-radius:var(--rs);font-size:12.5px;color:var(--ad)"></div>
@@ -714,19 +734,12 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
     <div id="staffRows"></div>
     <div id="staffTotal" style="display:none;text-align:right;font-size:12.5px;color:var(--rd);margin-top:6px"></div>
 
-    <!-- PROPS -->
+    <!-- CHI PHÍ DỰ ÁN (gộp: props + other) -->
     <div class="dv"></div>
-    <div class="sec-lbl">🎨 Chi phí đạo cụ & bối cảnh <button class="btn btn-gn btn-xs" onclick="addPropsRow()">+ Thêm item</button></div>
-    <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Thêm từng vật phẩm: tên · số lượng · đơn giá → tổng tự tính</div>
+    <div class="sec-lbl">📦 Chi phí dự án <button class="btn btn-gn btn-xs" onclick="addPropsRow()">+ Thêm khoản</button></div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Đạo cụ, bối cảnh, bartender, người mẫu, di chuyển, in ấn... · Số lượng × Đơn giá → tự tính</div>
     <div id="propsRows"></div>
     <div id="propsTotal" style="display:none;text-align:right;font-size:12.5px;color:var(--rd);margin-top:6px"></div>
-
-    <!-- OTHER COSTS -->
-    <div class="dv"></div>
-    <div class="sec-lbl">📦 Chi phí khác</div>
-    <div class="fr"><label class="fl">Chi phí khác (di chuyển, thuê TB, in ấn...)</label>
-      <input class="fi" id="f-oc" type="text" placeholder="0" oninput="fmtM(this)" onblur="calcSummary()">
-    </div>
 
     <!-- SUMMARY -->
     <div id="projSummary" style="display:none;margin-top:4px">
@@ -737,8 +750,8 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
         <div class="crow"><span style="font-weight:600">Tổng thu</span><span id="sm-gross" style="font-weight:600">—</span></div>
         <div style="height:1px;background:var(--bl);margin:6px 0"></div>
         <div class="crow"><span style="color:var(--rd)">– Nhân sự</span><span id="sm-staff" style="color:var(--rd)">—</span></div>
-        <div class="crow"><span style="color:var(--rd)">– Props & bối cảnh</span><span id="sm-props" style="color:var(--rd)">—</span></div>
-        <div class="crow"><span style="color:var(--rd)">– Chi phí khác</span><span id="sm-oc" style="color:var(--rd)">—</span></div>
+        <div class="crow"><span style="color:var(--rd)">– Chi phí dự án</span><span id="sm-props" style="color:var(--rd)">—</span></div>
+        <div id="sm-oc" style="display:none"></div>
         <div class="crow tot"><span>Lợi nhuận dự kiến</span><span id="sm-pf">—</span></div>
         <div class="crow" style="font-size:11.5px;color:var(--t3);margin-top:3px"><span>Biên lợi nhuận (trên tổng thu)</span><span id="sm-mg">—</span></div>
         <div style="height:1px;background:var(--bl);margin:8px 0"></div>
@@ -922,6 +935,27 @@ function fmtS(n){
 function fmtM(el){const r=el.value.replace(/\D/g,'');el.value=r?Number(r).toLocaleString('vi-VN'):'';}
 function pM(s){return parseInt((s||'').replace(/\D/g,''))||0;}
 function fmtDate(d){if(!d)return'—';const clean=String(d).split('T')[0];const[y,m,dd]=clean.split('-');if(!dd||!m||!y)return String(d);return`${dd}/${m}/${y}`;}
+function _fmtWorkDays(days){if(!days||!days.length)return'—';const sorted=[...days].sort();const first=fmtDate(sorted[0]),last=fmtDate(sorted[sorted.length-1]);return sorted.length===1?first:`${first}→${last} (${sorted.length} ngày)`;}
+// Chuẩn hóa ngày: dd/mm/yyyy hoặc d/m/yyyy → yyyy-mm-dd (ISO)
+function toISO(str){
+  if(!str)return'';
+  const s=String(str).split('T')[0].trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s; // đã ISO
+  const p=s.split('/');
+  if(p.length===3){
+    const[dd,mm,yy]=p;
+    return`${yy.padStart(4,'0')}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+  }
+  return s;
+}
+// Chuẩn hóa tất cả ngày trong PROJECTS về ISO một lần lúc khởi động
+function normalizeDates(){
+  PROJECTS.forEach(p=>{
+    if(p.dateStart)p.dateStart=toISO(p.dateStart);
+    if(p.dateEnd)p.dateEnd=toISO(p.dateEnd);
+    if(p.payments)p.payments.forEach(x=>{if(x.date)x.date=toISO(x.date);});
+  });
+}
 function $(id){return document.getElementById(id);}
 
 // ═══ DEFAULT STAFF — quản lý từ Settings ═══
@@ -1104,14 +1138,13 @@ function addPropsRow(data){
   div.id=id; div.style.cssText='background:var(--bg);border:1px solid var(--bl);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px';
   div.innerHTML=`
     <div class="fg4">
-      <div><label class="fl">Tên vật phẩm / mô tả</label><input class="fi" data-f="desc" placeholder="VD: Hoa tươi, Vải backdrop..." value="${d.desc||''}"></div>
+      <div><label class="fl">Tên khoản / mô tả</label><input class="fi" data-f="desc" placeholder="VD: Hoa tươi, bartender, di chuyển..." value="${d.desc||''}"></div>
       <div><label class="fl">SL</label><input class="fi" data-f="qty" type="number" min="1" placeholder="1" value="${d.qty||1}" oninput="calcPropsRow('${id}')"></div>
       <div><label class="fl">Đơn giá (đ)</label><input class="fi" data-f="up" type="text" placeholder="0" value="${d.unitPrice?Number(d.unitPrice).toLocaleString('vi-VN'):''}" oninput="fmtM(this);calcPropsRow('${id}')"></div>
       <button class="frow-del" onclick="delRow('${id}',propsRows,'propsRows');calcProps()">✕</button>
     </div>
-    <div class="fg2" style="margin-top:7px">
-      <div><label class="fl">Ngày mua</label><input class="fi" data-f="date" type="date" value="${d.date||''}"></div>
-      <div data-f="total" style="display:flex;align-items:flex-end;padding-bottom:2px;font-size:12.5px;font-weight:600;color:var(--rd)"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:4px">
+      <div data-f="total" style="font-size:12.5px;font-weight:600;color:var(--rd)"></div>
     </div>`;
   $('propsRows').appendChild(div);
   calcProps();
@@ -1172,6 +1205,64 @@ function calcDays(){
   $('daysPreview').textContent=`📅 ${fmtDate(s)} → ${fmtDate(e)} · ${days} ngày chụp`;
 }
 
+// ═══ DAY PICKER (tích ngày riêng lẻ) ═══
+let _pickerYM={y:new Date().getFullYear(),m:new Date().getMonth()};
+let _selDays=[];
+let _dateMode='range';
+
+function switchDateMode(mode){
+  _dateMode=mode;
+  $('dateRangeMode').style.display=mode==='range'?'':'none';
+  $('datePickMode').style.display=mode==='pick'?'':'none';
+  if(mode==='pick'){_selDays=[];renderDayPicker();renderSelDays();}
+  $('daysPreview').style.display='none';
+}
+
+function renderDayPicker(){
+  const{y,m}=_pickerYM;
+  const first=new Date(y,m,1), last=new Date(y,m+1,0);
+  const startDow=first.getDay()===0?6:first.getDay()-1;
+  const mn=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <button class="btn btn-g btn-xs" onclick="_pickerNav(-1)">‹</button>
+    <span style="font-size:12.5px;font-weight:600">Tháng ${m+1}/${y}</span>
+    <button class="btn btn-g btn-xs" onclick="_pickerNav(1)">›</button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:11px;margin-bottom:4px">
+    ${['T2','T3','T4','T5','T6','T7','CN'].map(d=>`<div style="color:var(--t3);padding:2px">${d}</div>`).join('')}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">`;
+  for(let i=0;i<startDow;i++)h+=`<div></div>`;
+  for(let d=1;d<=last.getDate();d++){
+    const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const sel=_selDays.includes(iso);
+    h+=`<div onclick="_toggleDay('${iso}')" style="padding:5px 2px;border-radius:5px;cursor:pointer;text-align:center;font-size:12px;font-weight:${sel?'700':'400'};background:${sel?'var(--ac)':'var(--bg2)'};color:${sel?'#fff':'var(--tx)'};border:1px solid ${sel?'var(--ac)':'var(--bl)'}">${d}</div>`;
+  }
+  h+=`</div>`;
+  $('dayPickCal').innerHTML=h;
+}
+
+function _pickerNav(dir){
+  let{y,m}=_pickerYM;
+  m+=dir; if(m<0){m=11;y--;} if(m>11){m=0;y++;}
+  _pickerYM={y,m}; renderDayPicker();
+}
+
+function _toggleDay(iso){
+  const i=_selDays.indexOf(iso);
+  if(i>-1)_selDays.splice(i,1);else _selDays.push(iso);
+  _selDays.sort();
+  renderDayPicker(); renderSelDays();
+}
+
+function renderSelDays(){
+  const el=$('selDaysList');
+  if(!_selDays.length){el.textContent='Chưa chọn ngày nào';return;}
+  el.innerHTML=`<span style="color:var(--ad);font-weight:600">✓ Đã chọn ${_selDays.length} ngày:</span> `
+    +_selDays.map(d=>`<span style="display:inline-block;background:var(--al);color:var(--ad);padding:1px 6px;border-radius:4px;margin:1px">${fmtDate(d)}</span>`).join('')
+    +`<button class="btn btn-g btn-xs" style="margin-left:6px" onclick="_selDays=[];renderDayPicker();renderSelDays()">Xoá hết</button>`;
+}
+
 function calcVat(){
   const net=pM($('f-nv').value);
   const hasVat=$('f-vat').checked;
@@ -1193,9 +1284,9 @@ function calcSummary(){
   const gross=net+vat;
   const staff=getTotalStaff();
   const props=getTotalProps();
-  const oc=pM($('f-oc').value);
+  const oc=0; // đã gộp vào Chi phí dự án (props)
   const tu=pM($('f-tu').value);
-  const totalCost=staff+props+oc;
+  const totalCost=staff+props;
   const profit=gross-totalCost;
   const margin=gross?Math.round(profit/gross*100):0;
   const debt=Math.max(gross-tu,0);
@@ -1227,13 +1318,21 @@ function saveProject(){
   const net=pM($('f-nv').value);
   const hasVat=$('f-vat').checked;
   const vat=hasVat?Math.round(net*0.08):0;
-  const ds=$('f-ds').value, de=$('f-de').value;
-  const totalDays=ds&&de?Math.round((new Date(de)-new Date(ds))/86400000)+1:1;
+  let ds,de,totalDays,workDays=[];
+  if(_dateMode==='pick'){
+    if(!_selDays.length){toast('⚠️ Chọn ít nhất 1 ngày làm việc');return;}
+    workDays=[..._selDays];
+    ds=workDays[0]; de=workDays[workDays.length-1];
+    totalDays=workDays.length;
+  } else {
+    ds=$('f-ds').value; de=$('f-de').value;
+    totalDays=ds&&de?Math.round((new Date(de)-new Date(ds))/86400000)+1:1;
+  }
   const staffList=getStaffList();
   const propsList=getPropsList();
   const staffCost=staffList.reduce((s,x)=>s+x.total,0);
   const propsCost=propsList.reduce((s,x)=>s+x.total,0);
-  const otherCost=pM($('f-oc').value);
+  const otherCost=0; // đã gộp vào propsList (Chi phí dự án)
   const tamUng=pM($('f-tu').value);
   const p={
     id:'P'+Date.now(),
@@ -1241,6 +1340,7 @@ function saveProject(){
     company:$('f-company')?$('f-company').value.trim():'',
     service:$('f-sv').value||'F&B Photography',
     dateStart:ds, dateEnd:de||ds, totalDays,
+    workDays,
     netValue:net, hasVAT:hasVat, vatAmt:vat, grossValue:net+vat,
     tamUng,
     payments: tamUng ? [{label:'Tạm ứng đặt cọc',amount:tamUng,date:ds,method:'Chuyển khoản',note:'Đặt cọc trước khi chụp',done:true,createdAt:new Date().toISOString()}] : [],
@@ -1261,7 +1361,7 @@ function saveProject(){
 }
 
 function resetModal(){
-  ['f-cl','f-nv','f-oc','f-no','f-tu','f-company'].forEach(id=>{if($(id))$(id).value='';});
+  ['f-cl','f-nv','f-no','f-tu','f-company'].forEach(id=>{if($(id))$(id).value='';});
   $('f-sv').selectedIndex=0; $('f-st').selectedIndex=0;
   $('f-ds').value=''; $('f-de').value='';
   $('f-vat').checked=false;
@@ -1272,6 +1372,10 @@ function resetModal(){
   $('propsTotal').style.display='none';
   $('staffRows').innerHTML=''; $('propsRows').innerHTML='';
   staffRows=[]; propsRows=[];
+  // Reset date mode về range
+  _dateMode='range'; _selDays=[];
+  document.querySelectorAll('[name=dateMode]').forEach(r=>r.value==='range'?r.checked=true:r.checked=false);
+  $('dateRangeMode').style.display=''; $('datePickMode').style.display='none';
 }
 
 // ═══════════════════════════════════════════════
@@ -1296,18 +1400,22 @@ function renderDPAll(p){
 }
 
 function renderDP0(p){
-  const cost=(p.staffCost||0)+(p.propsCost||0)+(p.otherCost||0);
-  const gross=p.grossValue||p.netValue||0;
-  const profit=gross-cost;
+  const cost=getTotalCost(p);
+  const contractVal=p.grossValue||p.netValue||0;
+  const extraVal=getClientCostsTotal(p);
+  const totalReceivable=contractVal+extraVal;
+  const profit=totalReceivable-cost;
   const debt=getDebt(p);
   const collected=getCollected(p);
   const s=SC[p.status]||{};
-  const dateStr=p.dateStart&&p.dateEnd&&p.dateStart!==p.dateEnd
+  const dateStr=p.workDays&&p.workDays.length?_fmtWorkDays(p.workDays)
+    :(p.dateStart&&p.dateEnd&&p.dateStart!==p.dateEnd
     ?`${fmtDate(p.dateStart)} → ${fmtDate(p.dateEnd)} (${p.totalDays||1} ngày)`
-    :(p.dateStart?fmtDate(p.dateStart):'—');
+    :(p.dateStart?fmtDate(p.dateStart):'—'));
+  const ccList=p.clientCosts||[];
   $('dp0').innerHTML=`
     <div class="finance-grid">
-      <div class="fcard"><div class="fc-l">Tổng thu (Gross)</div><div class="fc-v" style="color:var(--gn)">${fmtS(gross)}</div></div>
+      <div class="fcard"><div class="fc-l">Tổng thu (HĐ${extraVal?'+PS':''})</div><div class="fc-v" style="color:var(--gn)">${fmtS(totalReceivable)}</div></div>
       <div class="fcard"><div class="fc-l">Đã thu</div><div class="fc-v" style="color:var(--gn)">${fmtS(collected)}</div></div>
       <div class="fcard" style="${debt>0?'background:var(--rl);border:1px solid #f0c4c0':''}"><div class="fc-l" style="${debt>0?'color:var(--rd)':''}">⚠️ Công nợ còn lại</div><div class="fc-v" style="color:${debt>0?'var(--rd)':'var(--gn)'}">${debt>0?fmtS(debt):'✓ Đã thu đủ'}</div></div>
       <div class="fcard"><div class="fc-l">Lợi nhuận</div><div class="fc-v" style="color:${profit>=0?'var(--gn)':'var(--rd)'}">${fmtS(profit)}</div></div>
@@ -1321,13 +1429,58 @@ function renderDP0(p){
       <tr><td style="color:var(--t3);padding:6px 0">Trạng thái</td><td><span class="sbadge" style="background:${s.bg};color:${s.co}"><span class="sdot2" style="background:${s.dot}"></span>${p.status}</span></td></tr>
       ${p.note?`<tr><td style="color:var(--t3);padding:6px 0;vertical-align:top">Ghi chú</td><td style="line-height:1.6">${p.note}</td></tr>`:''}
     </table>
-    <div style="display:flex;gap:8px;margin-top:18px">
+    <!-- Chi phí phát sinh KH trả -->
+    <div style="margin-top:16px;border-top:1px solid var(--bl);padding-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:12.5px;font-weight:600">💰 Chi phí phát sinh (KH trả)</div>
+        <button class="btn btn-gn btn-xs" onclick="addClientCost()">+ Thêm khoản</button>
+      </div>
+      <div id="ccList" style="font-size:12.5px">
+        ${ccList.length?ccList.map((c,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bl)">
+          <div style="flex:1;color:var(--t2)">${c.name}</div>
+          <div style="font-weight:600;color:var(--bl2)">${fmt(c.amount)}</div>
+          <button class="frow-del" style="width:22px;height:22px;font-size:11px" onclick="removeClientCost(${i})">✕</button>
+        </div>`).join('')+'<div style="padding:5px 0;font-size:11.5px;color:var(--t3);text-align:right">Tổng phát sinh: <strong style="color:var(--bl2)">${fmt(extraVal)}</strong></div>'
+        :'<div style="color:var(--t3);font-size:11.5px;padding:4px 0">Chưa có khoản phát sinh nào</div>'}
+      </div>
+      <div id="ccForm" style="display:none;margin-top:8px;padding:10px;background:var(--al);border-radius:var(--rs)">
+        <div class="fg2" style="margin-bottom:8px">
+          <div><label class="fl">Tên khoản</label><input class="fi" id="cc-name" placeholder="Bartender, người mẫu, đạo cụ, di chuyển..."></div>
+          <div><label class="fl">Số tiền (đ)</label><input class="fi" id="cc-amt" type="text" placeholder="0" oninput="fmtM(this)"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-gn btn-s" onclick="saveClientCost()">✓ Lưu</button>
+          <button class="btn btn-g btn-s" onclick="$('ccForm').style.display='none'">Huỷ</button>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
       <select class="fs" id="dp-status-sel" style="flex:1;font-size:12.5px">
         ${['Liên hệ mới','Đã báo giá','Đang chụp','Hậu kỳ','Hoàn thành'].map(s=>`<option${s===p.status?' selected':''}>${s}</option>`).join('')}
       </select>
       <button class="btn btn-gn btn-s" onclick="updateStatus()">Cập nhật TT</button>
       <button class="btn btn-d btn-s" onclick="delProject('${p.id}')">🗑️</button>
     </div>`;
+}
+function addClientCost(){$('ccForm').style.display='block';$('cc-name').focus();}
+function saveClientCost(){
+  const name=$('cc-name').value.trim();
+  const amt=pM($('cc-amt').value);
+  if(!name){toast('⚠️ Nhập tên khoản');return;}
+  if(!CUR_P.clientCosts)CUR_P.clientCosts=[];
+  CUR_P.clientCosts.push({id:'cc'+Date.now(),name,amount:amt});
+  CUR_P.updatedAt=new Date().toISOString();
+  saveLocal();renderDP0(CUR_P);
+  if(SHEETS_URL)pushSheets({action:'updateProject',id:CUR_P.id,clientCosts:CUR_P.clientCosts});
+  toast('✅ Đã thêm: '+name);
+}
+function removeClientCost(i){
+  if(!CUR_P.clientCosts)return;
+  CUR_P.clientCosts.splice(i,1);
+  CUR_P.updatedAt=new Date().toISOString();
+  saveLocal();renderDP0(CUR_P);
+  if(SHEETS_URL)pushSheets({action:'updateProject',id:CUR_P.id,clientCosts:CUR_P.clientCosts});
+  toast('🗑️ Đã xóa khoản phát sinh');
 }
 
 function updateStatus(){
@@ -1722,8 +1875,8 @@ function openEditPanel(){
       <select class="fs" id="e-sv">${['F&B Photography','Product Photography','Videography nhà hàng','Quay phim quảng cáo','Real × AI Photography','Cho thuê đạo cụ'].map(s=>`<option${s===p.service?' selected':''}>${s}</option>`).join('')}</select>
     </div>
     <div class="fg2">
-      <div class="fr"><label class="fl">Ngày bắt đầu</label><input class="fi" id="e-ds" type="date" value="${p.dateStart||''}"></div>
-      <div class="fr"><label class="fl">Ngày kết thúc</label><input class="fi" id="e-de" type="date" value="${p.dateEnd||''}"></div>
+      <div class="fr"><label class="fl">Ngày bắt đầu</label><input class="fi" id="e-ds" type="date" value="${toISO(p.dateStart)||''}"></div>
+      <div class="fr"><label class="fl">Ngày kết thúc</label><input class="fi" id="e-de" type="date" value="${toISO(p.dateEnd)||''}"></div>
     </div>
     <div class="fg2">
       <div class="fr"><label class="fl">Trạng thái</label>
@@ -1897,7 +2050,7 @@ function renderRecentProjects(){
 
 function renderKanban(){
   $('kbBoard').innerHTML=COLS.map(col=>{
-    const cards=PROJECTS.filter(p=>p.status===col.k);
+    const cards=PROJECTS.filter(p=>p.status===col.k).sort((a,b)=>(toISO(b.dateStart)||b.createdAt||'').localeCompare(toISO(a.dateStart)||a.createdAt||''));
     const s=SC[col.k]||{};
     return`<div class="kc">
       <div class="kh"><div class="kt">${col.i} ${col.l}<span class="cb2" style="background:${s.bg||'#eee'};color:${s.co||'#555'}">${cards.length}</span></div></div>
@@ -2075,7 +2228,8 @@ function renderClients(){
 // PAYMENT HELPERS
 // ═══════════════════════════════════════════════
 function getCollected(p){return(p.payments||[]).filter(x=>x.done).reduce((s,x)=>s+(x.amount||0),0);}
-function getDebt(p){return Math.max((p.grossValue||p.netValue||0)-getCollected(p),0);}
+function getClientCostsTotal(p){return(p.clientCosts||[]).reduce((s,x)=>s+(x.amount||0),0);}
+function getDebt(p){return Math.max((p.grossValue||p.netValue||0)+getClientCostsTotal(p)-getCollected(p),0);}
 
 function renderDP4(p){
   const payments=p.payments||[];
@@ -2176,7 +2330,7 @@ function copyZaloDebt(){
 function localDate(str){if(!str)return null;const[y,m,d]=str.split('-');return new Date(+y,+m-1,+d);}
 function localYMD(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 // so sánh ngày: d nằm trong range [s,e] (đều là local Date)
-function inRange(d,s,e){const dn=localYMD(d);const ss=String(s).split('T')[0];const ee=String(e).split('T')[0];return dn>=ss&&dn<=ee;}
+function inRange(d,s,e){const dn=localYMD(d);const ss=toISO(s)||'';const ee=toISO(e)||'';if(!ss)return false;return dn>=ss&&dn<=(ee||ss);}
 
 // ═══════════════════════════════════════════════
 // WEEKLY / MONTHLY VIEW
@@ -2207,13 +2361,14 @@ function renderWeekly(){
     const isT=localYMD(d)===localYMD(now);
     const ds=localYMD(d);
     const evs=PROJECTS.filter(p=>{
+      if(p.workDays&&p.workDays.length)return p.workDays.includes(ds);
       if(!p.dateStart)return false;
       return inRange(d,p.dateStart,p.dateEnd||p.dateStart);
     });
     const debt=evs.reduce((s,p)=>s+getDebt(p),0);
     return`<div class="dc ${isT?'tod':''}" onclick="wkDayClick('${ds}')">
       <div class="dn">${dn[i]}</div><div class="dd2">${d.getDate()}</div>
-      ${evs.map(e=>`<div class="dev" style="${getDebt(e)>0?'background:var(--rl);color:var(--rd)':''}">${e.client}</div>`).join('')}
+      ${evs.map(e=>{const fd=e.status==='Hoàn thành'&&getDebt(e)===0;return`<div class="dev" style="${fd?'background:#dcfce7;color:#15803d':getDebt(e)>0?'background:var(--rl);color:var(--rd)':''}">${e.client}</div>`;}).join('')}
     </div>`;
   }).join('');
   renderWeekProjects(monStr, sunStr);
@@ -2241,12 +2396,13 @@ function renderMonthly(){
     const isToday=ds===todStr;
     if(!isCurrentMonth){cells+=`<div class="mcell mcell-out"></div>`;continue;}
     const evs=PROJECTS.filter(p=>{
+      if(p.workDays&&p.workDays.length)return p.workDays.includes(ds);
       if(!p.dateStart)return false;
       return inRange(cellDate,p.dateStart,p.dateEnd||p.dateStart);
     });
     cells+=`<div class="mcell ${isToday?'mcell-today':''}">
       <div class="mday">${cellDate.getDate()}</div>
-      ${evs.map(e=>`<div class="mev ${getDebt(e)>0?'mev-debt':''}" onclick="event.stopPropagation();showCalPopup([getProjectById('${e.id}')],event.clientX,event.clientY)" title="${e.client}">${e.client}</div>`).join('')}
+      ${evs.map(e=>{const fd=e.status==='Hoàn thành'&&getDebt(e)===0;return`<div class="mev${fd?' mev-done':getDebt(e)>0?' mev-debt':''}" onclick="event.stopPropagation();showCalPopup([getProjectById('${e.id}')],event.clientX,event.clientY)" title="${e.client}">${e.client}</div>`;}).join('')}
       ${evs.length>2?`<div class="mev-more">+${evs.length-2} dự án</div>`:''}
     </div>`;
   }
@@ -2273,11 +2429,12 @@ function renderWeekProjects(fromStr, toStr, label){
     return;
   }
   tasks.innerHTML=`<div style="display:flex;align-items:center;margin-bottom:10px"><div style="font-size:13px;font-weight:600">${wp.length} dự án${hdr?' — '+hdr:''}</div>${debtBadge}</div>`
-  +wp.sort((a,b)=>a.dateStart.localeCompare(b.dateStart)).map(p=>{
+  +wp.sort((a,b)=>(toISO(a.dateStart)||'').localeCompare(toISO(b.dateStart)||'')).map(p=>{
     const done=p.status==='Hoàn thành',s=SC[p.status]||{};
     const debt=getDebt(p);
-    const dateStr=p.dateEnd&&p.dateEnd!==p.dateStart?`${fmtDate(p.dateStart)} → ${fmtDate(p.dateEnd)}`:fmtDate(p.dateStart);
-    return`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:${done?'var(--gl)':'var(--bg)'};border-radius:var(--rs);border:1px solid ${done&&!debt?'#c8e8d4':debt>0?'#f0c4c0':'var(--border)'};cursor:pointer" onclick="openDetail('${p.id}')">
+    const fullyDone=done&&debt===0;
+    const dateStr=p.workDays&&p.workDays.length?_fmtWorkDays(p.workDays):(p.dateEnd&&p.dateEnd!==p.dateStart?`${fmtDate(p.dateStart)} → ${fmtDate(p.dateEnd)}`:fmtDate(p.dateStart));
+    return`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:${fullyDone?'#f0fdf4':done?'var(--gl)':'var(--bg)'};border-radius:var(--rs);border:1px solid ${fullyDone?'#86efac':debt>0?'#f0c4c0':'var(--border)'};cursor:pointer" onclick="openDetail('${p.id}')">
       <div style="font-size:16px">${done?'✅':'📸'}</div>
       <div style="flex:1">
         <div style="font-size:12.5px;font-weight:600">${p.client} — ${p.service||''}</div>
@@ -2293,7 +2450,7 @@ function renderWeekProjects(fromStr, toStr, label){
 // ═══════════════════════════════════════════════
 // SHEETS
 // ═══════════════════════════════════════════════
-function saveUrl(){SHEETS_URL=$('sUrl').value.trim();localStorage.setItem('cd_url',SHEETS_URL);}
+function saveUrl(){SHEETS_URL=$('sUrl').value.trim();localStorage.setItem('cd_url',SHEETS_URL);if(SHEETS_URL)startAutoSync();else stopAutoSync();}
 
 async function pushSheets(data){
   if(!SHEETS_URL)return;
@@ -2965,22 +3122,66 @@ function renderAll(){
 })();
 
 // Default calendar to month mode
+normalizeDates(); // chuẩn hóa ngày cũ dd/mm/yyyy → yyyy-mm-dd
 switchCalMode('month');
 renderAll();
 
-// Auto-sync mỗi 30 phút — im lặng, chỉ cập nhật đồng hồ
-setInterval(async()=>{
+// ═══════════════════════════════════════════════
+// AUTO-SYNC 2 CHIỀU MỖI 5 PHÚT
+// ═══════════════════════════════════════════════
+let _autoSyncTimer=null;
+function startAutoSync(){
+  if(!SHEETS_URL)return;
+  if(_autoSyncTimer)clearInterval(_autoSyncTimer);
+  _autoSyncTimer=setInterval(autoSync2Way,5*60*1000);
+}
+function stopAutoSync(){if(_autoSyncTimer){clearInterval(_autoSyncTimer);_autoSyncTimer=null;}}
+
+function _mergeProjects(remote){
+  let changed=false;
+  remote.forEach(rp=>{
+    if(rp.dateStart)rp.dateStart=toISO(rp.dateStart);
+    if(rp.dateEnd)rp.dateEnd=toISO(rp.dateEnd);
+    const li=PROJECTS.findIndex(p=>p.id===rp.id);
+    if(li===-1){PROJECTS.unshift(rp);changed=true;}
+    else{
+      const lt=new Date(PROJECTS[li].updatedAt||PROJECTS[li].createdAt||0).getTime();
+      const rt=new Date(rp.updatedAt||rp.createdAt||0).getTime();
+      if(rt>lt){PROJECTS[li]=rp;changed=true;}
+    }
+  });
+  return changed;
+}
+
+async function autoSync2Way(){
   if(!SHEETS_URL)return;
   try{
+    // 1. Push local → Sheets (fire-and-forget)
+    fetch(SHEETS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'batchSync',projects:PROJECTS,clients:CLIENTS})});
+    // 2. Pull từ Sheets → merge
     const r=await fetch(SHEETS_URL+'?action=getAll&t='+Date.now());
     const d=await r.json();
-    if(d.error)return;
-    if(d.projects&&d.projects.length>0)PROJECTS=d.projects;
-    if(d.clients&&d.clients.length>0)CLIENTS=d.clients;
-    saveLocal();renderAll();
-    setSync('ok','Auto-sync '+new Date().toLocaleTimeString('vi-VN'));
-  }catch(e){}
-},30*60*1000);
+    if(d.error)throw new Error(d.error);
+    let changed=false;
+    if(d.projects&&d.projects.length>0)changed=_mergeProjects(d.projects)||changed;
+    if(d.clients&&d.clients.length>0){
+      d.clients.forEach(rc=>{
+        const li=CLIENTS.findIndex(c=>c.id===rc.id);
+        if(li===-1){CLIENTS.unshift(rc);changed=true;}
+        else{
+          const lt=new Date(CLIENTS[li].updatedAt||CLIENTS[li].createdAt||0).getTime();
+          const rt=new Date(rc.updatedAt||rc.createdAt||0).getTime();
+          if(rt>lt){CLIENTS[li]=rc;changed=true;}
+        }
+      });
+    }
+    if(changed){saveLocal();renderAll();}
+    setSync('ok','Sync '+new Date().toLocaleTimeString('vi-VN'));
+  }catch(e){console.warn('[AutoSync]',e);}
+}
+
+// Khởi động auto-sync nếu đã có URL
+if(SHEETS_URL)startAutoSync();
 </script>
 </body>
 </html>
