@@ -303,6 +303,65 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
 .exp-cur{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:600;margin-left:4px}
 .exp-vnd{background:var(--gl);color:var(--gn)}.exp-usd{background:#dbeafe;color:var(--bl2)}.exp-yr{background:var(--al);color:var(--ad)}
 .owner-sal-card{background:linear-gradient(135deg,var(--bll),#fff);border:1px solid #bfdbfe}
+
+/* HAMBURGER BUTTON */
+.ham-btn{display:none;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid var(--border);border-radius:var(--rs);background:transparent;cursor:pointer;flex-shrink:0;color:var(--tx)}
+.ham-btn span{display:block;width:16px;height:2px;background:currentColor;border-radius:2px;transition:all .2s;position:relative}
+.ham-btn span::before,.ham-btn span::after{content:'';display:block;width:16px;height:2px;background:currentColor;border-radius:2px;position:absolute;left:0;transition:all .2s}
+.ham-btn span::before{top:-5px}.ham-btn span::after{top:5px}
+
+/* SIDEBAR OVERLAY */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;backdrop-filter:blur(1px)}
+
+/* MOBILE RESPONSIVE */
+@media(max-width:768px){
+  body{display:block}
+  .sb{transform:translateX(-100%);transition:transform .25s ease;z-index:100}
+  .sb.open{transform:translateX(0)}
+  .sb-overlay{display:block;opacity:0;pointer-events:none;transition:opacity .25s}
+  .sb-overlay.open{opacity:1;pointer-events:auto}
+  .main{margin-left:0}
+  .ham-btn{display:flex}
+  .tbar{padding:0 14px;gap:8px}
+  .tbar-r{gap:6px}
+  .tbar-r .sync-s{display:none}
+  .tbar-r #yearSel{width:68px;font-size:11px}
+  .tbar-r .btn-g[onclick*="syncSheets"]{display:none}
+  .tbar-r .btn-g[onclick*="pushAllToSheets"]{display:none}
+  .con{padding:14px}
+  .kpi-g{grid-template-columns:repeat(2,1fr);gap:10px}
+  .g2{grid-template-columns:1fr}
+  .fg2{grid-template-columns:1fr}
+  .fg3{grid-template-columns:1fr 1fr}
+  .fg4{grid-template-columns:1fr 1fr;row-gap:8px}
+  .fg5{grid-template-columns:1fr 1fr}
+  .kb{grid-template-columns:repeat(5,minmax(160px,1fr));overflow-x:auto;padding-bottom:4px}
+  .kbBoard{overflow-x:auto}
+  .dp{width:100vw;top:0;right:0;border-left:none;border-radius:0}
+  .md{width:calc(100vw - 28px);margin:14px}
+  .kpi-mbox{width:calc(100vw - 28px)}
+  .wg{grid-template-columns:repeat(7,1fr);gap:4px}
+  .dc{padding:6px 4px;min-height:62px}
+  .mcal-grid,.mcal-header{gap:2px}
+  .mcell{padding:4px 5px;min-height:72px}
+  .finance-grid{grid-template-columns:1fr 1fr}
+  .tbar-title{display:none}
+  table{font-size:12px}
+  thead th{padding:7px 10px;font-size:10px}
+  tbody td{padding:9px 10px}
+}
+@media(max-width:480px){
+  .kpi-g{grid-template-columns:1fr 1fr}
+  .fg3{grid-template-columns:1fr}
+  .fg4{grid-template-columns:1fr}
+  .fg5{grid-template-columns:1fr}
+  .finance-grid{grid-template-columns:1fr}
+  .mcell{padding:3px 4px;min-height:60px}
+  .kpi-v{font-size:20px}
+  .wg{gap:2px}
+  .dc{padding:4px 3px;min-height:54px}
+  .dd2{font-size:15px}
+}
 </style>
 </head>
 <body>
@@ -348,12 +407,20 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
   </div>
 </aside>
 
+<!-- SIDEBAR OVERLAY -->
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
 <!-- MAIN -->
 <main class="main">
   <div class="tbar">
-    <div>
-      <div style="font-family:'DM Serif Display',serif;font-size:17px" id="pgT">Dashboard</div>
-      <div style="font-size:10.5px;color:var(--t3)" id="pgS">Tổng quan hoạt động</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="ham-btn" onclick="toggleSidebar()" title="Menu" aria-label="Mở menu">
+        <span></span>
+      </button>
+      <div>
+        <div style="font-family:'DM Serif Display',serif;font-size:17px" id="pgT">Dashboard</div>
+        <div style="font-size:10.5px;color:var(--t3)" id="pgS">Tổng quan hoạt động</div>
+      </div>
     </div>
     <div class="tbar-r">
       <div class="sync-s"><div class="sdot" id="sdot"></div><span id="slbl">Chưa kết nối Sheets</span></div>
@@ -545,11 +612,6 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
           <div class="ss">Theo dõi riêng — không ảnh hưởng KPI dự án</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <label style="font-size:12px;color:var(--t2);display:flex;align-items:center;gap:6px">
-            💱 Tỷ giá USD:
-            <input class="fi" id="usdRateInput" type="text" style="width:96px;padding:5px 8px;font-size:13px" placeholder="25.000" oninput="onUsdRateChange(this)">
-            <span style="font-size:11px;color:var(--t3)">VND/USD</span>
-          </label>
           <button class="btn btn-p btn-s" onclick="openAddExpense()">+ Thêm danh mục</button>
         </div>
       </div>
@@ -560,8 +622,6 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
           <thead><tr>
             <th style="width:36px">#</th>
             <th>Danh mục</th>
-            <th style="text-align:center">Số tiền gốc</th>
-            <th style="text-align:center">Chu kỳ</th>
             <th style="text-align:right">VND / tháng</th>
             <th>Ghi chú</th>
             <th style="width:70px"></th>
@@ -887,19 +947,33 @@ let SHEETS_URL = localStorage.getItem('cd_url')||'';
 let EDIT_ID = null;
 
 // OWNER SALARY
-let OWNER_SALARY = JSON.parse(localStorage.getItem('cd_owner_salary')||'null') || {name:'Can Đăng',amount:15600000};
+let OWNER_SALARY = JSON.parse(localStorage.getItem('cd_owner_salary')||'null') || {name:'Can Đăng',amount:15675000};
+// Migration: cập nhật lương cũ 15.600.000 → 15.675.000
+if(OWNER_SALARY.amount===15600000){OWNER_SALARY.amount=15675000;localStorage.setItem('cd_owner_salary',JSON.stringify(OWNER_SALARY));}
 
 // EXPENSES
 const _DEFAULT_EXPENSES = [
   {id:'exp1',name:'Thuê nhà',amount:5000000,currency:'VND',period:'month',note:''},
-  {id:'exp2',name:'Photoshop + Lightroom',amount:120,currency:'USD',period:'year',note:'Adobe CC Plan'},
-  {id:'exp3',name:'Claude Pro AI',amount:0,currency:'VND',period:'month',note:'Nhập số tiền thực tế'},
+  {id:'exp2',name:'Photoshop + Lightroom',amount:250000,currency:'VND',period:'month',note:'Adobe CC Plan'},
+  {id:'exp3',name:'Claude Pro AI',amount:500000,currency:'VND',period:'month',note:'Nhập số tiền thực tế'},
   {id:'exp4',name:'Photoroom',amount:250000,currency:'VND',period:'month',note:''},
   {id:'exp5',name:'Mạng internet',amount:250000,currency:'VND',period:'month',note:''},
   {id:'exp6',name:'Phần mềm khác',amount:0,currency:'VND',period:'month',note:''},
 ];
 let EXPENSES = JSON.parse(localStorage.getItem('cd_expenses')||'null') || JSON.parse(JSON.stringify(_DEFAULT_EXPENSES));
-let USD_RATE = parseInt(localStorage.getItem('cd_usd_rate')||'25000');
+const USD_RATE = 25000; // Giữ để tương thích, không còn dùng trong UI
+// Migration: chuyển chi phí USD → VND (loại bỏ yếu tố ngoại tệ)
+(function migrateExpenses(){
+  let changed=false;
+  EXPENSES.forEach(e=>{
+    if(e.currency==='USD'){
+      // Chuyển đổi: năm / tháng → VND/tháng
+      const vnd=e.period==='year'?Math.round(e.amount*USD_RATE/12):Math.round(e.amount*USD_RATE);
+      e.amount=vnd; e.currency='VND'; e.period='month'; changed=true;
+    }
+  });
+  if(changed)localStorage.setItem('cd_expenses',JSON.stringify(EXPENSES));
+})();
 
 if(SHEETS_URL){ $('sUrl').value=SHEETS_URL; setSync('ok','Sheets đã kết nối'); }
 
@@ -1402,7 +1476,9 @@ function renderDPAll(p){
 function renderDP0(p){
   const cost=getTotalCost(p);
   const contractVal=p.grossValue||p.netValue||0;
-  const extraVal=getClientCostsTotal(p);
+  const extraRaw=getClientCostsRaw(p);
+  const extraVat=p.hasVAT?Math.round(extraRaw*0.08):0;
+  const extraVal=extraRaw+extraVat;
   const totalReceivable=contractVal+extraVal;
   const profit=totalReceivable-cost;
   const debt=getDebt(p);
@@ -1436,11 +1512,13 @@ function renderDP0(p){
         <button class="btn btn-gn btn-xs" onclick="addClientCost()">+ Thêm khoản</button>
       </div>
       <div id="ccList" style="font-size:12.5px">
-        ${ccList.length?ccList.map((c,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bl)">
+        ${ccList.length?ccList.map((c,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bl)">
           <div style="flex:1;color:var(--t2)">${c.name}</div>
           <div style="font-weight:600;color:var(--bl2)">${fmt(c.amount)}</div>
           <button class="frow-del" style="width:22px;height:22px;font-size:11px" onclick="removeClientCost(${i})">✕</button>
-        </div>`).join('')+'<div style="padding:5px 0;font-size:11.5px;color:var(--t3);text-align:right">Tổng phát sinh: <strong style="color:var(--bl2)">${fmt(extraVal)}</strong></div>'
+        </div>`).join('')
+        +(extraVat?`<div style="padding:4px 0;font-size:11.5px;color:var(--t2);text-align:right">+VAT 8%: <strong style="color:var(--or)">${fmt(extraVat)}</strong></div>`:'')
+        +`<div style="padding:5px 0;font-size:12px;font-weight:600;text-align:right;color:var(--bl2);border-top:1px solid var(--bl);margin-top:4px">Tổng KH trả thêm: ${fmt(extraVal)}</div>`
         :'<div style="color:var(--t3);font-size:11.5px;padding:4px 0">Chưa có khoản phát sinh nào</div>'}
       </div>
       <div id="ccForm" style="display:none;margin-top:8px;padding:10px;background:var(--al);border-radius:var(--rs)">
@@ -1470,7 +1548,7 @@ function saveClientCost(){
   if(!CUR_P.clientCosts)CUR_P.clientCosts=[];
   CUR_P.clientCosts.push({id:'cc'+Date.now(),name,amount:amt});
   CUR_P.updatedAt=new Date().toISOString();
-  saveLocal();renderDP0(CUR_P);
+  saveLocal();renderDP0(CUR_P);renderDP4(CUR_P);renderAll();
   if(SHEETS_URL)pushSheets({action:'updateProject',id:CUR_P.id,clientCosts:CUR_P.clientCosts});
   toast('✅ Đã thêm: '+name);
 }
@@ -1478,7 +1556,7 @@ function removeClientCost(i){
   if(!CUR_P.clientCosts)return;
   CUR_P.clientCosts.splice(i,1);
   CUR_P.updatedAt=new Date().toISOString();
-  saveLocal();renderDP0(CUR_P);
+  saveLocal();renderDP0(CUR_P);renderDP4(CUR_P);renderAll();
   if(SHEETS_URL)pushSheets({action:'updateProject',id:CUR_P.id,clientCosts:CUR_P.clientCosts});
   toast('🗑️ Đã xóa khoản phát sinh');
 }
@@ -2228,12 +2306,14 @@ function renderClients(){
 // PAYMENT HELPERS
 // ═══════════════════════════════════════════════
 function getCollected(p){return(p.payments||[]).filter(x=>x.done).reduce((s,x)=>s+(x.amount||0),0);}
-function getClientCostsTotal(p){return(p.clientCosts||[]).reduce((s,x)=>s+(x.amount||0),0);}
-function getDebt(p){return Math.max((p.grossValue||p.netValue||0)+getClientCostsTotal(p)-getCollected(p),0);}
+function getClientCostsRaw(p){return(p.clientCosts||[]).reduce((s,x)=>s+(x.amount||0),0);}
+function getClientCostsTotal(p){const raw=getClientCostsRaw(p);return p.hasVAT?Math.round(raw*1.08):raw;}
+function getTotalReceivable(p){return(p.grossValue||p.netValue||0)+getClientCostsTotal(p);}
+function getDebt(p){return Math.max(getTotalReceivable(p)-getCollected(p),0);}
 
 function renderDP4(p){
   const payments=p.payments||[];
-  const gross=p.grossValue||p.netValue||0;
+  const gross=getTotalReceivable(p); // HĐ + phát sinh (có VAT nếu áp dụng)
   const collected=getCollected(p);
   const debt=getDebt(p);
   $('dp4').innerHTML=`
@@ -2839,17 +2919,21 @@ const VIEWS={
   claude:['Claude Shortcut','Nhập liệu nhanh từ điện thoại'],
   settings:['Cài đặt','Nhân sự cố định & cấu hình studio'],
 };
-function sw(id,el){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
-  $('v-'+id).classList.add('on');
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  if(el)el.classList.add('on');
-  const[t,s]=VIEWS[id]||['',''];$('pgT').textContent=t;$('pgS').textContent=s;
-}
 function openModal(id){$('mo-'+id).classList.add('on');}
 function closeMo(e){
   if(e&&e.target!==e.currentTarget)return;
   document.querySelectorAll('.mo').forEach(m=>m.classList.remove('on'));
+}
+function toggleSidebar(){
+  const sb=document.querySelector('.sb');
+  const ov=$('sbOverlay');
+  const isOpen=sb.classList.contains('open');
+  if(isOpen){sb.classList.remove('open');ov.classList.remove('open');}
+  else{sb.classList.add('open');ov.classList.add('open');}
+}
+function closeSidebar(){
+  document.querySelector('.sb').classList.remove('open');
+  $('sbOverlay').classList.remove('open');
 }
 function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',3200);}
 function saveLocal(){localStorage.setItem('cd_p',JSON.stringify(PROJECTS));localStorage.setItem('cd_c',JSON.stringify(CLIENTS));}
@@ -2862,6 +2946,7 @@ function sw(id,el){
   if(id==='salary')renderSalary();
   if(id==='expenses')renderExpenses();
   if(id==='settings'){renderSettings();renderSettingsOwner();}
+  if(window.innerWidth<=768)closeSidebar();
 }
 
 function renderSettings(){
@@ -2972,8 +3057,8 @@ function renderSettingsOwner(){
 // EXPENSES (Chi phí vận hành)
 // ═══════════════════════════════════════════════
 function getVndMonth(e){
-  const r=e.currency==='USD'?e.amount*USD_RATE:e.amount;
-  return e.period==='year'?r/12:r;
+  // Tất cả chi phí đã quy về VND sau migration
+  return e.period==='year'?e.amount/12:e.amount;
 }
 
 function onUsdRateChange(el){
@@ -2984,18 +3069,14 @@ function onUsdRateChange(el){
 }
 
 function renderExpenses(){
-  // Sync USD rate input
-  const inp=$('usdRateInput');
-  if(inp) inp.value=Number(USD_RATE).toLocaleString('vi-VN');
-
   const total=EXPENSES.reduce((s,e)=>s+getVndMonth(e),0);
   const nonZero=EXPENSES.filter(e=>e.amount>0).length;
 
   const kpiEl=$('expKpi'); if(!kpiEl)return;
   kpiEl.innerHTML=`
     <div class="kpi"><div class="kpi-l">🏢 Tổng chi phí / tháng</div><div class="kpi-v" style="color:var(--rd)">${total?fmtS(Math.round(total)):'0đ'}</div><div class="kpi-d nt">${nonZero} danh mục có số tiền</div></div>
-    <div class="kpi"><div class="kpi-l">📅 Ước tính / năm</div><div class="kpi-v">${fmtS(Math.round(total*12))}</div><div class="kpi-d nt">Chi phí cố định</div></div>
-    <div class="kpi"><div class="kpi-l">💱 Tỷ giá USD hiện tại</div><div class="kpi-v" style="font-size:20px">${Number(USD_RATE).toLocaleString('vi-VN')}</div><div class="kpi-d nt">VND / 1 USD</div></div>`;
+    <div class="kpi"><div class="kpi-l">📅 Ước tính / năm</div><div class="kpi-v">${fmtS(Math.round(total*12))}</div><div class="kpi-d nt">Chi phí cố định hàng năm</div></div>
+    <div class="kpi"><div class="kpi-l">💼 Lương chủ / tháng</div><div class="kpi-v" style="font-size:20px">${fmtS(OWNER_SALARY.amount)}</div><div class="kpi-d nt">${OWNER_SALARY.name}</div></div>`;
 
   const tbody=$('expTable'); if(!tbody)return;
   if(!EXPENSES.length){
@@ -3005,19 +3086,12 @@ function renderExpenses(){
 
   tbody.innerHTML=EXPENSES.map((e,i)=>{
     const vndM=getVndMonth(e);
-    const curBadge=e.currency==='USD'
-      ?`<span class="exp-cur exp-usd">USD</span>`
-      :`<span class="exp-cur exp-vnd">VND</span>`;
-    const perLabel=e.period==='year'
-      ?`<span class="exp-cur exp-yr">/ năm</span>`
-      :`<span class="exp-cur" style="background:var(--bg);color:var(--t3)">/tháng</span>`;
-    const amtDisplay=e.amount?Number(e.amount).toLocaleString('vi-VN'):'—';
+    const amtDisplay=e.amount?Number(e.amount).toLocaleString('vi-VN')+'đ':'—';
+    const perLabel=e.period==='year'?'/năm':'/tháng';
     return`<tr style="border-bottom:1px solid var(--bl)">
       <td style="padding:10px 14px;color:var(--t3);font-size:12px">${i+1}</td>
       <td style="padding:10px 14px;font-weight:500">${e.name}</td>
-      <td style="padding:10px 14px;text-align:center">${amtDisplay} ${curBadge}</td>
-      <td style="padding:10px 14px;text-align:center">${perLabel}</td>
-      <td style="padding:10px 14px;text-align:right;font-weight:600;color:${vndM>0?'var(--rd)':'var(--t3)'}">${vndM>0?fmt(Math.round(vndM)):'—'}</td>
+      <td style="padding:10px 14px;text-align:right;font-weight:600;color:${vndM>0?'var(--rd)':'var(--t3)'}">${vndM>0?fmt(Math.round(vndM))+'<span style="font-size:10px;font-weight:400;color:var(--t3)">/tháng</span>':'—'}</td>
       <td style="padding:10px 14px;font-size:12px;color:var(--t3)">${e.note||'—'}</td>
       <td style="padding:10px 14px;white-space:nowrap">
         <button class="btn btn-g btn-xs" onclick="editExpense('${e.id}')">✏️</button>
@@ -3040,8 +3114,6 @@ function showExpenseForm(e){
   const isEdit=!!e;
   const form=$('expInlineForm');
   form.style.display='block';
-  const selCur=(cur)=>cur==='USD'?'selected':'';
-  const selVnd=(cur)=>cur!=='USD'?'selected':'';
   const selMon=(per)=>per==='month'?'selected':'';
   const selYr=(per)=>per==='year'?'selected':'';
   form.innerHTML=`<div class="card" style="border-color:var(--ac)">
@@ -3051,14 +3123,8 @@ function showExpenseForm(e){
         <div><label class="fl">Tên danh mục *</label><input class="fi" id="ef-name" value="${isEdit?e.name:''}" placeholder="VD: Thuê nhà, Cloud storage..."></div>
         <div><label class="fl">Ghi chú</label><input class="fi" id="ef-note" value="${isEdit?e.note||'':''}" placeholder="Tùy chọn"></div>
       </div>
-      <div class="fg3" style="margin-bottom:14px">
-        <div><label class="fl">Số tiền</label><input class="fi" id="ef-amount" type="text" value="${isEdit&&e.amount?Number(e.amount).toLocaleString('vi-VN'):''}" placeholder="0" oninput="fmtM(this)"></div>
-        <div><label class="fl">Đơn vị tiền</label>
-          <select class="fs" id="ef-cur">
-            <option value="VND" ${isEdit?selVnd(e.currency):'selected'}>VND (đồng)</option>
-            <option value="USD" ${isEdit?selCur(e.currency):''}>USD (đô)</option>
-          </select>
-        </div>
+      <div class="fg2" style="margin-bottom:14px">
+        <div><label class="fl">Số tiền (VND)</label><input class="fi" id="ef-amount" type="text" value="${isEdit&&e.amount?Number(e.amount).toLocaleString('vi-VN'):''}" placeholder="0" oninput="fmtM(this)"></div>
         <div><label class="fl">Chu kỳ thanh toán</label>
           <select class="fs" id="ef-period">
             <option value="month" ${isEdit?selMon(e.period):'selected'}>/ tháng</option>
@@ -3083,7 +3149,7 @@ function saveExpense(id){
   const name=$('ef-name').value.trim();
   if(!name){toast('⚠️ Nhập tên danh mục');return;}
   const amount=pM($('ef-amount').value);
-  const currency=$('ef-cur').value;
+  const currency='VND';
   const period=$('ef-period').value;
   const note=$('ef-note').value.trim();
   if(id){
