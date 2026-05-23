@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Can Đăng Studio</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer onload="initGCalClient()"></script>
 <style>
 :root{
   --white:#fff;--bg:#f7f6f3;--border:#e2e0db;--bl:#eeece8;
@@ -906,6 +907,21 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
           <div class="hint">Hiển thị trong Nhân sự &amp; Lương — không gắn với dự án nào</div>
         </div>
       </div>
+      <!-- Google Calendar card -->
+      <div class="card" style="max-width:680px;margin-bottom:16px">
+        <div class="ch">
+          <div><div class="ct">📅 Đồng bộ Google Calendar</div><div class="cs">Tự động tạo sự kiện khi thêm/sửa/xóa dự án — không hiển thị chi phí</div></div>
+        </div>
+        <div class="cb">
+          <div class="steps" style="margin-bottom:16px">
+            <div class="step"><div class="sn">1</div><div class="sc">Vào <a href="https://console.cloud.google.com" target="_blank" style="color:var(--ac)">console.cloud.google.com</a> → tạo project mới → <strong>Enable Google Calendar API</strong></div></div>
+            <div class="step"><div class="sn">2</div><div class="sc"><strong>APIs &amp; Services → Credentials → Create OAuth 2.0 Client ID</strong> → loại: <em>Web application</em></div></div>
+            <div class="step"><div class="sn">3</div><div class="sc">Thêm <span class="ci">https://candangphoto-hue.github.io</span> vào <strong>Authorized JavaScript origins</strong></div></div>
+            <div class="step"><div class="sn">4</div><div class="sc">Copy <strong>Client ID</strong> → paste vào ô dưới → Lưu → Kết nối Google</div></div>
+          </div>
+          <div id="gcalSettingsBox"></div>
+        </div>
+      </div>
       <div class="card" style="max-width:680px">
         <div class="ch"><div class="ct">👥 Danh sách nhân sự thường xuyên</div><button class="btn btn-gn btn-s" onclick="addDefaultStaffRow()">+ Thêm người</button></div>
         <div class="cb">
@@ -1428,6 +1444,7 @@ function saveProject(){
   PROJECTS.unshift(p);
   saveLocal();
   if(SHEETS_URL) pushSheets({action:'addProject',...p});
+  gcalPush(p);
   closeMo();
   renderAll();
   toast('✅ Đã thêm: '+client);
@@ -1565,6 +1582,7 @@ function updateStatus(){
   const p=CUR_P; if(!p)return;
   p.status=$('dp-status-sel').value;
   saveLocal(); renderAll(); renderDPAll(p);
+  gcalPush(p);
   toast('✅ Đổi trạng thái → '+p.status);
 }
 
@@ -1990,6 +2008,7 @@ function saveEdit(){
   p.note=$('e-no').value;
   CUR_P=p;
   saveLocal(); renderAll(); renderDPAll(p); closeMo();
+  gcalPush(p);
   toast('✅ Đã lưu thay đổi');
 }
 
@@ -2000,6 +2019,8 @@ function dpTab(i,el){
 
 function delProject(id){
   if(!confirm('Xóa dự án này?'))return;
+  const del=PROJECTS.find(p=>p.id===id);
+  if(del) gcalDeleteEvent(del);
   PROJECTS=PROJECTS.filter(p=>p.id!==id);
   saveLocal(); renderAll(); closeDP();
   toast('🗑️ Đã xóa dự án');
@@ -2945,7 +2966,7 @@ function sw(id,el){
   const[t,s]=VIEWS[id]||['',''];$('pgT').textContent=t;$('pgS').textContent=s;
   if(id==='salary')renderSalary();
   if(id==='expenses')renderExpenses();
-  if(id==='settings'){renderSettings();renderSettingsOwner();}
+  if(id==='settings'){renderSettings();renderSettingsOwner();renderGCalSettings();}
   if(window.innerWidth<=768)closeSidebar();
 }
 
@@ -3248,6 +3269,227 @@ async function autoSync2Way(){
 
 // Khởi động auto-sync nếu đã có URL
 if(SHEETS_URL)startAutoSync();
+
+// ═══════════════════════════════════════════════
+// GOOGLE CALENDAR INTEGRATION
+// ═══════════════════════════════════════════════
+let GCAL_CLIENT_ID = localStorage.getItem('cd_gcal_client_id')||'';
+let GCAL_CAL_ID    = localStorage.getItem('cd_gcal_id')||'primary';
+let _gcalToken     = null;
+let _gcalTokenExp  = 0;
+let _gcalTokenClient = null;
+let _gcalPendingCBs = [];
+
+const GCAL_SCOPE = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly';
+
+// Màu sự kiện khớp dashboard
+const GCAL_COLORS = {
+  'Liên hệ mới': '7',   // Peacock – xanh biển
+  'Đã báo giá':  '5',   // Banana  – vàng
+  'Đang chụp':   '6',   // Tangerine – cam
+  'Hậu kỳ':      '3',   // Grape   – tím
+  'Hoàn thành':  '2',   // Sage    – xanh lá
+};
+function gcalColor(status){ return GCAL_COLORS[status]||'8'; }
+
+// Nội dung sự kiện – KHÔNG có chi phí/giá gói
+function gcalDesc(p){
+  const staffNames=(p.staffList||[]).map(s=>s.name).filter(Boolean);
+  const lines=[
+    '📷 ' + (p.service||''),
+    '👤 Khách hàng: ' + (p.client||''),
+  ];
+  if(p.company) lines.push('🏢 Công ty: '+p.company);
+  lines.push('👨‍💼 Phụ trách: '+(p.owner||'Can Đăng'));
+  if(staffNames.length>1) lines.push('👥 Ê-kíp: '+staffNames.join(', '));
+  if(p.note) lines.push('📝 '+p.note);
+  lines.push('');
+  lines.push('— Can Đăng Studio');
+  return lines.join('\n');
+}
+function gcalTitle(p){ return (p.service||'Chụp ảnh')+' · '+(p.client||''); }
+
+function _gcalNextDay(d){
+  const dt=new Date(d+'T00:00:00'); dt.setDate(dt.getDate()+1);
+  return dt.toISOString().split('T')[0];
+}
+
+// Init Google Identity Services – gọi lại khi script load xong
+function initGCalClient(){
+  if(!GCAL_CLIENT_ID||typeof google==='undefined'||!google.accounts)return;
+  _gcalTokenClient=google.accounts.oauth2.initTokenClient({
+    client_id: GCAL_CLIENT_ID,
+    scope: GCAL_SCOPE,
+    callback:(resp)=>{
+      if(resp.error){toast('⚠️ Google: '+resp.error);_gcalPendingCBs=[];return;}
+      _gcalToken=resp.access_token;
+      _gcalTokenExp=Date.now()+(Number(resp.expires_in)-60)*1000;
+      localStorage.setItem('cd_gcal_connected','1');
+      renderGCalSettings();
+      const cbs=[..._gcalPendingCBs]; _gcalPendingCBs=[];
+      cbs.forEach(cb=>cb());
+    },
+  });
+}
+
+function gcalEnsureToken(cb){
+  if(_gcalToken && Date.now()<_gcalTokenExp){cb();return;}
+  _gcalPendingCBs.push(cb);
+  if(_gcalPendingCBs.length>1)return; // đang chờ token, chỉ request 1 lần
+  if(!_gcalTokenClient){
+    if(!GCAL_CLIENT_ID){_gcalPendingCBs=[];toast('⚠️ Chưa nhập Google Client ID trong Cài đặt');return;}
+    initGCalClient();
+    if(!_gcalTokenClient){_gcalPendingCBs=[];toast('⚠️ Google API chưa sẵn sàng, thử lại sau');return;}
+  }
+  _gcalTokenClient.requestAccessToken({prompt:''});
+}
+
+async function gcalPush(p){
+  if(!GCAL_CLIENT_ID||!localStorage.getItem('cd_gcal_connected'))return;
+  gcalEnsureToken(()=>_gcalDoPush(p));
+}
+
+async function _gcalDoPush(p){
+  const days=p.workDays&&p.workDays.length?p.workDays:null;
+  const ds=days?days[0]:(p.dateStart||'');
+  const de=days?days[days.length-1]:(p.dateEnd||ds);
+  if(!ds)return;
+  const event={
+    summary: gcalTitle(p),
+    description: gcalDesc(p),
+    start:{date:ds},
+    end:{date:_gcalNextDay(de)},
+    colorId: gcalColor(p.status),
+  };
+  const calId=encodeURIComponent(GCAL_CAL_ID||'primary');
+  const hdrs={'Authorization':'Bearer '+_gcalToken,'Content-Type':'application/json'};
+  try{
+    let url,method;
+    if(p.gcalEventId){
+      url=`https://www.googleapis.com/calendar/v3/calendars/${calId}/events/${p.gcalEventId}`;
+      method='PUT';
+    } else {
+      url=`https://www.googleapis.com/calendar/v3/calendars/${calId}/events`;
+      method='POST';
+    }
+    const res=await fetch(url,{method,headers:hdrs,body:JSON.stringify(event)});
+    if(res.status===401){_gcalToken=null;gcalEnsureToken(()=>_gcalDoPush(p));return;}
+    if(res.status===404&&p.gcalEventId){
+      // Event đã bị xóa trên GCal, tạo mới
+      delete p.gcalEventId; await _gcalDoPush(p); return;
+    }
+    if(!res.ok){const err=await res.json();toast('⚠️ GCal: '+(err.error?.message||res.status));return;}
+    const data=await res.json();
+    p.gcalEventId=data.id;
+    saveLocal();
+    toast('📅 Đã đồng bộ Google Calendar');
+  }catch(e){console.warn('[GCal]',e);}
+}
+
+async function gcalDeleteEvent(p){
+  if(!p||!p.gcalEventId||!GCAL_CLIENT_ID||!localStorage.getItem('cd_gcal_connected'))return;
+  const eid=p.gcalEventId;
+  gcalEnsureToken(async()=>{
+    const calId=encodeURIComponent(GCAL_CAL_ID||'primary');
+    try{
+      await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events/${eid}`,{
+        method:'DELETE',
+        headers:{'Authorization':'Bearer '+_gcalToken}
+      });
+    }catch(e){console.warn('[GCal delete]',e);}
+  });
+}
+
+async function loadGCalCalendars(){
+  gcalEnsureToken(async()=>{
+    try{
+      const res=await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList',{
+        headers:{'Authorization':'Bearer '+_gcalToken}
+      });
+      const data=await res.json();
+      const sel=$('gcalCalSel'); if(!sel)return;
+      sel.innerHTML=(data.items||[]).map(c=>`<option value="${c.id}"${c.id===GCAL_CAL_ID?' selected':''}>${c.summary}</option>`).join('');
+      toast('✅ Đã tải danh sách lịch');
+    }catch(e){toast('⚠️ Không tải được danh sách lịch');}
+  });
+}
+
+function gcalConnect(){
+  if(!GCAL_CLIENT_ID){toast('⚠️ Chưa nhập Client ID');return;}
+  initGCalClient();
+  if(!_gcalTokenClient){toast('⚠️ Google API đang tải, thử lại sau vài giây');return;}
+  _gcalTokenClient.requestAccessToken({prompt:'consent'});
+}
+
+function gcalDisconnect(){
+  if(_gcalToken && typeof google!=='undefined' && google.accounts){
+    google.accounts.oauth2.revoke(_gcalToken,()=>{});
+  }
+  _gcalToken=null; _gcalTokenExp=0;
+  localStorage.removeItem('cd_gcal_connected');
+  renderGCalSettings();
+  toast('✅ Đã ngắt kết nối Google Calendar');
+}
+
+function saveGCalClientId(){
+  const cid=$('gcalClientInput') ? $('gcalClientInput').value.trim() : '';
+  if(!cid){toast('⚠️ Nhập Client ID');return;}
+  GCAL_CLIENT_ID=cid;
+  localStorage.setItem('cd_gcal_client_id',cid);
+  _gcalTokenClient=null; // reset để init lại
+  toast('✅ Đã lưu Client ID');
+  renderGCalSettings();
+}
+
+function saveGCalCalendar(){
+  const sel=$('gcalCalSel'); if(!sel)return;
+  GCAL_CAL_ID=sel.value;
+  localStorage.setItem('cd_gcal_id',GCAL_CAL_ID);
+  toast('✅ Đã chọn lịch: '+sel.options[sel.selectedIndex].text);
+}
+
+function renderGCalSettings(){
+  const box=$('gcalSettingsBox'); if(!box)return;
+  const connected=!!localStorage.getItem('cd_gcal_connected');
+  box.innerHTML=`
+    <div class="fg2" style="margin-bottom:12px;align-items:end">
+      <div>
+        <label class="fl">Google OAuth Client ID</label>
+        <input class="fi" id="gcalClientInput" value="${GCAL_CLIENT_ID}" placeholder="xxxxxxxx.apps.googleusercontent.com">
+        <div class="hint">Lấy từ Google Cloud Console → Credentials</div>
+      </div>
+      <div><button class="btn btn-g btn-s" onclick="saveGCalClientId()">Lưu</button></div>
+    </div>
+    ${connected ? `
+      <div class="fg2" style="margin-bottom:12px;align-items:end">
+        <div>
+          <label class="fl">Đồng bộ vào lịch</label>
+          <select class="fs" id="gcalCalSel" onchange="saveGCalCalendar()">
+            <option value="primary">Lịch chính (primary)</option>
+          </select>
+        </div>
+        <div><button class="btn btn-g btn-s" onclick="loadGCalCalendars()">↻ Tải lịch</button></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="font-size:12.5px;color:var(--gn);font-weight:600">✅ Đã kết nối Google Calendar</span>
+        <button class="btn btn-d btn-s" onclick="gcalDisconnect()">Ngắt kết nối</button>
+      </div>
+    ` : `
+      <div style="margin-bottom:12px">
+        <button class="btn btn-p btn-s" onclick="gcalConnect()" ${!GCAL_CLIENT_ID?'disabled':''}>🔗 Đăng nhập Google & Kết nối</button>
+        ${!GCAL_CLIENT_ID?'<span style="font-size:11.5px;color:var(--t3);margin-left:8px">Nhập Client ID trước</span>':''}
+      </div>
+    `}
+    <div style="background:var(--bg);border-radius:var(--rs);padding:10px 12px;font-size:11.5px;color:var(--t3);line-height:1.8">
+      <span style="font-weight:600;color:var(--t2)">Màu theo trạng thái:</span>
+      🔵 Liên hệ mới &nbsp;·&nbsp; 🟡 Đã báo giá &nbsp;·&nbsp; 🟠 Đang chụp &nbsp;·&nbsp; 🟣 Hậu kỳ &nbsp;·&nbsp; 🟢 Hoàn thành<br>
+      <span style="font-weight:600;color:var(--t2)">Hiển thị:</span> Khách hàng · Dịch vụ · Ê-kíp · Phụ trách · Ghi chú — <strong style="color:var(--rd)">không có chi phí</strong>
+    </div>`;
+  if(connected) setTimeout(loadGCalCalendars, 200);
+}
+
+// Init ngay nếu đã có client ID lúc load trang
+if(GCAL_CLIENT_ID && typeof google !== 'undefined') initGCalClient();
 </script>
 </body>
 </html>
