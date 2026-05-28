@@ -1579,7 +1579,9 @@ function removeClientCost(i){
 function updateStatus(){
   const p=CUR_P; if(!p)return;
   p.status=$('dp-status-sel').value;
+  p.updatedAt=new Date().toISOString();
   saveLocal(); renderAll(); renderDPAll(p);
+  if(SHEETS_URL) pushSheets({action:'updateProject',...p});
   gcalPush(p);
   toast('✅ Đổi trạng thái → '+p.status);
 }
@@ -2005,7 +2007,9 @@ function saveEdit(){
   p.otherCost=pM($('e-oc').value);
   p.note=$('e-no').value;
   CUR_P=p;
+  p.updatedAt=new Date().toISOString();
   saveLocal(); renderAll(); renderDPAll(p); closeMo();
+  if(SHEETS_URL) pushSheets({action:'updateProject',...p});
   gcalPush(p);
   toast('✅ Đã lưu thay đổi');
 }
@@ -2021,6 +2025,7 @@ function delProject(id){
   if(del) gcalDeleteEvent(del);
   PROJECTS=PROJECTS.filter(p=>p.id!==id);
   saveLocal(); renderAll(); closeDP();
+  if(SHEETS_URL) pushSheets({action:'deleteProject',id});
   toast('🗑️ Đã xóa dự án');
 }
 function closeDP(){
@@ -2399,7 +2404,9 @@ function saveAddPayment(){
     done:$('np-done').checked,
     createdAt:new Date().toISOString(),
   });
+  CUR_P.updatedAt=new Date().toISOString();
   saveLocal(); renderDPAll(CUR_P); renderAll();
+  if(SHEETS_URL) pushSheets({action:'updateProject',...CUR_P});
   toast('✅ Đã thêm đợt thanh toán');
 }
 
@@ -2407,14 +2414,18 @@ function togglePayment(i){
   if(!CUR_P.payments)return;
   CUR_P.payments[i].done=!CUR_P.payments[i].done;
   if(CUR_P.payments[i].done && !CUR_P.payments[i].date) CUR_P.payments[i].date=new Date().toISOString().split('T')[0];
+  CUR_P.updatedAt=new Date().toISOString();
   saveLocal(); renderDPAll(CUR_P); renderAll();
+  if(SHEETS_URL) pushSheets({action:'updateProject',...CUR_P});
   toast(CUR_P.payments[i].done?'✅ Đã đánh dấu thu tiền':'↩️ Đã hoàn tác');
 }
 
 function delPayment(i){
   if(!confirm('Xóa đợt thanh toán này?'))return;
   CUR_P.payments.splice(i,1);
+  CUR_P.updatedAt=new Date().toISOString();
   saveLocal(); renderDPAll(CUR_P); renderAll();
+  if(SHEETS_URL) pushSheets({action:'updateProject',...CUR_P});
   toast('🗑️ Đã xóa đợt');
 }
 
@@ -2599,9 +2610,21 @@ async function syncSheets(){
     const r=await fetch(SHEETS_URL+'?action=getAll&t='+Date.now());
     const d=await r.json();
     if(d.error)throw new Error(d.error);
-    if(d.projects&&d.projects.length>0)PROJECTS=d.projects;
-    if(d.clients&&d.clients.length>0)CLIENTS=d.clients;
-    saveLocal();renderAll();
+    let changed=false;
+    // Dùng merge thay vì ghi đè — giữ dữ liệu local mới hơn
+    if(d.projects&&d.projects.length>0) changed=_mergeProjects(d.projects)||changed;
+    if(d.clients&&d.clients.length>0){
+      d.clients.forEach(rc=>{
+        const li=CLIENTS.findIndex(c=>c.id===rc.id);
+        if(li===-1){CLIENTS.unshift(rc);changed=true;}
+        else{
+          const lt=new Date(CLIENTS[li].updatedAt||CLIENTS[li].createdAt||0).getTime();
+          const rt=new Date(rc.updatedAt||rc.createdAt||0).getTime();
+          if(rt>lt){CLIENTS[li]=rc;changed=true;}
+        }
+      });
+    }
+    if(changed){saveLocal();renderAll();}
     setSync('ok','Sync '+new Date().toLocaleTimeString('vi-VN'));
     toast('✅ Đã sync — '+(d.projects?.length||0)+' dự án, '+(d.clients?.length||0)+' khách hàng');
   }catch(e){
@@ -3266,7 +3289,13 @@ async function autoSync2Way(){
 }
 
 // Khởi động auto-sync nếu đã có URL
-if(SHEETS_URL)startAutoSync();
+if(SHEETS_URL){
+  startAutoSync();
+  // Auto-pull khi mở trang (delay 1.5s để render xong trước)
+  setTimeout(()=>{
+    syncSheets().catch(()=>{});
+  }, 1500);
+}
 
 // ═══════════════════════════════════════════════
 // GOOGLE CALENDAR INTEGRATION
@@ -3323,8 +3352,9 @@ function initGCalClient(){
     hint: 'candangphoto@gmail.com',
     callback:(resp)=>{
       if(resp.error){
-        // Nếu lỗi khi tự kết nối lại thì im lặng, không toast
-        if(!resp._silent) toast('⚠️ Google: '+resp.error);
+        // Lỗi "access_denied" / "interaction_required" khi silent = bình thường, bỏ qua
+        const silentErr=['access_denied','interaction_required','immediate_failed'];
+        if(!silentErr.includes(resp.error)) toast('⚠️ Google Calendar: '+resp.error);
         _gcalPendingCBs=[];return;
       }
       _gcalToken=resp.access_token;
@@ -3335,9 +3365,9 @@ function initGCalClient(){
       cbs.forEach(cb=>cb());
     },
   });
-  // Tự kết nối lại lặng lẽ nếu đã từng kết nối
+  // Tự lấy token lặng lẽ nếu đã từng kết nối (prompt:'' = không hiện popup nếu đã có session)
   if(localStorage.getItem('cd_gcal_connected')){
-    _gcalTokenClient.requestAccessToken({prompt:''});
+    try{ _gcalTokenClient.requestAccessToken({prompt:''}); }catch(e){}
   }
 }
 
