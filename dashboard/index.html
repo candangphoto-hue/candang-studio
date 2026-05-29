@@ -550,7 +550,7 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
       </div>
       <div class="card">
         <div class="tw"><table>
-          <thead><tr><th>Tháng</th><th>Dự án</th><th>Doanh thu (net)</th><th>VAT</th><th>Tổng thu</th><th>CP Nhân sự</th><th>CP Props</th><th>CP Khác</th><th>CP Vận hành</th><th>Tổng chi</th><th>Lợi nhuận</th><th>Biên LN</th></tr></thead>
+          <thead><tr><th>Tháng</th><th>Dự án</th><th>Doanh thu (net)</th><th>VAT</th><th>Tổng thu KH</th><th>CP Nhân sự</th><th>CP Props</th><th>CP Khác</th><th>CP Vận hành</th><th>Tổng chi</th><th>LN (sau VAT)</th><th>Biên LN</th></tr></thead>
           <tbody id="rvT"></tbody>
         </table></div>
       </div>
@@ -1375,8 +1375,8 @@ function calcSummary(){
   const oc=0; // đã gộp vào Chi phí dự án (props)
   const tu=pM($('f-tu').value);
   const totalCost=staff+props;
-  const profit=gross-totalCost;
-  const margin=gross?Math.round(profit/gross*100):0;
+  const profit=net-totalCost;
+  const margin=net?Math.round(profit/net*100):0;
   const debt=Math.max(gross-tu,0);
 
   if(!net&&!totalCost&&!tu){$('projSummary').style.display='none';return;}
@@ -1495,7 +1495,8 @@ function renderDP0(p){
   const extraVat=p.hasVAT?Math.round(extraRaw*0.08):0;
   const extraVal=extraRaw+extraVat;
   const totalReceivable=contractVal+extraVal;
-  const profit=totalReceivable-cost;
+  const vatLiab=getVATLiability(p);
+  const profit=(p.netValue||0)+extraRaw-cost;
   const debt=getDebt(p);
   const collected=getCollected(p);
   const s=SC[p.status]||{};
@@ -1506,10 +1507,11 @@ function renderDP0(p){
   const ccList=p.clientCosts||[];
   $('dp0').innerHTML=`
     <div class="finance-grid">
-      <div class="fcard"><div class="fc-l">Tổng thu (HĐ${extraVal?'+PS':''})</div><div class="fc-v" style="color:var(--gn)">${fmtS(totalReceivable)}</div></div>
+      <div class="fcard"><div class="fc-l">Tổng thu từ KH (HĐ${extraVal?'+PS':''})</div><div class="fc-v" style="color:var(--gn)">${fmtS(totalReceivable)}</div></div>
       <div class="fcard"><div class="fc-l">Đã thu</div><div class="fc-v" style="color:var(--gn)">${fmtS(collected)}</div></div>
       <div class="fcard" style="${debt>0?'background:var(--rl);border:1px solid #f0c4c0':''}"><div class="fc-l" style="${debt>0?'color:var(--rd)':''}">⚠️ Công nợ còn lại</div><div class="fc-v" style="color:${debt>0?'var(--rd)':'var(--gn)'}">${debt>0?fmtS(debt):'✓ Đã thu đủ'}</div></div>
-      <div class="fcard"><div class="fc-l">Lợi nhuận</div><div class="fc-v" style="color:${profit>=0?'var(--gn)':'var(--rd)'}">${fmtS(profit)}</div></div>
+      ${vatLiab?`<div class="fcard" style="border-color:#e8a000"><div class="fc-l" style="color:var(--or)">🏛️ Thuế VAT phải nộp</div><div class="fc-v" style="color:var(--or)">${fmtS(vatLiab)}</div></div>`:''}
+      <div class="fcard"><div class="fc-l">💰 Lợi nhuận (sau VAT)</div><div class="fc-v" style="color:${profit>=0?'var(--gn)':'var(--rd)'}">${fmtS(profit)}</div></div>
     </div>
     <table style="width:100%;font-size:12.5px;margin-top:4px">
       <tr><td style="color:var(--t3);padding:6px 0;width:120px">Dịch vụ</td><td style="font-weight:500">${p.service||'—'}</td></tr>
@@ -1865,19 +1867,21 @@ function renderDP3(p){
   const oc=otherList.reduce((s,x)=>s+(x.amount||0),0);
   const totalCost=staff+props+oc;
   const gross=p.grossValue||p.netValue||0;
-  const profit=gross-totalCost;
-  const margin=gross?Math.round(profit/gross*100):0;
+  const net=p.netValue||0;
+  const profit=net-totalCost;
+  const margin=net?Math.round(profit/net*100):0;
   $('dp3').innerHTML=`
     <div class="csum" style="margin-bottom:16px">
-      <div class="crow"><span style="color:var(--t2)">Giá Net</span><span>${fmt(p.netValue||0)}</span></div>
+      <div class="crow"><span style="color:var(--t2)">Giá Net (doanh thu)</span><span>${fmt(net)}</span></div>
       ${p.hasVAT?`<div class="crow vat"><span>+ VAT 8%</span><span style="color:var(--bl2)">+${fmt(p.vatAmt||0)}</span></div>`:''}
-      <div class="crow" style="font-weight:600"><span>Tổng thu (Gross)</span><span style="color:var(--gn)">${fmt(gross)}</span></div>
+      <div class="crow" style="font-weight:600"><span>Tổng thu từ KH</span><span style="color:var(--gn)">${fmt(gross)}</span></div>
       <div style="height:1px;background:var(--bl);margin:6px 0"></div>
+      ${p.hasVAT?`<div class="crow"><span style="color:var(--or)">– Thuế VAT nộp NN</span><span style="color:var(--or)">−${fmt(p.vatAmt||0)}</span></div>`:''}
       <div class="crow"><span style="color:var(--rd)">– Nhân sự</span><span style="color:var(--rd)">${staff?fmt(staff):'—'}</span></div>
       <div class="crow"><span style="color:var(--rd)">– Props & đạo cụ</span><span style="color:var(--rd)">${props?fmt(props):'—'}</span></div>
       <div class="crow"><span style="color:var(--rd)">– Chi phí khác</span><span style="color:var(--rd)">${oc?fmt(oc):'—'}</span></div>
-      <div class="crow" style="font-size:12px;color:var(--t3);border-top:1px solid var(--bl);padding-top:5px;margin-top:4px"><span>Tổng chi</span><span>${fmt(totalCost)}</span></div>
-      <div class="crow tot"><span>Lợi nhuận</span><span style="color:${profit>=0?'var(--gn)':'var(--rd)'}">${fmt(profit)}</span></div>
+      <div class="crow" style="font-size:12px;color:var(--t3);border-top:1px solid var(--bl);padding-top:5px;margin-top:4px"><span>Tổng chi (DA)</span><span>${fmt(totalCost)}</span></div>
+      <div class="crow tot"><span>Lợi nhuận (sau VAT)</span><span style="color:${profit>=0?'var(--gn)':'var(--rd)'}">${fmt(profit)}</span></div>
       <div class="crow" style="font-size:11.5px;color:var(--t3)"><span>Biên LN</span><span>${margin}%</span></div>
     </div>
 
@@ -2050,7 +2054,8 @@ function getTotalCost(p){
   const oc=p.otherList?p.otherList.reduce((s,x)=>s+(x.amount||0),0):(p.otherCost||0);
   return(p.staffCost||0)+(p.propsCost||0)+oc;
 }
-function getProfit(p){return(p.grossValue||p.netValue||0)-getTotalCost(p);}
+function getVATLiability(p){return(p.vatAmt||0)+(p.hasVAT?Math.round(getClientCostsRaw(p)*0.08):0);}
+function getProfit(p){return(p.netValue||0)+getClientCostsRaw(p)-getTotalCost(p);}
 function getMonthlyOpex(){
   // Chi phí vận hành cố định/tháng + lương chủ studio
   const exp=EXPENSES.reduce((s,e)=>s+getVndMonth(e),0);
@@ -2061,10 +2066,11 @@ function renderKPIs(){
   const now=new Date(),m=now.getMonth(),y=SEL_YEAR;
   const mp=PROJECTS.filter(p=>{if(!p.dateStart)return false;const d=new Date(p.dateStart);return d.getMonth()===m&&d.getFullYear()===y;});
   const rev=mp.reduce((s,p)=>s+(p.grossValue||p.netValue||0),0);
+  const netRev=mp.reduce((s,p)=>s+(p.netValue||0),0);
   const projCost=mp.reduce((s,p)=>s+getTotalCost(p),0);
   const opex=getMonthlyOpex();
   const totalCost=projCost+opex;
-  const profit=rev-totalCost;
+  const profit=netRev-totalCost;
   const pend=PROJECTS.filter(p=>p.status==='Đang chụp'||p.status==='Hậu kỳ').length;
   const totalDebt=PROJECTS.reduce((s,p)=>s+getDebt(p),0);
   const debtProjects=PROJECTS.filter(p=>getDebt(p)>0).length;
@@ -2085,8 +2091,9 @@ function renderChart(){
   const data=months.map(mo=>{
     const ps=PROJECTS.filter(p=>{if(!p.dateStart)return false;const d=new Date(p.dateStart);return d.getMonth()===mo.m&&d.getFullYear()===mo.y;});
     const rev=ps.reduce((s,p)=>s+(p.grossValue||p.netValue||0),0);
+    const netRev=ps.reduce((s,p)=>s+(p.netValue||0),0);
     const cost=ps.reduce((s,p)=>s+getTotalCost(p),0)+_opex;
-    return{l:mo.l,rev,cost,profit:Math.max(rev-cost,0)};
+    return{l:mo.l,rev,cost,profit:Math.max(netRev-cost,0)};
   });
   const maxV=Math.max(...data.map(d=>d.rev),1);
   const h=95;
@@ -2228,7 +2235,7 @@ function renderRevenue(){
   if(!rows.length){tbody.innerHTML=`<tr><td colspan="12"><div class="emp"><div class="eic">📊</div><div class="etl">Chưa có dữ liệu</div></div></td></tr>`;
   } else {
     tbody.innerHTML=rows.map(k=>{
-      const r=mMap[k],projTc=r.staff+r.props+r.oc,tc=projTc+rvOpex,p=r.gross-tc,mg=r.gross?Math.round(p/r.gross*100):0;
+      const r=mMap[k],projTc=r.staff+r.props+r.oc,tc=projTc+rvOpex,p=r.net-tc,mg=r.net?Math.round(p/r.net*100):0;
       const mc=mg>=40?'var(--gn)':mg>=20?'var(--ad)':'var(--rd)';
       return`<tr style="cursor:pointer" onclick="showMonthDetail('${k}')" title="Click xem chi tiết tháng">
         <td><strong style="color:var(--ad)">${r.lbl}</strong> <span style="font-size:10px;color:var(--t3)">${r.n} DA</span></td>
@@ -2248,14 +2255,16 @@ function renderRevenue(){
   }
   const src=filtered;
   const aR=src.reduce((s,p)=>s+(p.grossValue||p.netValue||0),0);
+  const aNet=src.reduce((s,p)=>s+(p.netValue||0),0);
+  const aVAT=src.reduce((s,p)=>s+(p.vatAmt||0),0);
   const aProjC=src.reduce((s,p)=>s+getTotalCost(p),0);
   const totalOpexAll=rvOpex*rows.length;
   const aC=aProjC+totalOpexAll;
-  const aP=aR-aC,avg=src.length?Math.round(aR/src.length):0;
+  const aP=aNet-aC,avg=src.length?Math.round(aR/src.length):0;
   $('rvKpi').innerHTML=`
-    <div class="kpi"><div class="kpi-l">📈 Tổng doanh thu</div><div class="kpi-v">${fmtS(aR)}</div><div class="kpi-d nt">${src.length} dự án</div></div>
+    <div class="kpi"><div class="kpi-l">📈 Tổng thu từ KH</div><div class="kpi-v">${fmtS(aR)}</div><div class="kpi-d nt">${src.length} dự án${aVAT?` · VAT: ${fmtS(aVAT)}`:''}</div></div>
     <div class="kpi"><div class="kpi-l">💸 Tổng chi phí</div><div class="kpi-v">${fmtS(aC)}</div><div class="kpi-d nt"><span style="color:var(--t3)">DA: ${fmtS(aProjC)}</span> · <span style="color:var(--or)">Vận hành: ${fmtS(totalOpexAll)}</span></div></div>
-    <div class="kpi"><div class="kpi-l">💰 Lợi nhuận thực</div><div class="kpi-v" style="color:${aP>=0?'var(--gn)':'var(--rd)'}">${fmtS(Math.abs(aP))}</div><div class="kpi-d ${aP>=0?'up':'dn'}">${aP>=0?'▲ Dương':'▼ Âm'}</div></div>
+    <div class="kpi"><div class="kpi-l">💰 Lợi nhuận thực (sau VAT)</div><div class="kpi-v" style="color:${aP>=0?'var(--gn)':'var(--rd)'}">${fmtS(Math.abs(aP))}</div><div class="kpi-d ${aP>=0?'up':'dn'}">${aP>=0?'▲ Dương':'▼ Âm'}</div></div>
     <div class="kpi"><div class="kpi-l">📊 TB/dự án</div><div class="kpi-v">${fmtS(avg)}</div><div class="kpi-d nt">──</div></div>`;
 }
 
@@ -2302,9 +2311,10 @@ function renderClients(){
   const enriched=CLIENTS.map(c=>{
     const ps=PROJECTS.filter(p=>p.client===c.name);
     const totalRev=ps.reduce((s,p)=>s+(p.grossValue||p.netValue||0),0);
+    const totalNet=ps.reduce((s,p)=>s+(p.netValue||0),0);
     const totalCost=ps.reduce((s,p)=>s+getTotalCost(p),0);
-    const totalProfit=totalRev-totalCost;
-    const margin=totalRev?Math.round(totalProfit/totalRev*100):0;
+    const totalProfit=totalNet-totalCost;
+    const margin=totalNet?Math.round(totalProfit/totalNet*100):0;
     const last=ps.sort((a,b)=>a.dateStart<b.dateStart?1:-1)[0];
     const totalDebt=ps.reduce((s,p)=>s+getDebt(p),0);
     return{...c,ps,totalRev,totalProfit,margin,last,totalDebt};
