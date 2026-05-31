@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+
+<title>Tư Vấn Dự Án Chụp Ảnh — Can Đăng Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ══ RESET ══ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+  background: #f0f2f5;
+  color: #1a1a1a;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══ APP SHELL — căn giữa, max-width rộng trên desktop ══ */
+.app-shell {
+  width: 100%;
+  max-width: 560px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+@media (min-width: 600px) {
+  .app-shell {
+    box-shadow: 0 0 40px rgba(0,0,0,0.10);
+    min-height: 100vh;
+  }
+}
+@media (min-width: 900px) {
+  .app-shell { max-width: 640px; }
+}
+
+/* ══ TOP BAR ══ */
+.topbar {
+  padding: 20px 24px 16px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-logo-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.topbar-icon {
+  height: 60px;
+  width: 60px;
+  object-fit: contain;
+}
+.topbar-wordmark {
+  height: 20px;
+  width: auto;
+}
+
+/* ══ STEP DOTS ══ */
+.step-dots { display: flex; align-items: center; }
+.step-dot-wrap { display: flex; align-items: center; }
+.sdot {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2.5px solid #e0e0e0;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800;
+  color: #bbb;
+  cursor: pointer;
+  transition: all 0.25s;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+  flex-shrink: 0;
+  user-select: none;
+}
+.sdot.active {
+  border-color: #f07c1e;
+  background: linear-gradient(135deg, #f07c1e, #e04e1a);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(240,124,30,0.35);
+}
+.sdot.done {
+  border-color: #f07c1e;
+  background: #fff5ee;
+  color: #f07c1e;
+  font-size: 16px;
+}
+.sdot-line {
+  width: 32px; height: 3px;
+  background: #e0e0e0;
+  transition: background 0.3s;
+  margin: 0 2px;
+}
+.sdot-line.done { background: #f07c1e; }
+
+/* ══ CONTENT ══ */
+.scroll-content {
+  flex: 1;
+  padding: 26px 24px 130px;
+}
+@media (min-width: 600px) {
+  .scroll-content { padding: 30px 36px 140px; }
+}
+
+.step-card { display: none; animation: fadeIn 0.3s ease; }
+.step-card.visible { display: block; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.step-label {
+  font-size: 11px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #f07c1e; margin-bottom: 7px;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+.step-title {
+  font-size: 24px; font-weight: 800;
+  line-height: 1.25; color: #1a1a1a;
+  margin-bottom: 6px;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+.step-desc {
+  font-size: 14px; color: #666;
+  line-height: 1.65; margin-bottom: 22px;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+
+/* ══ INFO BOX ══ */
+.info-box {
+  background: #fff8f3;
+  border-left: 4px solid #f07c1e;
+  border-radius: 0 10px 10px 0;
+  padding: 13px 16px; margin-bottom: 20px;
+  font-size: 13.5px; color: #555; line-height: 1.65;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+.info-box b { color: #1a1a1a; }
+
+/* ══ PROMISE CARD ══ */
+.promise-card {
+  background: linear-gradient(135deg, #fff4ec, #fff0e5);
+  border: 1.5px solid #fad5b8;
+  border-radius: 14px;
+  padding: 16px 18px; margin-bottom: 20px;
+}
+.promise-card-title {
+  font-size: 12px; font-weight: 800;
+  color: #e04e1a; margin-bottom: 10px;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+.promise-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.promise-list li {
+  display: flex; align-items: flex-start; gap: 9px;
+  font-size: 13.5px; color: #444; line-height: 1.5;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+.promise-list li::before {
+  content: '✓'; color: #f07c1e; font-weight: 800;
+  flex-shrink: 0; font-size: 13px; margin-top: 1px;
+}
+
+/* ══ FIELDS ══ */
+.field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+.field label {
+  font-size: 13px; font-weight: 800; color: #333;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+.field label .req { color: #f07c1e; margin-left: 2px; }
+.field label .opt { font-weight: 400; color: #888; font-size: 12px; margin-left: 4px; }
+.field input[type=text],
+.field input[type=email],
+.field input[type=tel],
+.field textarea,
+.field select {
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+  border: 2px solid #e8e8e8; border-radius: 12px;
+  padding: 13px 16px; font-size: 15px;
+  color: #1a1a1a; background: #fafafa;
+  outline: none; transition: border-color 0.2s, background 0.2s;
+  width: 100%; -webkit-appearance: none;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  border-color: #f07c1e; background: #fff;
+}
+.field textarea { resize: vertical; min-height: 80px; }
+
+/* ══ CHOICE CARDS (radio) ══ */
+.choice-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 16px;
+}
+.choice-grid.single { grid-template-columns: 1fr; }
+.choice-item { position: relative; }
+.choice-item input[type=radio] { position: absolute; opacity: 0; width: 0; height: 0; }
+.choice-item label {
+  display: flex; flex-direction: row;
+  align-items: center; gap: 11px;
+  padding: 13px 14px;
+  border: 2px solid #e8e8e8; border-radius: 14px;
+  cursor: pointer; background: #fafafa;
+  transition: all 0.18s; -webkit-tap-highlight-color: transparent;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+}
+.choice-icon { font-size: 20px; flex-shrink: 0; line-height: 1; }
+.choice-body { display: flex; flex-direction: column; gap: 2px; }
+.choice-name { font-size: 14px; font-weight: 800; color: #1a1a1a; line-height: 1.2; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+.choice-sub { font-size: 12px; color: #888; line-height: 1.35; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+.choice-item input:checked + label { border-color: #f07c1e; background: #fff6f0; }
+.choice-item input:checked + label .choice-name { color: #e04e1a; }
+.choice-item input:checked + label::after {
+  content: '✓';
+  position: absolute; top: 8px; right: 10px;
+  font-size: 11px; font-weight: 800; color: #f07c1e;
+  background: #ffe5d0; width: 18px; height: 18px;
+  border-radius: 50%; display: flex;
+  align-items: center; justify-content: center;
+  line-height: 18px; text-align: center;
+}
+
+/* ══ TAG CHIPS (checkbox multi) ══ */
+.tag-grid { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 16px; }
+.tag-item { position: relative; }
+.tag-item input[type=checkbox] { position: absolute; opacity: 0; width: 0; height: 0; }
+.tag-item label {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 15px;
+  border: 2px solid #e8e8e8; border-radius: 100px;
+  cursor: pointer; background: #fafafa;
+  font-size: 14px; font-weight: 700; color: #444;
+  transition: all 0.18s; -webkit-tap-highlight-color: transparent;
+  font-family: "Be Vietnam Pro", Arial, sans-serif;
+  white-space: nowrap;
+}
+.tag-item label .tag-icon { font-size: 15px; }
+.tag-item input:checked + label { border-color: #f07c1e; background: #fff6f0; color: #e04e1a; }
+
+/* ══ SLIDER ══ */
+.slider-section { margin-bottom: 20px; }
+.slider-top { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 12px; }
+.slider-big-num { font-size: 56px; font-weight: 900; color: #f07c1e; line-height: 1; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+.slider-unit { font-size: 15px; color: #888; margin-bottom: 8px; font-weight: 700; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px; background: #e8e8e8;
+  border-radius: 6px; outline: none; border: none; box-shadow: none; padding: 0;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, #f07c1e, #e04e1a);
+  cursor: pointer; box-shadow: 0 3px 10px rgba(240,124,30,0.4);
+}
+input[type=range]::-moz-range-thumb {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, #f07c1e, #e04e1a);
+  cursor: pointer; border: none; box-shadow: 0 3px 10px rgba(240,124,30,0.4);
+}
+.slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: #aaa; margin-top: 6px; font-weight: 700; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+
+/* ══ INTL EXTRA ══ */
+.intl-extra {
+  display: none; flex-direction: column; gap: 12px;
+  background: #fff8f3; border: 2px solid #fad5b8;
+  border-radius: 14px; padding: 16px; margin-bottom: 16px;
+}
+.intl-extra.show { display: flex; }
+.intl-extra-label { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #e04e1a; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+
+/* ══ BOTTOM BAR ══ */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 560px;
+  padding: 12px 24px 22px;
+  background: #fff; border-top: 1px solid #f0f0f0;
+  z-index: 50;
+}
+@media (min-width: 900px) { .bottom-bar { max-width: 640px; } }
+.bottom-bar-inner { display: flex; gap: 10px; }
+.btn-back {
+  background: #f5f5f5; border: none; border-radius: 12px;
+  padding: 0 20px; height: 54px;
+  font-size: 15px; font-weight: 800; color: #666;
+  cursor: pointer; font-family: "Be Vietnam Pro", Arial, sans-serif;
+  transition: background 0.15s; flex-shrink: 0;
+}
+.btn-back:active { background: #e8e8e8; }
+.btn-next {
+  flex: 1; background: linear-gradient(135deg, #f07c1e, #e04e1a);
+  border: none; border-radius: 12px; height: 54px;
+  font-size: 16px; font-weight: 800; color: #fff;
+  cursor: pointer; font-family: "Be Vietnam Pro", Arial, sans-serif;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn-next:active { opacity: 0.9; transform: scale(0.98); }
+
+/* ══ RESULT ══ */
+#result-page { display: none; }
+#result-page.visible { display: block; animation: fadeIn 0.35s ease; }
+
+.result-hero {
+  background: linear-gradient(135deg, #f07c1e, #e04e1a);
+  margin: -26px -24px 24px; padding: 36px 28px 30px;
+  text-align: center; color: #fff;
+}
+@media (min-width: 600px) { .result-hero { margin: -30px -36px 24px; } }
+.result-hero-icon { font-size: 46px; margin-bottom: 10px; }
+.result-hero h2 { font-size: 26px; font-weight: 800; margin-bottom: 6px; font-family: "Be Vietnam Pro", Arial, sans-serif; color: #fff; }
+.result-hero p { font-size: 14px; opacity: 0.9; line-height: 1.65; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+
+.days-card {
+  background: linear-gradient(135deg, #fff4ec, #fff0e5);
+  border: 2px solid #fad5b8; border-radius: 16px;
+  padding: 22px 20px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 20px;
+}
+.days-big { font-size: 64px; font-weight: 900; color: #f07c1e; line-height: 1; flex-shrink: 0; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+.days-text h3 { font-size: 17px; font-weight: 800; color: #1a1a1a; margin-bottom: 5px; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+.days-text p { font-size: 13px; color: #666; line-height: 1.6; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+
+.result-card { background: #fafafa; border: 2px solid #e8e8e8; border-radius: 16px; margin-bottom: 16px; overflow: hidden; }
+.result-card-header { background: #1a1a1a; padding: 13px 20px; font-size: 12px; font-weight: 800; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+.result-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 12px 20px; border-bottom: 1px solid #efefef; font-size: 14px; }
+.result-row:last-child { border-bottom: none; }
+.result-row-label { color: #888; font-size: 13px; flex-shrink: 0; min-width: 110px; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+.result-row-val { font-weight: 800; color: #1a1a1a; text-align: right; font-family: "Be Vietnam Pro", Arial, sans-serif; font-size: 14px; }
+
+.roadmap { padding: 16px 20px; }
+.roadmap-item { display: flex; gap: 14px; padding-bottom: 18px; position: relative; }
+.roadmap-item:not(:last-child)::before { content: ''; position: absolute; left: 17px; top: 36px; width: 2px; height: calc(100% - 18px); background: #e8e8e8; }
+.roadmap-num { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #f07c1e, #e04e1a); color: #fff; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 1; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+.roadmap-body { padding-top: 6px; }
+.roadmap-body strong { display: block; font-size: 15px; font-weight: 800; color: #1a1a1a; margin-bottom: 3px; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+.roadmap-body span { font-size: 13px; color: #666; line-height: 1.6; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+
+.cta-card { background: #1a1a1a; border-radius: 16px; padding: 26px 22px; text-align: center; margin-bottom: 24px; }
+.cta-card p { color: rgba(255,255,255,0.75); font-size: 14px; line-height: 1.7; margin-bottom: 18px; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+.cta-card p b { color: #fff; }
+.cta-links { display: flex; flex-direction: column; gap: 10px; }
+.btn-zalo { display: flex; align-items: center; justify-content: center; gap: 10px; background: #0068ff; color: #fff; border: none; border-radius: 12px; padding: 15px 20px; font-size: 15px; font-weight: 800; font-family: "Be Vietnam Pro", Arial, sans-serif; cursor: pointer; text-decoration: none; }
+.btn-portfolio { display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 13px 20px; font-size: 14px; font-weight: 800; font-family: "Be Vietnam Pro", Arial, sans-serif; cursor: pointer; text-decoration: none; }
+.cta-note { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 12px; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+
+/* ══ TOAST & LOADING ══ */
+.toast {
+  position: fixed; bottom: 90px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #1a1a1a; color: #fff;
+  padding: 11px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 700; font-family: "Be Vietnam Pro", Arial, sans-serif;
+  z-index: 999; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  white-space: nowrap; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.loading-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(255,255,255,0.92); z-index: 200;
+  align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+}
+.loading-overlay.show { display: flex; }
+.spinner { width: 42px; height: 42px; border: 4px solid #f0e8e2; border-top-color: #f07c1e; border-radius: 50%; animation: spin 0.75s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 15px; font-weight: 800; color: #555; font-family: "Be Vietnam Pro", Arial, sans-serif; }
+
+@media (max-width: 380px) {
+  .step-title { font-size: 20px; }
+  .slider-big-num { font-size: 46px; }
+  .sdot { width: 32px; height: 32px; font-size: 13px; }
+  .sdot-line { width: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Đang gửi thông tin...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<div class="app-shell">
+
+  <!-- ══ TOPBAR ══ -->
+  <div class="topbar">
+    <div class="topbar-logo-row">
+      <img class="topbar-icon" src="data:image/jpeg;base64,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" alt="Can Dang Studio" />
+      <img class="topbar-wordmark" src="data:image/jpeg;base64,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" alt="Can Dang Studio" />
+    </div>
+    <div class="step-dots">
+      <div class="step-dot-wrap"><div class="sdot active" id="sdot-1" onclick="jumpTo(1)">1</div></div>
+      <div class="step-dot-wrap"><div class="sdot-line" id="sline-1"></div><div class="sdot" id="sdot-2" onclick="jumpTo(2)">2</div></div>
+      <div class="step-dot-wrap"><div class="sdot-line" id="sline-2"></div><div class="sdot" id="sdot-3" onclick="jumpTo(3)">3</div></div>
+      <div class="step-dot-wrap"><div class="sdot-line" id="sline-3"></div><div class="sdot" id="sdot-4" onclick="jumpTo(4)">4</div></div>
+    </div>
+  </div>
+
+  <!-- ══ SCROLL CONTENT ══ -->
+  <div class="scroll-content">
+
+    <!-- ── STEP 1 ── -->
+    <div class="step-card visible" id="step-1">
+      <div class="step-label">Bước 1 / 4 — Thông tin cơ bản</div>
+      <div class="step-title">Nhà hàng của bạn ở đâu?</div>
+      <div class="step-desc">Vị trí quyết định gói dịch vụ và quy trình phù hợp nhất.</div>
+
+      <div class="field"><label>Tên của bạn <span class="req">*</span></label><input type="text" id="f-name" placeholder="Nguyễn Văn A" autocomplete="name" /></div>
+      <div class="field"><label>Số Zalo <span class="req">*</span></label><input type="tel" id="f-zalo" placeholder="09xxxxxxxx" autocomplete="tel" /></div>
+      <div class="field"><label>Gmail <span class="opt">(không bắt buộc)</span></label><input type="email" id="f-gmail" placeholder="email@gmail.com" autocomplete="email" /></div>
+
+      <div class="field"><label>Nhà hàng tại <span class="req">*</span></label></div>
+      <div class="choice-grid">
+        <div class="choice-item"><input type="radio" name="location" id="loc-hn" value="Hà Nội" /><label for="loc-hn"><span class="choice-icon">🏙️</span><span class="choice-body"><span class="choice-name">Hà Nội</span><span class="choice-sub">Nội & ngoại thành</span></span></label></div>
+        <div class="choice-item"><input type="radio" name="location" id="loc-mn" value="Tỉnh phía Bắc" /><label for="loc-mn"><span class="choice-icon">🗺️</span><span class="choice-body"><span class="choice-name">Tỉnh phía Bắc</span><span class="choice-sub">HP, Bắc Ninh...</span></span></label></div>
+        <div class="choice-item"><input type="radio" name="location" id="loc-hcm" value="TP. Hồ Chí Minh" /><label for="loc-hcm"><span class="choice-icon">🌇</span><span class="choice-body"><span class="choice-name">TP. HCM</span><span class="choice-sub">& miền Nam</span></span></label></div>
+        <div class="choice-item"><input type="radio" name="location" id="loc-intl" value="Nước ngoài" /><label for="loc-intl"><span class="choice-icon">🌏</span><span class="choice-body"><span class="choice-name">Nước ngoài</span><span class="choice-sub">International</span></span></label></div>
+      </div>
+
+      <div class="intl-extra" id="intl-extra">
+        <div class="intl-extra-label">Thông tin dự án quốc tế</div>
+        <div class="field" style="margin:0"><label>Quốc gia</label><input type="text" id="f-country" placeholder="Singapore, Nhật Bản, Úc..." /></div>
+        <div class="field" style="margin:0">
+          <label>Múi giờ của bạn</label>
+          <select id="f-timezone">
+            <option value="">-- Chọn múi giờ --</option>
+            <option>UTC+7 (Việt Nam, Thái Lan)</option>
+            <option>UTC+8 (Singapore, Malaysia, Đài Loan)</option>
+            <option>UTC+9 (Nhật Bản, Hàn Quốc)</option>
+            <option>UTC+10 (Úc — Sydney)</option>
+            <option>UTC+5:30 (Ấn Độ)</option>
+            <option>UTC+4 (UAE, Dubai)</option>
+            <option>UTC+3 (Ả Rập Saudi)</option>
+            <option>UTC+1 (Trung Âu)</option>
+            <option>UTC+0 (Anh, Ireland)</option>
+            <option>UTC-5 (Mỹ — Đông)</option>
+            <option>UTC-8 (Mỹ — Tây)</option>
+            <option>Khác</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STEP 2 ── -->
+    <div class="step-card" id="step-2">
+      <div class="step-label">Bước 2 / 4 — Mô hình nhà hàng</div>
+      <div class="step-title">Nhà hàng phục vụ món gì?</div>
+      <div class="step-desc">Phong cách ẩm thực quyết định concept, ánh sáng và đạo cụ phù hợp.</div>
+
+      <div class="info-box"><b>Vấn đề thường gặp:</b> Nhiều nhà hàng đặt lịch mà không có concept rõ — ảnh ra không đúng thương hiệu, phải chụp lại tốn kém. Studio lên concept chi tiết <em>trước buổi chụp</em> để loại bỏ rủi ro này.</div>
+
+      <div class="field"><label>Loại ẩm thực <span class="req">*</span> <span class="opt">(chọn nhiều)</span></label></div>
+      <div class="tag-grid">
+        <div class="tag-item"><input type="checkbox" name="food-type" id="ft-viet" value="Món Việt" /><label for="ft-viet"><span class="tag-icon">🍜</span> Món Việt</label></div>
+        <div class="tag-item"><input type="checkbox" name="food-type" id="ft-cafe" value="Cafe / Đồ uống" /><label for="ft-cafe"><span class="tag-icon">☕</span> Cafe / Đồ uống</label></div>
+        <div class="tag-item"><input type="checkbox" name="food-type" id="ft-fast" value="Đồ ăn nhanh" /><label for="ft-fast"><span class="tag-icon">🍔</span> Đồ ăn nhanh</label></div>
+        <div class="tag-item"><input type="checkbox" name="food-type" id="ft-au" value="Món Âu" /><label for="ft-au"><span class="tag-icon">🥩</span> Món Âu</label></div>
+        <div class="tag-item"><input type="checkbox" name="food-type" id="ft-nhat" value="Nhật / Hàn" /><label for="ft-nhat"><span class="tag-icon">🍱</span> Nhật / Hàn</label></div>
+        <div class="tag-item"><input type="checkbox" name="food-type" id="ft-trung" value="Món Trung" /><label for="ft-trung"><span class="tag-icon">🥟</span> Món Trung</label></div>
+        <div class="tag-item"><input type="checkbox" name="food-type" id="ft-banh" value="Bánh & Dessert" /><label for="ft-banh"><span class="tag-icon">🎂</span> Bánh & Dessert</label></div>
+        <div class="tag-item"><input type="checkbox" name="food-type" id="ft-bbq" value="Lẩu / BBQ" /><label for="ft-bbq"><span class="tag-icon">🍲</span> Lẩu / BBQ</label></div>
+        <div class="tag-item"><input type="checkbox" name="food-type" id="ft-hai" value="Hải sản" /><label for="ft-hai"><span class="tag-icon">🦞</span> Hải sản</label></div>
+        <div class="tag-item"><input type="checkbox" name="food-type" id="ft-other" value="Khác" /><label for="ft-other"><span class="tag-icon">🍽️</span> Khác</label></div>
+      </div>
+
+      <div class="field"><label>Phong cách nhà hàng <span class="req">*</span> <span class="opt">(chọn nhiều)</span></label></div>
+      <div class="tag-grid">
+        <div class="tag-item"><input type="checkbox" name="restaurant-style" id="rs-modern" value="Hiện đại" /><label for="rs-modern">✨ Hiện đại</label></div>
+        <div class="tag-item"><input type="checkbox" name="restaurant-style" id="rs-minimal" value="Tối giản" /><label for="rs-minimal">◻️ Tối giản</label></div>
+        <div class="tag-item"><input type="checkbox" name="restaurant-style" id="rs-luxury" value="Sang trọng" /><label for="rs-luxury">👑 Sang trọng</label></div>
+        <div class="tag-item"><input type="checkbox" name="restaurant-style" id="rs-classic" value="Cổ điển" /><label for="rs-classic">🕰️ Cổ điển</label></div>
+        <div class="tag-item"><input type="checkbox" name="restaurant-style" id="rs-rustic" value="Mộc mạc" /><label for="rs-rustic">🪵 Mộc mạc</label></div>
+        <div class="tag-item"><input type="checkbox" name="restaurant-style" id="rs-retro" value="Hoài cổ" /><label for="rs-retro">📷 Hoài cổ</label></div>
+        <div class="tag-item"><input type="checkbox" name="restaurant-style" id="rs-street" value="Đường phố" /><label for="rs-street">🛵 Đường phố</label></div>
+        <div class="tag-item"><input type="checkbox" name="restaurant-style" id="rs-budget" value="Bình dân" /><label for="rs-budget">🏠 Bình dân</label></div>
+        <div class="tag-item"><input type="checkbox" name="restaurant-style" id="rs-trad" value="Truyền thống" /><label for="rs-trad">🏮 Truyền thống</label></div>
+        <div class="tag-item"><input type="checkbox" name="restaurant-style" id="rs-ethnic" value="Dân tộc" /><label for="rs-ethnic">🎋 Dân tộc</label></div>
+        <div class="tag-item"><input type="checkbox" name="restaurant-style" id="rs-fusion" value="Giao thoa (Fusion)" /><label for="rs-fusion">🌐 Fusion</label></div>
+      </div>
+
+      <div class="field"><label>Mô tả thêm về nhà hàng <span class="opt">(không bắt buộc)</span></label><textarea id="f-restaurant-desc" placeholder="Ví dụ: Nhà hàng sushi 40 món, phong cách tối giản Nhật Bản, không gian yên tĩnh..."></textarea></div>
+    </div>
+
+    <!-- ── STEP 3 ── -->
+    <div class="step-card" id="step-3">
+      <div class="step-label">Bước 3 / 4 — Số lượng & Loại ảnh</div>
+      <div class="step-title">Cần chụp bao nhiêu món?</div>
+      <div class="step-desc">Mỗi món được dàn dựng và chụp theo concept riêng — không chụp nhanh để có ảnh.</div>
+
+      <div class="promise-card">
+        <div class="promise-card-title">Studio chuẩn bị toàn bộ</div>
+        <ul class="promise-list">
+          <li>Concept chi tiết từng món trước buổi chụp</li>
+          <li>Bối cảnh, ánh sáng studio chuyên nghiệp</li>
+          <li>Đạo cụ, dụng cụ bầy biện đồng bộ phong cách</li>
+          <li>Thực phẩm, gia vị trang trí theo đúng định lượng</li>
+          <li>Ảnh chỉnh sửa hoàn chỉnh, xuất file dùng ngay</li>
+        </ul>
+      </div>
+
+      <div class="slider-section">
+        <div class="field"><label>Số món cần chụp <span class="req">*</span></label></div>
+        <div class="slider-top">
+          <span class="slider-big-num" id="dish-val">15</span>
+          <span class="slider-unit">món ăn</span>
+        </div>
+        <input type="range" id="dish-slider" min="5" max="60" value="15" step="1" oninput="updateSlider()" />
+        <div class="slider-labels"><span>5</span><span>20</span><span>35</span><span>50</span><span>60+</span></div>
+      </div>
+
+      <div class="field"><label>Loại ảnh mong muốn <span class="req">*</span></label></div>
+      <div class="choice-grid single">
+        <div class="choice-item"><input type="radio" name="photo-type" id="pt-concept" value="Concept sáng tạo" /><label for="pt-concept"><span class="choice-icon">🎨</span><span class="choice-body"><span class="choice-name">Concept sáng tạo</span><span class="choice-sub">Bối cảnh, đạo cụ, màu thương hiệu. Dùng cho menu, mạng xã hội, catalogue.</span></span></label></div>
+        <div class="choice-item"><input type="radio" name="photo-type" id="pt-white" value="Ảnh nền trắng" /><label for="pt-white"><span class="choice-icon">⬜</span><span class="choice-body"><span class="choice-name">Ảnh nền trắng</span><span class="choice-sub">Chuẩn thương mại. Dùng cho packaging, POS, website order.</span></span></label></div>
+        <div class="choice-item"><input type="radio" name="photo-type" id="pt-both" value="Kết hợp cả hai" /><label for="pt-both"><span class="choice-icon">✨</span><span class="choice-body"><span class="choice-name">Kết hợp cả hai</span><span class="choice-sub">Bộ ảnh hoàn chỉnh nhất — concept + nền trắng.</span></span></label></div>
+      </div>
+    </div>
+
+    <!-- ── STEP 4 ── -->
+    <div class="step-card" id="step-4">
+      <div class="step-label">Bước 4 / 4 — Chi tiết dự án</div>
+      <div class="step-title">Một vài thông tin cuối</div>
+      <div class="step-desc">Giúp studio chuẩn bị chính xác, tránh trao đổi lại nhiều lần.</div>
+
+      <div id="intl-only-block" style="display:none; margin-bottom:20px;">
+        <div class="promise-card">
+          <div class="promise-card-title">Khách quốc tế — Cần chuẩn bị</div>
+          <ul class="promise-list">
+            <li>Mẫu cốc, bát, đĩa thực tế của nhà hàng (gửi trước) — đồng bộ vận hành</li>
+            <li>Ảnh điện thoại từng món — studio hiểu hình thức trình bày</li>
+            <li>Thông tin định lượng từng món — chuẩn bị thực phẩm đúng lượng</li>
+            <li>Ghi chú bầy biện: trang trí với thực phẩm, gia vị, hoa lá đặc trưng</li>
+            <li>Duyệt ảnh realtime từ xa qua Google Drive trong buổi chụp</li>
+          </ul>
+        </div>
+        <div class="field"><label>Bạn đã có ảnh tham khảo từng món chưa?</label></div>
+        <div class="choice-grid">
+          <div class="choice-item"><input type="radio" name="has-ref" id="ref-yes" value="Đã có ảnh tham khảo" /><label for="ref-yes"><span class="choice-icon">✅</span><span class="choice-body"><span class="choice-name">Đã có</span></span></label></div>
+          <div class="choice-item"><input type="radio" name="has-ref" id="ref-no" value="Chưa có, sẽ chuẩn bị" /><label for="ref-no"><span class="choice-icon">🔜</span><span class="choice-body"><span class="choice-name">Chưa có, sẽ chuẩn bị</span></span></label></div>
+        </div>
+      </div>
+
+      <div class="field"><label>Thời gian mong muốn triển khai</label></div>
+      <div class="choice-grid">
+        <div class="choice-item"><input type="radio" name="timeline" id="tl-1m" value="Trong 1 tháng tới" /><label for="tl-1m"><span class="choice-icon">⚡</span><span class="choice-body"><span class="choice-name">Trong 1 tháng</span></span></label></div>
+        <div class="choice-item"><input type="radio" name="timeline" id="tl-3m" value="1–3 tháng" /><label for="tl-3m"><span class="choice-icon">📅</span><span class="choice-body"><span class="choice-name">1–3 tháng</span></span></label></div>
+        <div class="choice-item"><input type="radio" name="timeline" id="tl-flex" value="Linh hoạt" /><label for="tl-flex"><span class="choice-icon">🗓️</span><span class="choice-body"><span class="choice-name">Linh hoạt</span></span></label></div>
+        <div class="choice-item"><input type="radio" name="timeline" id="tl-plan" value="Đang lên kế hoạch" /><label for="tl-plan"><span class="choice-icon">📝</span><span class="choice-body"><span class="choice-name">Đang lên KH</span></span></label></div>
+      </div>
+
+      <div class="field"><label>Mục đích sử dụng ảnh</label></div>
+      <div class="choice-grid single">
+        <div class="choice-item"><input type="radio" name="usage" id="us-menu" value="Menu & in ấn" /><label for="us-menu"><span class="choice-icon">📋</span><span class="choice-body"><span class="choice-name">Menu & in ấn</span><span class="choice-sub">Tờ rơi, poster, catalogue</span></span></label></div>
+        <div class="choice-item"><input type="radio" name="usage" id="us-social" value="Mạng xã hội & marketing" /><label for="us-social"><span class="choice-icon">📱</span><span class="choice-body"><span class="choice-name">Mạng xã hội & marketing</span><span class="choice-sub">Facebook, Instagram, TikTok</span></span></label></div>
+        <div class="choice-item"><input type="radio" name="usage" id="us-all" value="Toàn bộ kênh" /><label for="us-all"><span class="choice-icon">🚀</span><span class="choice-body"><span class="choice-name">Toàn bộ kênh</span><span class="choice-sub">Menu + social + website + quảng cáo</span></span></label></div>
+      </div>
+
+      <div class="field" style="margin-top:4px;"><label>Ghi chú thêm <span class="opt">(không bắt buộc)</span></label><textarea id="f-notes" placeholder="Phong cách, màu sắc thương hiệu, yêu cầu đặc biệt..."></textarea></div>
+    </div>
+
+    <!-- ── RESULT ── -->
+    <div id="result-page">
+      <div class="result-hero">
+        <div class="result-hero-icon">🎉</div>
+        <h2 id="res-hero-title">Cảm ơn!</h2>
+        <p>Studio đã nhận thông tin.<br>Dưới đây là lộ trình dự kiến cho dự án của bạn.</p>
+      </div>
+
+      <div class="days-card">
+        <div class="days-big" id="res-days">1</div>
+        <div class="days-text">
+          <h3 id="res-days-title">Ước tính ngày chụp</h3>
+          <p id="res-days-desc"></p>
+        </div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-card-header">Thông tin dự án</div>
+        <div class="result-row"><span class="result-row-label">Khách hàng</span><span class="result-row-val" id="res-s-name">–</span></div>
+        <div class="result-row"><span class="result-row-label">Vị trí</span><span class="result-row-val" id="res-s-loc">–</span></div>
+        <div class="result-row"><span class="result-row-label">Ẩm thực</span><span class="result-row-val" id="res-s-food">–</span></div>
+        <div class="result-row"><span class="result-row-label">Phong cách</span><span class="result-row-val" id="res-s-style">–</span></div>
+        <div class="result-row"><span class="result-row-label">Số món</span><span class="result-row-val" id="res-s-dishes">–</span></div>
+        <div class="result-row"><span class="result-row-label">Loại ảnh</span><span class="result-row-val" id="res-s-photo">–</span></div>
+        <div class="result-row"><span class="result-row-label">Triển khai</span><span class="result-row-val" id="res-s-timeline">–</span></div>
+        <div class="result-row"><span class="result-row-label">Mục đích</span><span class="result-row-val" id="res-s-usage">–</span></div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-card-header">Lộ trình triển khai</div>
+        <div class="roadmap" id="res-roadmap"></div>
+      </div>
+
+      <div class="promise-card">
+        <div class="promise-card-title">Can Đăng Studio cam kết</div>
+        <ul class="promise-list" id="res-commitments"></ul>
+      </div>
+
+      <div class="cta-card">
+        <p>Studio sẽ liên hệ Zalo của bạn trong vòng <b>24 giờ</b> để xác nhận lịch và báo giá chi tiết.</p>
+        <div class="cta-links">
+          <a href="https://zalo.me/0904329595" class="btn-zalo" target="_blank">💬 Nhắn Zalo ngay — 0904 329 595</a>
+          <a href="http://candangstudio.vn" class="btn-portfolio" target="_blank">🖼️ Xem portfolio tại candangstudio.vn</a>
+        </div>
+        <div class="cta-note">Hoặc chờ studio liên hệ lại theo số Zalo bạn đã cung cấp</div>
+      </div>
+    </div>
+
+  </div><!-- /scroll-content -->
+
+  <!-- ══ BOTTOM BAR ══ -->
+  <div class="bottom-bar" id="bottom-bar">
+    <div class="bottom-bar-inner" id="btn-row">
+      <button class="btn-next" onclick="handleMain()">Tiếp tục →</button>
+    </div>
+  </div>
+
+</div><!-- /app-shell -->
+
+<script>
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxYsWgNu5xtysquz5URNTeEXHX9zQIRvzsjz-lPAP4SWrQ7GMkZImCCkfDw55CUlD7X/exec';
+let currentStep = 1;
+let maxReached = 1;
+
+// Intl toggle
+document.querySelectorAll('input[name="location"]').forEach(r => {
+  r.addEventListener('change', () => {
+    const isIntl = r.value === 'Nước ngoài';
+    document.getElementById('intl-extra').classList.toggle('show', isIntl);
+    document.getElementById('intl-only-block').style.display = isIntl ? 'block' : 'none';
+  });
+});
+
+function updateSlider() {
+  document.getElementById('dish-val').textContent = document.getElementById('dish-slider').value;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function getVal(id) { return (document.getElementById(id)?.value || '').trim(); }
+function getRadio(name) { const el = document.querySelector('input[name="'+name+'"]:checked'); return el ? el.value : ''; }
+function getChecked(name) { return Array.from(document.querySelectorAll('input[name="'+name+'"]:checked')).map(e => e.value); }
+
+function updateDots(step) {
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById('sdot-' + i);
+    if (!dot) continue;
+    dot.className = 'sdot';
+    if (i < step) { dot.className = 'sdot done'; dot.textContent = '✓'; }
+    else if (i === step) { dot.className = 'sdot active'; dot.textContent = i; }
+    else { dot.textContent = i; }
+    const line = document.getElementById('sline-' + i);
+    if (line) line.className = 'sdot-line' + (i < step ? ' done' : '');
+  }
+}
+
+function updateBottomBar(step) {
+  const btnRow = document.getElementById('btn-row');
+  const back = '<button class="btn-back" onclick="goBack()">← Quay lại</button>';
+  const next = '<button class="btn-next" onclick="handleMain()">Tiếp tục →</button>';
+  const submit = '<button class="btn-next" onclick="handleMain()">Gửi & Xem lộ trình →</button>';
+  if (step === 1) { btnRow.innerHTML = next; }
+  else if (step <= 3) { btnRow.innerHTML = back + next; }
+  else if (step === 4) { btnRow.innerHTML = back + submit; }
+  else { document.getElementById('bottom-bar').style.display = 'none'; }
+}
+
+function updateUI(step) {
+  for (let i = 1; i <= 4; i++) document.getElementById('step-' + i)?.classList.remove('visible');
+  document.getElementById('result-page').classList.remove('visible');
+  document.getElementById('bottom-bar').style.display = '';
+  if (step <= 4) document.getElementById('step-' + step).classList.add('visible');
+  else document.getElementById('result-page').classList.add('visible');
+  updateDots(step);
+  updateBottomBar(step);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function jumpTo(step) {
+  if (step > maxReached) return;
+  currentStep = step;
+  updateUI(step);
+}
+
+function validate(step) {
+  if (step === 1) {
+    if (!getVal('f-name')) { showToast('⚠️ Vui lòng nhập tên của bạn'); return false; }
+    if (!getVal('f-zalo')) { showToast('⚠️ Vui lòng nhập số Zalo'); return false; }
+    if (!getRadio('location')) { showToast('⚠️ Vui lòng chọn vị trí nhà hàng'); return false; }
+  }
+  if (step === 2) {
+    if (getChecked('food-type').length === 0) { showToast('⚠️ Vui lòng chọn ít nhất 1 loại ẩm thực'); return false; }
+    if (getChecked('restaurant-style').length === 0) { showToast('⚠️ Vui lòng chọn ít nhất 1 phong cách'); return false; }
+  }
+  if (step === 3) {
+    if (!getRadio('photo-type')) { showToast('⚠️ Vui lòng chọn loại ảnh'); return false; }
+  }
+  return true;
+}
+
+function goBack() { currentStep--; updateUI(currentStep); }
+
+function handleMain() {
+  if (!validate(currentStep)) return;
+  if (currentStep < 4) {
+    currentStep++;
+    if (currentStep > maxReached) maxReached = currentStep;
+    updateUI(currentStep);
+  } else {
+    submitForm();
+  }
+}
+
+function estimateDays(dishCount, location) {
+  // HN & Tỉnh phía Bắc: 20 món/ngày
+  if (location === 'Hà Nội' || location === 'Tỉnh phía Bắc') return Math.max(1, Math.ceil(dishCount / 20));
+  // TP.HCM: 15 món/ngày
+  if (location === 'TP. Hồ Chí Minh') return Math.max(1, Math.ceil(dishCount / 15));
+  // Nước ngoài: 15 món/ngày tại studio HN
+  if (location === 'Nước ngoài') return Math.max(1, Math.ceil(dishCount / 15));
+  return Math.max(1, Math.ceil(dishCount / 20));
+}
+
+async function submitForm() {
+  const location = getRadio('location');
+  const dishCount = parseInt(document.getElementById('dish-slider').value);
+  const photoType = getRadio('photo-type');
+  const foodTypes = getChecked('food-type').join(', ');
+  const styles = getChecked('restaurant-style').join(', ');
+  const isIntl = location === 'Nước ngoài';
+  const days = estimateDays(dishCount, location);
+  const name = getVal('f-name');
+
+  const data = {
+    name, zalo: getVal('f-zalo'), gmail: getVal('f-gmail'),
+    location, country: getVal('f-country'), timezone: getVal('f-timezone'),
+    food_type: foodTypes, restaurant_style: styles,
+    restaurant_desc: getVal('f-restaurant-desc'),
+    dish_count: dishCount, photo_type: photoType,
+    has_ref: getRadio('has-ref'), timeline: getRadio('timeline'),
+    usage: getRadio('usage'), notes: getVal('f-notes'),
+    estimated_days: days + ' ngày chụp'
+  };
+
+  document.getElementById('loadingOverlay').classList.add('show');
+  try { await fetch(SHEET_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) }); } catch(e) {}
+
+  // Fill result
+  document.getElementById('res-hero-title').textContent = 'Cảm ơn, ' + name + '!';
+  document.getElementById('res-days').textContent = days;
+  document.getElementById('res-days-title').textContent = 'Ước tính ' + days + ' ngày chụp';
+  const daysDescMap = {
+    'Hà Nội': 'Triển khai tại địa điểm khách hàng. ~20 món/ngày. Studio xác nhận lịch chi tiết.',
+    'Tỉnh phía Bắc': 'Triển khai tại địa điểm khách hàng. ~20 món/ngày. Studio xác nhận lịch chi tiết.',
+    'TP. Hồ Chí Minh': 'Triển khai tại địa điểm khách hàng hoặc studio tùy ngân sách. ~15 món/ngày.',
+    'Nước ngoài': 'Chụp tại studio Hà Nội. ~15 món/ngày. Lịch cụ thể xác nhận sau khi trao đổi.'
+  };
+  document.getElementById('res-days-desc').textContent = daysDescMap[location] || '~20 món/ngày. Studio sẽ xác nhận lịch chi tiết.';
+
+  document.getElementById('res-s-name').textContent = name + (data.zalo ? ' | ' + data.zalo : '');
+  document.getElementById('res-s-loc').textContent = location + (data.country ? ' (' + data.country + ')' : '');
+  document.getElementById('res-s-food').textContent = foodTypes || '—';
+  document.getElementById('res-s-style').textContent = styles || '—';
+  document.getElementById('res-s-dishes').textContent = dishCount + ' món';
+  document.getElementById('res-s-photo').textContent = photoType;
+  document.getElementById('res-s-timeline').textContent = data.timeline || '—';
+  document.getElementById('res-s-usage').textContent = data.usage || '—';
+
+  const roadmapHN = [
+    { t: 'Xác nhận & lên concept', d: 'Studio liên hệ Zalo trong 24h để trao đổi phong cách và xác nhận danh sách món.' },
+    { t: 'Studio chuẩn bị', d: 'Bối cảnh, đạo cụ, thực phẩm trang trí theo concept đã duyệt. Khách không cần mang gì.' },
+    { t: 'Ngày chụp', d: (()=>{
+      if (location === 'Hà Nội') return 'Studio đến tận địa điểm nhà hàng tại Hà Nội. ~20 món/ngày.';
+      if (location === 'Tỉnh phía Bắc') return 'Studio đến tận địa điểm khách hàng tại tỉnh. ~20 món/ngày.';
+      if (location === 'TP. Hồ Chí Minh') return 'Chụp tại địa điểm khách hàng hoặc studio tùy ngân sách. ~15 món/ngày.';
+      return 'Chụp tại studio Hà Nội. ~15 món/ngày.';
+    })() },
+    { t: 'Chỉnh sửa & bàn giao file', d: 'Ảnh hoàn chỉnh trong 2–3 ngày làm việc. Bàn giao qua Google Drive, full-res, không watermark.' }
+  ];
+  const roadmapIntl = [
+    { t: 'Trao đổi concept', d: 'Studio nhận thông tin, lên mood board và danh sách vật phẩm cần chuẩn bị. 3–5 ngày làm việc.' },
+    { t: 'Chuẩn bị & vận chuyển', d: 'Quý khách gửi mẫu cốc, bát và ảnh tham khảo từng món về studio.' },
+    { t: 'Ngày chụp tại Hà Nội', d: 'Studio thực hiện theo concept đã duyệt. Khách duyệt ảnh realtime từ xa.' },
+    { t: 'Chỉnh sửa & bàn giao', d: 'File hoàn chỉnh qua Google Drive trong 3–5 ngày làm việc sau buổi chụp.' },
+    { t: 'Báo giá chính thức', d: 'Studio liên hệ trong 24h để xác nhận chi tiết và gửi báo giá đầy đủ.' }
+  ];
+  const rm = isIntl ? roadmapIntl : roadmapHN;
+  document.getElementById('res-roadmap').innerHTML = rm.map((s, i) =>
+    '<div class="roadmap-item"><div class="roadmap-num">' + (i+1) + '</div><div class="roadmap-body"><strong>' + s.t + '</strong><span>' + s.d + '</span></div></div>'
+  ).join('');
+
+  const commits = [
+    'Concept chi tiết được duyệt trước buổi chụp',
+    'Studio chuẩn bị toàn bộ: bối cảnh, đạo cụ, thực phẩm trang trí',
+    'Ảnh hoàn chỉnh, chỉnh sửa chuyên nghiệp — xuất file dùng ngay',
+    isIntl ? 'Duyệt ảnh realtime từ xa — kiểm soát chất lượng đầy đủ' : 'Bàn giao file 2–3 ngày làm việc qua Google Drive',
+    '10+ năm kinh nghiệm, 2.000+ dự án: KFC, Golden Gate, Bibica, LIXIL...'
+  ];
+  document.getElementById('res-commitments').innerHTML = commits.map(c => '<li>' + c + '</li>').join('');
+
+  setTimeout(() => {
+    document.getElementById('loadingOverlay').classList.remove('show');
+    currentStep = 5; maxReached = 5;
+    updateUI(5);
+  }, 1000);
+}
+</script>
+</body>
+</html>
