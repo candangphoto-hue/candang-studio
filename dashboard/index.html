@@ -57,6 +57,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .btn-s{padding:4px 10px;font-size:11.5px}
 .btn-xs{padding:3px 8px;font-size:11px}
 .btn-gn{background:var(--gl);color:var(--gn);border:1px solid #b8ddc8}.btn-gn:hover{background:#d0eeda}
+.btn-rd{background:#fff0ef;color:#c0392b;border:1px solid #f0c4c0}.btn-rd:hover{background:#fbd0cd}
+/* LEAD PANEL */
+.ld-sec{padding:14px 0;border-bottom:1px solid var(--bl)}
+.ld-sec:last-of-type{border-bottom:none}
+.ld-sec-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+.ld-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:4px 0;font-size:13px}
+.ld-lbl{color:var(--t3);flex-shrink:0;min-width:110px}
+.ld-val{color:var(--tx);font-weight:500;text-align:right;line-height:1.5}
+/* Form-source badge on lead card */
+.lead-form-badge{display:inline-block;font-size:9.5px;font-weight:700;background:#fff4ec;color:#e04e1a;border:1px solid #fad5b8;border-radius:4px;padding:1px 5px;margin-left:5px;vertical-align:middle}
+.lead-form-info{font-size:10.5px;color:var(--t3);margin-bottom:5px;line-height:1.4}
 
 /* CONTENT */
 .con{padding:24px 28px}
@@ -532,7 +543,12 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
     <div id="v-leads" class="view">
       <div class="sh">
         <div><div class="st">Liên hệ mới & Báo giá</div><div class="ss" id="leadCnt">0 lead</div></div>
-        <button class="btn btn-p" onclick="openModal('addP')">+ Thêm lead</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select class="fs" id="leadMonthSel" style="font-size:12px;padding:6px 10px;height:auto;width:auto" onchange="leadMonthFilter=this.value;renderLeads()">
+            <option value="">Tất cả tháng</option>
+          </select>
+          <button class="btn btn-p" onclick="openModal('addP')">+ Thêm lead</button>
+        </div>
       </div>
       <div class="kb" id="leadBoard"></div>
     </div>
@@ -853,7 +869,67 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
 
 <!-- DETAIL PANEL -->
 <!-- OVERLAY để click ngoài đóng detail panel -->
-<div class="dp-overlay" id="dpOverlay" onclick="closeDP()"></div>
+<div class="dp-overlay" id="dpOverlay" onclick="closeDP();closeLeadPanel()"></div>
+
+<!-- LEAD DETAIL PANEL -->
+<div class="dp" id="leadPanel">
+  <div class="dph">
+    <div class="dpc" id="ld-name">Chi tiết lead</div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="btn btn-gn btn-s" onclick="confirmLeadFromPanel()">✓ Chốt → Dự án</button>
+      <button class="mx" onclick="closeLeadPanel()">✕</button>
+    </div>
+  </div>
+  <div class="dpb" style="padding:16px 18px;display:flex;flex-direction:column;gap:0">
+
+    <!-- Liên hệ -->
+    <div class="ld-sec">
+      <div class="ld-sec-title">📱 Thông tin liên hệ</div>
+      <div class="ld-row"><span class="ld-lbl">Zalo</span><a id="ld-zalo" class="ld-val" href="#" style="color:var(--ac);font-weight:600">—</a></div>
+      <div class="ld-row"><span class="ld-lbl">Gmail</span><span id="ld-gmail" class="ld-val">—</span></div>
+      <div class="ld-row"><span class="ld-lbl">Vị trí</span><span id="ld-location" class="ld-val">—</span></div>
+      <div class="ld-row" id="ld-country-row"><span class="ld-lbl">Quốc gia / Múi giờ</span><span id="ld-country" class="ld-val">—</span></div>
+    </div>
+
+    <!-- Nhà hàng -->
+    <div class="ld-sec">
+      <div class="ld-sec-title">🍽️ Mô hình nhà hàng</div>
+      <div class="ld-row"><span class="ld-lbl">Ẩm thực</span><span id="ld-food" class="ld-val">—</span></div>
+      <div class="ld-row"><span class="ld-lbl">Phong cách</span><span id="ld-style" class="ld-val">—</span></div>
+      <div class="ld-row" id="ld-desc-row"><span class="ld-lbl">Mô tả</span><span id="ld-desc" class="ld-val">—</span></div>
+    </div>
+
+    <!-- Yêu cầu chụp -->
+    <div class="ld-sec">
+      <div class="ld-sec-title">📸 Yêu cầu chụp</div>
+      <div class="ld-row"><span class="ld-lbl">Số món</span><span id="ld-dishes" class="ld-val">—</span></div>
+      <div class="ld-row"><span class="ld-lbl">Loại ảnh</span><span id="ld-photo" class="ld-val">—</span></div>
+      <div class="ld-row"><span class="ld-lbl">Ước tính</span><span id="ld-est" class="ld-val" style="font-weight:700;color:var(--ac)">—</span></div>
+      <div class="ld-row" id="ld-ref-row"><span class="ld-lbl">Ảnh tham khảo</span><span id="ld-ref" class="ld-val">—</span></div>
+    </div>
+
+    <!-- Chi tiết dự án -->
+    <div class="ld-sec">
+      <div class="ld-sec-title">📋 Chi tiết dự án</div>
+      <div class="ld-row"><span class="ld-lbl">Triển khai</span><span id="ld-timeline" class="ld-val">—</span></div>
+      <div class="ld-row"><span class="ld-lbl">Mục đích</span><span id="ld-usage" class="ld-val">—</span></div>
+      <div class="ld-row" id="ld-notes-row"><span class="ld-lbl">Ghi chú KH</span><span id="ld-notes" class="ld-val">—</span></div>
+      <div class="ld-row"><span class="ld-lbl">Nhận lead</span><span id="ld-date" class="ld-val">—</span></div>
+      <div class="ld-row"><span class="ld-lbl">Trạng thái</span>
+        <select id="ld-status-sel" class="fs" style="font-size:12px;padding:4px 8px;height:auto;width:auto" onchange="updateLeadStatus(this.value)">
+          <option>Liên hệ mới</option><option>Đã báo giá</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="padding-top:8px;border-top:1px solid var(--bl);display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-p" style="width:100%" onclick="confirmLeadFromPanel()">✓ Chốt → Mở form Thêm dự án</button>
+      <button class="btn btn-rd" style="width:100%" onclick="deleteLeadFromPanel()">🗑 Xóa lead này</button>
+    </div>
+
+  </div>
+</div>
 
 <div class="dp" id="dPanel">
   <div class="dph">
@@ -1007,6 +1083,12 @@ const LEAD_COLS=[
   {k:'Liên hệ mới',l:'Liên hệ mới',i:'📬'},
   {k:'Đã báo giá', l:'Đã báo giá', i:'📋'},
 ];
+let leadMonthFilter='';
+let CUR_LEAD_ID=null;
+function parseLeadData(p){
+  if(!p||!p.note||!p.note.startsWith('[LEAD_FORM_v1]'))return null;
+  try{return JSON.parse(p.note.slice(14));}catch{return null;}
+}
 const ROLES=['Chụp ảnh chính','Phụ tá chụp','Hậu kỳ / Edit','Stylist','Makeup','Đạo diễn hình ảnh','Quay phim','Khác'];
 
 // ═══════════════════════════════════════════════
@@ -1520,7 +1602,8 @@ function renderDP0(p){
       <tr><td style="color:var(--t3);padding:6px 0">VAT</td><td>${p.hasVAT?`✅ Có VAT — ${fmt(p.vatAmt||0)}`:'Không có VAT'}</td></tr>
       <tr><td style="color:var(--t3);padding:6px 0">Tạm ứng</td><td style="color:var(--gn);font-weight:500">${p.tamUng?fmt(p.tamUng):'Chưa có'}</td></tr>
       <tr><td style="color:var(--t3);padding:6px 0">Trạng thái</td><td><span class="sbadge" style="background:${s.bg};color:${s.co}"><span class="sdot2" style="background:${s.dot}"></span>${p.status}</span></td></tr>
-      ${p.note?`<tr><td style="color:var(--t3);padding:6px 0;vertical-align:top">Ghi chú</td><td style="line-height:1.6">${p.note}</td></tr>`:''}
+      ${p.note&&!p.note.startsWith('[LEAD_FORM_v1]')?`<tr><td style="color:var(--t3);padding:6px 0;vertical-align:top">Ghi chú</td><td style="line-height:1.6">${p.note}</td></tr>`:''}
+      ${p.note&&p.note.startsWith('[LEAD_FORM_v1]')?`<tr><td style="color:var(--t3);padding:6px 0">Form data</td><td><a href="#" onclick="closeDP();openLeadDetail('${p.id}');return false" style="color:var(--ac);font-weight:500">Xem chi tiết form →</a></td></tr>`:''}
     </table>
     <!-- Chi phí phát sinh KH trả -->
     <div style="margin-top:16px;border-top:1px solid var(--bl);padding-top:14px">
@@ -2041,6 +2124,7 @@ function closeDP(){
 // ESC key closes panel
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
+    if($('leadPanel').classList.contains('on')){closeLeadPanel();return;}
     if($('dPanel').classList.contains('on'))closeDP();
     document.querySelectorAll('.mo.on').forEach(m=>m.classList.remove('on'));
     hideCalPopup();
@@ -2183,33 +2267,149 @@ function renderKanban(){
 }
 
 function renderLeads(){
-  const leads=PROJECTS.filter(p=>p.status==='Liên hệ mới'||p.status==='Đã báo giá');
+  const allLeads=PROJECTS.filter(p=>p.status==='Liên hệ mới'||p.status==='Đã báo giá');
+
+  // Populate month dropdown
+  const monthSel=$('leadMonthSel');
+  if(monthSel){
+    const months=[...new Set(allLeads.map(p=>{
+      const d=p.createdAt?new Date(p.createdAt):null;
+      return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`:null;
+    }).filter(Boolean))].sort().reverse();
+    const cur=monthSel.value;
+    monthSel.innerHTML='<option value="">Tất cả tháng</option>'+months.map(m=>{
+      const [y,mo]=m.split('-');
+      const lbl=`T${parseInt(mo)}/${y}`;
+      return`<option value="${m}"${m===cur?' selected':''}>${lbl}</option>`;
+    }).join('');
+    if(!leadMonthFilter&&months.length)leadMonthFilter=cur||'';
+  }
+
+  // Filter by month
+  const leads=leadMonthFilter?allLeads.filter(p=>{
+    const d=p.createdAt?new Date(p.createdAt):null;
+    if(!d)return false;
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    return k===leadMonthFilter;
+  }):allLeads;
+
   $('leadBoard').innerHTML=LEAD_COLS.map(col=>{
     const cards=leads.filter(p=>p.status===col.k);
     const s=SC[col.k]||{};
     return`<div class="kc">
       <div class="kh"><div class="kt">${col.i} ${col.l}<span class="cb2" style="background:${s.bg||'#eee'};color:${s.co||'#555'}">${cards.length}</span></div></div>
       <div class="kb2">${cards.length?cards.map(p=>{
-        const dateStr=p.dateStart?fmtDate(p.dateStart):'Chưa có ngày';
-        return`<div class="pc" style="position:relative">
-          <div class="pc-cl" onclick="openDetail('${p.id}')" style="cursor:pointer">${p.client}</div>
-          <div class="pc-sv">${p.service||'—'}</div>
-          ${p.grossValue||p.netValue?`<div class="pc-cs">💰 ${fmtS(p.grossValue||p.netValue)}</div>`:''}
+        const ld=parseLeadData(p);
+        const dateStr=p.createdAt?fmtDate(p.createdAt.slice(0,10)):'—';
+        const isForm=!!ld;
+        const infoLine=isForm?`${p.source==='form-tu-van'?'<span class="lead-form-badge">📝 Form</span>':''}`:'';
+        const formInfo=isForm?`<div class="lead-form-info">📍 ${ld.location}${ld.dish_count?' · '+ld.dish_count+' món':''}${ld.estimated_days?' · ~'+ld.estimated_days:''}</div>`:'';
+        const priceInfo=!isForm&&(p.grossValue||p.netValue)?`<div class="pc-cs">💰 ${fmtS(p.grossValue||p.netValue)}</div>`:'';
+        const cardClick=isForm?`openLeadDetail('${p.id}')`:`openDetail('${p.id}')`;
+        return`<div class="pc" style="position:relative" onclick="${cardClick}">
+          <div class="pc-cl">${p.client}${infoLine}</div>
+          ${formInfo}
+          ${isForm?'':`<div class="pc-sv">${p.service||'—'}</div>`}
+          ${priceInfo}
           <div class="pc-ft"><div class="pc-dt">📅 ${dateStr}</div></div>
-          <button class="btn btn-gn btn-xs" style="margin-top:8px;width:100%" onclick="confirmLead('${p.id}')">✓ Chốt → Dự án</button>
+          <button class="btn btn-gn btn-xs" style="margin-top:8px;width:100%" onclick="event.stopPropagation();confirmLead('${p.id}')">✓ Chốt → Dự án</button>
         </div>`;
       }).join(''):'<div style="text-align:center;padding:20px;color:var(--t3);font-size:11.5px">Trống</div>'}</div>
     </div>`;
   }).join('');
-  $('leadCnt').textContent=leads.length+' lead';
+  $('leadCnt').textContent=leads.length+(leadMonthFilter?' lead tháng này':' lead');
 }
 
 function confirmLead(id){
   const p=PROJECTS.find(x=>x.id===id); if(!p)return;
-  if(!confirm(`Chốt "${p.client}" — chuyển sang Đang chụp?`))return;
-  p.status='Đang chụp';
-  saveLocal();renderAll();
-  toast('✅ Đã chốt — chuyển sang mục Dự án');
+  const ld=parseLeadData(p);
+  if(ld){
+    // Form lead: pre-fill add project modal
+    closeLeadPanel();
+    openModal('addP');
+    setTimeout(()=>{
+      if($('f-cl'))$('f-cl').value=p.client;
+      if($('f-sv')){
+        const opt=[...$('f-sv').options].find(o=>o.value==='F&B Photography');
+        if(opt)$('f-sv').value='F&B Photography';
+      }
+      const summary=`[Lead từ form]\nZalo: ${ld.zalo||'—'}\nVị trí: ${ld.location||'—'}\nẨm thực: ${ld.food_type||'—'}\nPhong cách: ${ld.restaurant_style||'—'}\nSố món: ${ld.dish_count||'—'} | Loại ảnh: ${ld.photo_type||'—'}\nƯớc tính: ${ld.estimated_days||'—'}\nGhi chú KH: ${ld.notes||'—'}`;
+      if($('f-no'))$('f-no').value=summary;
+    },50);
+  } else {
+    if(!confirm(`Chốt "${p.client}" — chuyển sang Đang chụp?`))return;
+    p.status='Đang chụp';
+    saveLocal();renderAll();
+    toast('✅ Đã chốt — chuyển sang mục Dự án');
+  }
+}
+
+function openLeadDetail(id){
+  const p=PROJECTS.find(x=>x.id===id); if(!p)return;
+  const ld=parseLeadData(p);
+  if(!ld){openDetail(id);return;}
+  CUR_LEAD_ID=id;
+  // Header
+  $('ld-name').textContent=p.client;
+  // Liên hệ
+  const zaloEl=$('ld-zalo');
+  if(ld.zalo){zaloEl.textContent=ld.zalo;zaloEl.href='https://zalo.me/'+ld.zalo.replace(/\D/g,'');}
+  else{zaloEl.textContent='—';zaloEl.removeAttribute('href');}
+  $('ld-gmail').textContent=ld.gmail||'—';
+  $('ld-location').textContent=ld.location||'—';
+  const intl=ld.country||ld.timezone;
+  $('ld-country-row').style.display=intl?'':'none';
+  $('ld-country').textContent=[ld.country,ld.timezone].filter(Boolean).join(' · ');
+  // Nhà hàng
+  $('ld-food').textContent=ld.food_type||'—';
+  $('ld-style').textContent=ld.restaurant_style||'—';
+  $('ld-desc-row').style.display=ld.restaurant_desc?'':'none';
+  $('ld-desc').textContent=ld.restaurant_desc||'';
+  // Yêu cầu chụp
+  $('ld-dishes').textContent=ld.dish_count?ld.dish_count+' món':'—';
+  $('ld-photo').textContent=ld.photo_type||'—';
+  $('ld-est').textContent=ld.estimated_days||'—';
+  $('ld-ref-row').style.display=ld.has_ref?'':'none';
+  $('ld-ref').textContent=ld.has_ref||'';
+  // Chi tiết
+  $('ld-timeline').textContent=ld.timeline||'—';
+  $('ld-usage').textContent=ld.usage||'—';
+  $('ld-notes-row').style.display=ld.notes?'':'none';
+  $('ld-notes').textContent=ld.notes||'';
+  $('ld-date').textContent=p.createdAt?new Date(p.createdAt).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+  const sel=$('ld-status-sel');
+  if(sel)[...(sel.options)].forEach(o=>{o.selected=o.value===p.status;});
+  // Show panel
+  $('leadPanel').classList.add('on');
+  $('dpOverlay').classList.add('on');
+}
+
+function closeLeadPanel(){
+  $('leadPanel').classList.remove('on');
+  if(!$('dPanel').classList.contains('on'))$('dpOverlay').classList.remove('on');
+  CUR_LEAD_ID=null;
+}
+
+function confirmLeadFromPanel(){
+  if(CUR_LEAD_ID)confirmLead(CUR_LEAD_ID);
+}
+
+function updateLeadStatus(status){
+  if(!CUR_LEAD_ID)return;
+  const p=PROJECTS.find(x=>x.id===CUR_LEAD_ID); if(!p)return;
+  p.status=status; p.updatedAt=new Date().toISOString();
+  saveLocal(); if(SHEETS_URL)pushSheets({action:'updateStatus',id:p.id,status,updatedAt:p.updatedAt});
+  renderLeads(); toast('✅ Đã cập nhật trạng thái');
+}
+
+function deleteLeadFromPanel(){
+  if(!CUR_LEAD_ID)return;
+  const p=PROJECTS.find(x=>x.id===CUR_LEAD_ID); if(!p)return;
+  if(!confirm(`Xóa lead "${p.client}"?`))return;
+  PROJECTS.splice(PROJECTS.indexOf(p),1);
+  saveLocal(); if(SHEETS_URL)pushSheets({action:'delProject',id:p.id});
+  closeLeadPanel(); renderLeads(); renderKPIs();
+  toast('🗑 Đã xóa lead');
 }
 
 function renderRevenue(){

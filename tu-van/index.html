@@ -637,7 +637,7 @@ input[type=range]::-moz-range-thumb {
 </div><!-- /app-shell -->
 
 <script>
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxYsWgNu5xtysquz5URNTeEXHX9zQIRvzsjz-lPAP4SWrQ7GMkZImCCkfDw55CUlD7X/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwdIlXaPOArfIo6eh_KQuIBrr-RxS9YlO1Cphzi6AiEYJS9-OKXKHERDVZvsl-o3PWn/exec';
 let currentStep = 1;
 let maxReached = 1;
 
@@ -755,8 +755,8 @@ async function submitForm() {
   const days = estimateDays(dishCount, location);
   const name = getVal('f-name');
 
-  const data = {
-    name, zalo: getVal('f-zalo'), gmail: getVal('f-gmail'),
+  const leadFormData = {
+    zalo: getVal('f-zalo'), gmail: getVal('f-gmail'),
     location, country: getVal('f-country'), timezone: getVal('f-timezone'),
     food_type: foodTypes, restaurant_style: styles,
     restaurant_desc: getVal('f-restaurant-desc'),
@@ -764,6 +764,21 @@ async function submitForm() {
     has_ref: getRadio('has-ref'), timeline: getRadio('timeline'),
     usage: getRadio('usage'), notes: getVal('f-notes'),
     estimated_days: days + ' ngày chụp'
+  };
+
+  const data = {
+    action: 'addProject',
+    id: 'F' + Date.now(),
+    client: name,
+    service: 'F&B Photography',
+    status: 'Liên hệ mới',
+    source: 'form-tu-van',
+    note: '[LEAD_FORM_v1]' + JSON.stringify(leadFormData),
+    netValue: 0, hasVAT: false, vatAmt: 0, grossValue: 0,
+    tamUng: 0, staffCost: 0, propsCost: 0, otherCost: 0, totalDays: 0,
+    staffList: [], propsList: [], workDays: [], payments: [], clientCosts: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   document.getElementById('loadingOverlay').classList.add('show');
