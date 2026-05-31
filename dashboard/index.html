@@ -547,6 +547,11 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
           <select class="fs" id="leadMonthSel" style="font-size:12px;padding:6px 10px;height:auto;width:auto" onchange="leadMonthFilter=this.value;renderLeads()">
             <option value="">Tất cả tháng</option>
           </select>
+          <div style="display:flex;gap:4px" id="leadRegionBtns">
+            <button class="btn btn-xs" id="rfAll"  onclick="leadRegionFilter='';renderLeads()">Tất cả</button>
+            <button class="btn btn-xs" id="rfDom"  onclick="leadRegionFilter='domestic';renderLeads()">🇻🇳 Trong nước</button>
+            <button class="btn btn-xs" id="rfIntl" onclick="leadRegionFilter='intl';renderLeads()">🌏 Quốc tế</button>
+          </div>
           <button class="btn btn-p" onclick="openModal('addP')">+ Thêm lead</button>
         </div>
       </div>
@@ -888,7 +893,7 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
       <div class="ld-row"><span class="ld-lbl">Zalo</span><a id="ld-zalo" class="ld-val" href="#" style="color:var(--ac);font-weight:600">—</a></div>
       <div class="ld-row"><span class="ld-lbl">Gmail</span><span id="ld-gmail" class="ld-val">—</span></div>
       <div class="ld-row"><span class="ld-lbl">Vị trí</span><span id="ld-location" class="ld-val">—</span></div>
-      <div class="ld-row" id="ld-country-row"><span class="ld-lbl">Quốc gia / Múi giờ</span><span id="ld-country" class="ld-val">—</span></div>
+      <div class="ld-row" id="ld-country-row"><span class="ld-lbl">Múi giờ</span><span id="ld-country" class="ld-val">—</span></div>
     </div>
 
     <!-- Nhà hàng -->
@@ -1084,6 +1089,7 @@ const LEAD_COLS=[
   {k:'Đã báo giá', l:'Đã báo giá', i:'📋'},
 ];
 let leadMonthFilter='';
+let leadRegionFilter='';
 let CUR_LEAD_ID=null;
 function parseLeadData(p){
   if(!p||!p.note||!p.note.startsWith('[LEAD_FORM_v1]'))return null;
@@ -2286,12 +2292,26 @@ function renderLeads(){
   }
 
   // Filter by month
-  const leads=leadMonthFilter?allLeads.filter(p=>{
+  let leads=leadMonthFilter?allLeads.filter(p=>{
     const d=p.createdAt?new Date(p.createdAt):null;
     if(!d)return false;
     const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
     return k===leadMonthFilter;
   }):allLeads;
+
+  // Filter by region
+  if(leadRegionFilter){
+    leads=leads.filter(p=>{
+      const ld=parseLeadData(p);
+      const isIntl=ld?ld.location==='Nước ngoài':false;
+      return leadRegionFilter==='intl'?isIntl:!isIntl;
+    });
+  }
+
+  // Update region filter button styles
+  ['rfAll','rfDom','rfIntl'].forEach(id=>{const b=$( id);if(b)b.className='btn btn-xs'+(
+    (id==='rfAll'&&!leadRegionFilter)||(id==='rfDom'&&leadRegionFilter==='domestic')||(id==='rfIntl'&&leadRegionFilter==='intl')
+    ?' btn-p':' btn-g');});
 
   $('leadBoard').innerHTML=LEAD_COLS.map(col=>{
     const cards=leads.filter(p=>p.status===col.k);
@@ -2302,8 +2322,10 @@ function renderLeads(){
         const ld=parseLeadData(p);
         const dateStr=p.createdAt?fmtDate(p.createdAt.slice(0,10)):'—';
         const isForm=!!ld;
+        const isIntl=isForm&&ld.location==='Nước ngoài';
+        const locationLabel=isIntl&&ld.country?`🌏 ${ld.country}`:(isForm?`📍 ${ld.location}`:'');
         const infoLine=isForm?`${p.source==='form-tu-van'?'<span class="lead-form-badge">📝 Form</span>':''}`:'';
-        const formInfo=isForm?`<div class="lead-form-info">📍 ${ld.location}${ld.dish_count?' · '+ld.dish_count+' món':''}${ld.estimated_days?' · ~'+ld.estimated_days:''}</div>`:'';
+        const formInfo=isForm?`<div class="lead-form-info">${locationLabel}${ld.dish_count?' · '+ld.dish_count+' món':''}${ld.estimated_days?' · ~'+ld.estimated_days:''}</div>`:'';
         const priceInfo=!isForm&&(p.grossValue||p.netValue)?`<div class="pc-cs">💰 ${fmtS(p.grossValue||p.netValue)}</div>`:'';
         const cardClick=isForm?`openLeadDetail('${p.id}')`:`openDetail('${p.id}')`;
         return`<div class="pc" style="position:relative" onclick="${cardClick}">
@@ -2356,15 +2378,24 @@ function openLeadDetail(id){
   if(ld.zalo){zaloEl.textContent=ld.zalo;zaloEl.href='https://zalo.me/'+ld.zalo.replace(/\D/g,'');}
   else{zaloEl.textContent='—';zaloEl.removeAttribute('href');}
   $('ld-gmail').textContent=ld.gmail||'—';
-  $('ld-location').textContent=ld.location||'—';
-  const intl=ld.country||ld.timezone;
-  $('ld-country-row').style.display=intl?'':'none';
-  $('ld-country').textContent=[ld.country,ld.timezone].filter(Boolean).join(' · ');
+  // Vị trí: gộp "Nước ngoài — Tên nước" vào 1 dòng
+  if(ld.location==='Nước ngoài'&&ld.country){
+    $('ld-location').innerHTML=`🌏 Nước ngoài &mdash; <strong>${ld.country}</strong>`;
+  } else {
+    $('ld-location').textContent=ld.location||'—';
+  }
+  // Múi giờ — hàng riêng, đổi label
+  const tzRow=$('ld-country-row');
+  const tzLbl=tzRow?tzRow.querySelector('.ld-lbl'):null;
+  if(tzLbl)tzLbl.textContent='Múi giờ';
+  tzRow.style.display=ld.timezone?'':'none';
+  $('ld-country').textContent=ld.timezone||'';
   // Nhà hàng
   $('ld-food').textContent=ld.food_type||'—';
   $('ld-style').textContent=ld.restaurant_style||'—';
-  $('ld-desc-row').style.display=ld.restaurant_desc?'':'none';
-  $('ld-desc').textContent=ld.restaurant_desc||'';
+  // Mô tả phong cách — luôn hiện
+  $('ld-desc-row').style.display='';
+  $('ld-desc').textContent=ld.restaurant_desc||'—';
   // Yêu cầu chụp
   $('ld-dishes').textContent=ld.dish_count?ld.dish_count+' món':'—';
   $('ld-photo').textContent=ld.photo_type||'—';
