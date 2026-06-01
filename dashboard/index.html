@@ -1037,6 +1037,7 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
 // DATA
 // ═══════════════════════════════════════════════
 let PROJECTS = JSON.parse(localStorage.getItem('cd_p')||'[]');
+let DELETED_IDS = new Set(JSON.parse(localStorage.getItem('cd_deleted_ids')||'[]'));
 let CLIENTS  = JSON.parse(localStorage.getItem('cd_c')||'[]');
 let SHEETS_URL = localStorage.getItem('cd_url')||'';
 let EDIT_ID = null;
@@ -1674,6 +1675,7 @@ function updateStatus(){
   saveLocal(); renderAll(); renderDPAll(p);
   if(SHEETS_URL) pushSheets({action:'updateProject',...p});
   gcalPush(p);
+  if(p.status==='Hoàn thành') autoSyncClients();
   toast('✅ Đổi trạng thái → '+p.status);
 }
 
@@ -2090,6 +2092,7 @@ function saveEdit(){
   p.service=$('e-sv').value;
   p.dateStart=$('e-ds').value;
   p.dateEnd=$('e-de').value;
+  p.workDays=[]; // FIX: panel dùng range mode → xóa workDays cũ để calendar render đúng
   p.totalDays=p.dateStart&&p.dateEnd?Math.round((new Date(p.dateEnd)-new Date(p.dateStart))/86400000)+1:1;
   p.status=$('e-st').value;
   p.owner=$('e-ow').value;
@@ -2112,10 +2115,15 @@ function dpTab(i,el){
   document.querySelectorAll('.dtp').forEach((p,j)=>p.classList.toggle('on',j===i));
 }
 
+function _recordDeleted(id){
+  DELETED_IDS.add(id);
+  localStorage.setItem('cd_deleted_ids',JSON.stringify([...DELETED_IDS]));
+}
 function delProject(id){
   if(!confirm('Xóa dự án này?'))return;
   const del=PROJECTS.find(p=>p.id===id);
   if(del) gcalDeleteEvent(del);
+  _recordDeleted(id);
   PROJECTS=PROJECTS.filter(p=>p.id!==id);
   saveLocal(); renderAll(); closeDP();
   if(SHEETS_URL) pushSheets({action:'deleteProject',id});
@@ -2437,6 +2445,7 @@ function deleteLeadFromPanel(){
   if(!CUR_LEAD_ID)return;
   const p=PROJECTS.find(x=>x.id===CUR_LEAD_ID); if(!p)return;
   if(!confirm(`Xóa lead "${p.client}"?`))return;
+  _recordDeleted(p.id);
   PROJECTS.splice(PROJECTS.indexOf(p),1);
   saveLocal(); if(SHEETS_URL)pushSheets({action:'delProject',id:p.id});
   closeLeadPanel(); renderLeads(); renderKPIs();
@@ -2535,7 +2544,33 @@ function showMonthDetail(k){
   $('kpiModal').classList.add('on');
 }
 
+function autoSyncClients(){
+  // Tự động thêm khách hàng từ dự án Hoàn thành, dedup theo tên (không phân biệt hoa thường)
+  let changed=false;
+  const existing=new Set(CLIENTS.map(c=>c.name.trim().toLowerCase()));
+  PROJECTS.filter(p=>p.status==='Hoàn thành'&&p.client&&p.client.trim()).forEach(p=>{
+    const nm=p.client.trim();
+    if(!existing.has(nm.toLowerCase())){
+      existing.add(nm.toLowerCase());
+      CLIENTS.push({
+        id:'Cauto_'+p.id,
+        name:nm,
+        industry:'F&B / Nhà hàng',
+        phone:'',
+        note:'',
+        createdAt:p.createdAt||new Date().toISOString(),
+        updatedAt:p.updatedAt||p.createdAt||new Date().toISOString(),
+        autoAdded:true,
+      });
+      changed=true;
+    }
+  });
+  if(changed) saveLocal();
+  return changed;
+}
+
 function renderClients(){
+  autoSyncClients();
   const tbody=$('clT');
   if(!CLIENTS.length){tbody.innerHTML=`<tr><td colspan="7"><div class="emp"><div class="eic">👥</div><div class="etl">Chưa có khách hàng</div></div></td></tr>`;return;}
   // Enrich + sort by revenue
@@ -3489,6 +3524,7 @@ function stopAutoSync(){if(_autoSyncTimer){clearInterval(_autoSyncTimer);_autoSy
 function _mergeProjects(remote){
   let changed=false;
   remote.forEach(rp=>{
+    if(DELETED_IDS.has(rp.id)) return; // FIX: bỏ qua lead/dự án đã xóa local
     if(rp.dateStart)rp.dateStart=toISO(rp.dateStart);
     if(rp.dateEnd)rp.dateEnd=toISO(rp.dateEnd);
     const li=PROJECTS.findIndex(p=>p.id===rp.id);
