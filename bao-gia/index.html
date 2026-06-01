@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Báo Giá Tự Động – Can Đăng Studio</title>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<script>if(typeof docx==='undefined'){document.write('<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"><\/script>')}</script>
+<script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -536,7 +539,7 @@ body {
       <div class="vat-note">VAT mặc định 8% — tự động tính cho từng gói.</div>
     </div>
 
-    <button class="btn-export" onclick="exportWord()">📥 Xuất file Word (.doc)</button>
+    <button class="btn-export" onclick="exportWord()">📥 Xuất file Word (.docx)</button>
   </div>
 
   <!-- ===== PREVIEW AREA ===== -->
@@ -549,7 +552,7 @@ body {
 
 <!-- ===== MOBILE EXPORT BUTTON ===== -->
 <div class="mobile-export">
-  <button onclick="exportWord()">📥 Xuất file Word (.doc)</button>
+  <button onclick="exportWord()">📥 Xuất file Word (.docx)</button>
 </div>
 
 <!-- ===== SCRIPT ===== -->
@@ -801,46 +804,148 @@ function render() {
 }
 
 // ──────────────────────────────────────────────
-// CONVERT LISTS → WORD-COMPATIBLE BULLETS
-// Word không render list-style-type:disc
-// Chuyển <ul><li> thành <p> với ký tự • thực
+// DOWNLOAD HELPER – Web Share API mobile → FileSaver → blob URL
 // ──────────────────────────────────────────────
-function convertListsForWord(html) {
-  // Bullet trong bảng (cell-list) — dùng padding-left đơn giản, KHÔNG text-indent (WPS bug)
-  html = html.replace(
-    /<ul[^>]*class="cell-list"[^>]*>([\s\S]*?)<\/ul>/gi,
-    function(match, content) {
-      const items = [];
-      content.replace(/<li>([\s\S]*?)<\/li>/gi, function(m, text) {
-        items.push(
-          '<p style="margin-top:2px;margin-bottom:3px;margin-left:12pt;' +
-          'font-family:\'Times New Roman\',serif;font-size:12pt;line-height:1.4;">' +
-          '• ' + text.trim() + '</p>'
-        );
-      });
-      return items.join('');
-    }
-  );
-
-  // Bullet ngoài bảng (ul thường)
-  html = html.replace(
-    /<ul>([\s\S]*?)<\/ul>/gi,
-    function(match, content) {
-      const items = [];
-      content.replace(/<li>([\s\S]*?)<\/li>/gi, function(m, text) {
-        items.push(
-          '<p style="margin-top:2px;margin-bottom:3px;margin-left:16pt;' +
-          'font-family:\'Times New Roman\',serif;font-size:13pt;line-height:1.4;">' +
-          '• ' + text.trim() + '</p>'
-        );
-      });
-      return items.join('');
-    }
-  );
-
-  return html;
+async function _dlBlob(blob, name) {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile && navigator.share && navigator.canShare) {
+    try {
+      var sf = new File([blob], name, {type: blob.type || 'application/octet-stream'});
+      if (navigator.canShare({files: [sf]})) { await navigator.share({files:[sf],title:name}); return; }
+    } catch(e) { if(e.name==='AbortError') return; }
+  }
+  if (typeof saveAs !== 'undefined') { saveAs(blob, name); return; }
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
 }
 
+// ──────────────────────────────────────────────
+// EXPORT TO .DOCX
+// ──────────────────────────────────────────────
+async function exportWord() {
+  if(typeof docx==='undefined'){showToast('❌ Thư viện chưa tải, thử lại!',3000);return;}
+  const {Document,Paragraph,TextRun,Table,TableRow,TableCell,
+         AlignmentType,WidthType,BorderStyle,ShadingType,VerticalAlign,Packer}=docx;
+
+  const tenKH=v('tenKH')||'Khách hàng', thang=v('thang')||'....', nam=v('nam')||'....';
+  const loai=v('loai'), diaDiem=v('diaDiem'), slMonYC=v('slMonYC')||'.....', sp=isSP(loai);
+
+  const btnD=document.querySelector('.btn-export'), btnM=document.querySelector('.mobile-export button');
+  [btnD,btnM].forEach(b=>{if(b){b._orig=b._orig||b.innerHTML;b.innerHTML='⏳ Đang tạo...';b.disabled=true;}});
+  const done=()=>[btnD,btnM].forEach(b=>{if(b){b.innerHTML='✅ Xong!';b.disabled=false;setTimeout(()=>b.innerHTML=b._orig,3000);}});
+
+  const FN='Times New Roman';
+  const DB='1E3A5F',LB='EAF1FB',GB='FDF6E3',GT='5A3E00',VB='FFFBF0',WH='FFFFFF';
+
+  function T(text,o={}){return new TextRun({text,bold:o.bold||false,italic:o.italic||false,size:(o.sz||13)*2,font:FN,color:o.col||'000000'});}
+  function P(text,o={}){
+    const runs=typeof text==='string'?[T(text,o)]:text;
+    return new Paragraph({alignment:o.align||AlignmentType.LEFT,spacing:{before:o.before||0,after:o.after!==undefined?o.after:80},indent:o.indent?{left:o.indent}:undefined,children:runs});
+  }
+  function BUL(text,o={}){return P('• '+text,{...o,indent:360,after:o.after!==undefined?o.after:60,sz:o.sz||13});}
+  function CBUL(text,o={}){return P('• '+text,{...o,indent:160,after:40,sz:12});}
+  function SP(n=80){return new Paragraph({spacing:{after:n},children:[T('')]});}
+
+  const BG={style:BorderStyle.SINGLE,size:4,color:'B8CCE4'};
+  const BD={style:BorderStyle.SINGLE,size:4,color:'1A3060'};
+  const BL={style:BorderStyle.SINGLE,size:18,color:'2A5298'};
+  const sh=fill=>({fill,type:ShadingType.CLEAR,color:'auto'});
+
+  function mkC(paras,o={}){return new TableCell({width:o.w?{size:o.w,type:WidthType.DXA}:undefined,columnSpan:o.cs,shading:o.bg?sh(o.bg):undefined,verticalAlign:o.va||VerticalAlign.TOP,borders:{top:BG,bottom:BG,left:o.boldL?BL:BG,right:BG},children:paras});}
+  function mkH(text,w){return new TableCell({width:{size:w,type:WidthType.DXA},shading:sh(DB),verticalAlign:VerticalAlign.CENTER,borders:{top:BD,bottom:BD,left:BD,right:BD},children:[P(text,{align:AlignmentType.CENTER,before:60,after:60,bold:true,sz:12,col:WH})]});}
+  function mkDk(paras,o={}){return new TableCell({width:o.w?{size:o.w,type:WidthType.DXA}:undefined,columnSpan:o.cs,shading:sh(DB),verticalAlign:VerticalAlign.CENTER,borders:{top:BD,bottom:BD,left:BD,right:BD},children:paras});}
+
+  // Column widths DXA: STT, Nội dung, ĐVT, Đơn giá, Thời gian, Thành tiền
+  const W=[470,4100,940,1210,1030,1210];
+
+  function buildPkg(pkgNum){
+    const {chiPhi:cp,vat,total}=calcPkg(num('cp'+pkgNum));
+    const slMon=v('sl'+pkgNum), slAnh=v('anh'+pkgNum);
+    const donVi=sp?'sản phẩm':'món';
+    const ps=sp?'Phát sinh sản phẩm + 200.000vnđ/1 ảnh':'Phát sinh món ăn + 300.000vnđ/1 món';
+    let heading='',subheading='',thoiGian='',col1=[],extraRows=[];
+
+    if(pkgNum===1){
+      heading='Gói 1: Gói chụp ảnh quảng cáo cơ bản'; thoiGian='9h – 15h';
+      col1=[P('Gói chụp ảnh quảng cáo cơ bản',{bold:true,sz:12,after:40}),CBUL('Số lượng: '+slMon+' '+donVi),CBUL('Bối cảnh, đạo cụ cơ bản'),CBUL('Chỉnh sửa '+slAnh+' ảnh hoàn thiện'),CBUL(ps)];
+    } else if(pkgNum===2){
+      heading='Gói 2: Gói chụp ảnh quảng cáo Stylist'; thoiGian='9h – 17h';
+      const dc=sp?'điều chỉnh sản phẩm phù hợp với chụp ảnh':'điều chỉnh món ăn phù hợp với chụp ảnh';
+      col1=[P('Gói chụp ảnh concept có Foodstylist',{bold:true,sz:12,after:40}),CBUL('Số lượng: '+slMon+' '+donVi),CBUL('Đạo cụ, bối cảnh phù hợp với concept chụp'),CBUL('Foodstylist trang trí, '+dc),CBUL('Chỉnh sửa '+slAnh+' ảnh hoàn thiện'),CBUL(ps)];
+    } else {
+      const ll=sp?'sản phẩm':'món ăn';
+      heading='Gói 3: Gói chụp ảnh concept '+ll+' cao cấp';
+      subheading='Foodstylist lên ý tưởng sáng tạo, đề xuất concept chụp, chuẩn bị đạo cụ bối cảnh cho dự án chụp hình';
+      thoiGian='1 ngày';
+      const ps3=sp?'Phát sinh ngoài '+slMon+' sản phẩm + 200.000vnđ/1 ảnh':'Phát sinh ngoài '+slMon+' món ăn + 300.000vnđ/1 món (set)';
+      col1=[P('Gói chụp ảnh quảng cáo cao cấp',{bold:true,sz:12,after:40}),CBUL('Máy ảnh in ấn khổ lớn'),CBUL('Số lượng: dưới '+slMon+' '+(sp?'sản phẩm':'món')),CBUL('Foodstylist chuẩn bị đạo cụ, bối cảnh, trang trí trên set chụp hình'),CBUL('Nhiều concept thực hiện và đạo cụ hơn cho bộ ảnh',{bold:true}),CBUL('Chỉnh sửa '+slAnh+' ảnh hoàn thiện'),CBUL(ps3)];
+      extraRows=[new TableRow({children:[mkC([SP(0)],{w:W[0],bg:VB}),mkC([P('Quyền lợi VIP',{bold:true,sz:12,after:40}),CBUL('Can Đăng trực tiếp chụp bộ ảnh'),CBUL('Tặng chụp ảnh nền trắng sản phẩm: tách phông 25 ảnh hoàn thiện'),CBUL('Tặng 5 ảnh kết hợp AI từ công nghệ hình ảnh độc quyền')],{w:W[1]+W[2]+W[3]+W[4]+W[5],bg:VB,cs:5})]})];
+    }
+
+    const tW=W.reduce((a,b)=>a+b,0);
+    const rows=[
+      new TableRow({tableHeader:true,children:[mkH('STT',W[0]),mkH('Nội dung',W[1]),mkH('ĐVT',W[2]),mkH('Đơn giá\n(vnđ)',W[3]),mkH('Thời gian\nthực hiện',W[4]),mkH('Thành tiền\n(vnđ)',W[5])]}),
+      new TableRow({children:[mkC([P('1',{bold:true,sz:12,align:AlignmentType.CENTER,after:0})],{w:W[0],va:VerticalAlign.CENTER}),mkC(col1,{w:W[1],boldL:true}),mkC([P('Trọn gói',{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[2],va:VerticalAlign.CENTER}),mkC([P(fmt(cp),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[3],va:VerticalAlign.CENTER}),mkC([P(thoiGian,{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[4],va:VerticalAlign.CENTER}),mkC([P(fmt(cp),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[5],va:VerticalAlign.CENTER})]}),
+      ...extraRows,
+      new TableRow({children:[mkC([P('2',{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:LB,va:VerticalAlign.CENTER}),mkC([P('Chi phí dịch vụ',{bold:true,sz:12,col:DB,after:0})],{w:W[1],bg:LB,va:VerticalAlign.CENTER}),mkC([P(fmt(cp),{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[2]+W[3]+W[4],bg:LB,va:VerticalAlign.CENTER,cs:3}),mkC([SP(0)],{w:W[5],bg:LB})]}),
+      new TableRow({children:[mkC([P('3',{bold:true,sz:12,col:GT,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:GB,va:VerticalAlign.CENTER}),mkC([P('Thuế giá trị gia tăng 08% VAT',{bold:true,sz:12,col:GT,after:0})],{w:W[1]+W[2]+W[3]+W[4],bg:GB,va:VerticalAlign.CENTER,cs:4}),mkC([P(fmt(vat),{bold:true,sz:12,col:GT,align:AlignmentType.RIGHT,after:0})],{w:W[5],bg:GB,va:VerticalAlign.CENTER})]}),
+      new TableRow({children:[mkDk([P('4',{bold:true,sz:12,col:WH,align:AlignmentType.CENTER,after:0})],{w:W[0]}),mkDk([P('Tổng cộng',{bold:true,sz:12,col:WH,after:0})],{w:W[1]+W[2]+W[3]+W[4],cs:4}),mkDk([P(fmt(total),{bold:true,sz:13,col:WH,align:AlignmentType.RIGHT,after:0})],{w:W[5]})]})
+    ];
+    const out=[P(heading,{bold:true,before:200,after:80})];
+    if(subheading) out.push(P(subheading,{italic:true,bold:true,after:80}));
+    out.push(new Table({width:{size:tW,type:WidthType.DXA},rows}));
+    return out;
+  }
+
+  const ch=[];
+  ch.push(P('BÁO GIÁ CHI PHÍ CHỤP ẢNH QUẢNG CÁO '+loai.toUpperCase(),{bold:true,sz:15,align:AlignmentType.CENTER,after:120}));
+  [['Can Đăng Studio',true],['Công ty TNHH Can Creative',true],['Điện thoại: 090 432 9595',false],['Thời gian thực hiện: tháng '+thang+' năm '+nam,false],['Email: Candangphoto@gmail.com',false]].forEach(([t,b])=>ch.push(P(t,{align:AlignmentType.RIGHT,after:40,bold:b})));
+  ch.push(SP());
+  ch.push(P('Gửi '+tenKH,{bold:true,after:80}));
+  ch.push(SP(40));
+  ch.push(P('Yêu cầu:',{bold:true,after:60}));
+  ch.push(BUL('Chụp ảnh '+loai));
+  ch.push(BUL('Số lượng: '+slMonYC+' '+(sp?'sản phẩm':'món/set')));
+  ch.push(SP(40));
+  ch.push(P('Chúng tôi xác nhận thông tin và gửi báo giá chụp ảnh quảng cáo',{bold:true,after:80}));
+  ch.push(SP(40));
+  ch.push(P('Trong gói dịch vụ:',{bold:true,after:60}));
+  ['Chụp ảnh tại '+diaDiem,'Thiết bị chiếu sáng','Thiết bị chụp ảnh và dải ống kính Canon','Macbook check file hình ảnh','File chỉnh sửa hoàn thiện trên những hình ảnh khách hàng đã phê duyệt (khách hàng được sửa tối đa 3 lần)','Chèn Logo tùy theo yêu cầu của khách hàng'].forEach(t=>ch.push(BUL(t)));
+  ch.push(SP(60));
+  if(chk('chk1')) buildPkg(1).forEach(e=>ch.push(e));
+  if(chk('chk2')) buildPkg(2).forEach(e=>ch.push(e));
+  if(chk('chk3')) buildPkg(3).forEach(e=>ch.push(e));
+  ch.push(SP());
+  ch.push(P('Portfolio',{bold:true,after:40}));
+  ch.push(new Paragraph({spacing:{after:80},children:[new TextRun({text:'https://candangstudio.vn/',bold:true,color:'1155CC',font:FN,size:26})]}));
+  ch.push(SP(60));
+  ch.push(P('Thanh toán:',{bold:true,after:60}));
+  ['Khách hàng thanh toán trước 50% khi chốt thực hiện dự án','Thanh toán 50% còn lại sau khi kết thúc chỉnh sửa','Bàn giao hình ảnh sau khi nhận thanh toán đầy đủ từ khách hàng'].forEach(t=>ch.push(BUL(t)));
+  ch.push(SP(60));
+  ch.push(P('Thông tin tài khoản ngân hàng',{bold:true,after:40}));
+  ch.push(P('Tên tài khoản: Công ty TNHH Can Creative',{after:40,indent:320}));
+  ch.push(P('Số tài khoản: 3638 6868 8888',{after:40,indent:320}));
+  ch.push(P('Ngân hàng TMCP Á Châu ACB – Chi nhánh Hoàng Cầu',{after:80,indent:320}));
+  ch.push(SP(60));
+  ch.push(P('Trân trọng !',{bold:true}));
+
+  try {
+    const doc=new Document({sections:[{properties:{page:{margin:{top:1134,right:1247,bottom:1247,left:1247}}},children:ch}]});
+    const blob=await Packer.toBlob(doc);
+    const safe=(tenKH||'KH').replace(/[<>:"/\\|?*]/g,'').replace(/\s+/g,'_');
+    await _dlBlob(blob,'BaoGia_CanDangStudio_'+safe+'_T'+thang+'_'+nam+'.docx');
+    done(); showToast('📥 File .docx đã tải về!');
+  } catch(e) {
+    [btnD,btnM].forEach(b=>{if(b){b.innerHTML=b._orig;b.disabled=false;}});
+    showToast('❌ Lỗi xuất file — thử lại!',4000); console.error('exportWord error:',e);
+  }
+}
+
+// ── placeholder để không break nếu còn ref cũ ──
+function convertListsForWord(html){return html;}
 // ──────────────────────────────────────────────
 // TOAST
 // ──────────────────────────────────────────────
@@ -858,122 +963,9 @@ function showToast(msg, dur) {
 }
 
 // ──────────────────────────────────────────────
-// DOWNLOAD HELPER – Web Share API (Android) → FileSaver → blob URL
+// MOBILE: TAB SWITCHING + DOCUMENT SCALE
 // ──────────────────────────────────────────────
-async function _dlBlob(blob, name) {
-  // Android Chrome: mở share sheet → người dùng chọn Zalo / Lưu vào Files
-  if (navigator.share && navigator.canShare) {
-    try {
-      var sf = new File([blob], name, {type: blob.type || 'application/octet-stream'});
-      if (navigator.canShare({files: [sf]})) {
-        await navigator.share({files: [sf], title: name});
-        return;
-      }
-    } catch(serr) {
-      if (serr.name === 'AbortError') return; // người dùng bấm Huỷ
-      // lỗi khác → fallback
-    }
-  }
-  // Desktop / fallback
-  if (typeof saveAs !== 'undefined') { saveAs(blob, name); return; }
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url; a.download = name;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
-}
-
-// ──────────────────────────────────────────────
-// EXPORT TO WORD
-// ──────────────────────────────────────────────
-async function exportWord() {
-  // Loading state on buttons
-  var btnM = document.querySelector('.mobile-export button');
-  var btnD = document.querySelector('.btn-export');
-  var origM = btnM ? btnM.innerHTML : '';
-  var origD = btnD ? btnD.innerHTML : '';
-  function setLoading(on) {
-    if (btnM) { btnM.innerHTML = on ? '⏳ Đang tạo file...' : origM; btnM.disabled = on; }
-    if (btnD) { btnD.innerHTML = on ? '⏳ Đang tạo...' : origD;    btnD.disabled = on; }
-  }
-  function setDone() {
-    if (btnM) { btnM.innerHTML = '✅ Đã tải file!'; btnM.disabled = false; setTimeout(function(){ btnM.innerHTML = origM; }, 3000); }
-    if (btnD) { btnD.innerHTML = '✅ Tải xong!';   btnD.disabled = false; setTimeout(function(){ btnD.innerHTML = origD; }, 3000); }
-  }
-  setLoading(true);
-
-  try {
-  // Lấy HTML preview rồi convert bullet cho Word
-  const rawHTML  = document.getElementById('doc').innerHTML;
-  const wordBody = convertListsForWord(rawHTML);
-
-  const tenKH = v('tenKH') || 'KhachHang';
-  const thang = v('thang');
-  const nam   = v('nam');
-  const fname = 'BaoGia_CanDangStudio'
-    + (tenKH !== '[Tên_khách_hàng]' ? '_' + tenKH.replace(/\s+/g,'_') : '')
-    + (thang ? '_T' + thang : '')
-    + (nam   ? '_'  + nam   : '')
-    + '.doc';
-
-  const wordDoc = `<!DOCTYPE html>
-<html xmlns:o="urn:schemas-microsoft-com:office:office"
-      xmlns:w="urn:schemas-microsoft-com:office:word"
-      xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-<meta charset="UTF-8">
-<meta name="ProgId" content="Word.Document">
-<!--[if gte mso 9]><xml>
-<w:WordDocument>
-  <w:View>Print</w:View>
-  <w:Zoom>100</w:Zoom>
-  <w:DoNotOptimizeForBrowser/>
-</w:WordDocument>
-</xml><![endif]-->
-<style>
-  @page { size: A4; margin: 20mm 22mm 22mm 22mm; }
-  body { font-family:'Times New Roman',Times,serif; font-size:13pt; line-height:1.2; color:#000; }
-  .doc-title { text-align:center; font-size:15pt; font-weight:bold; text-transform:uppercase; margin-bottom:14px; line-height:1.3; }
-  .doc-header-info { text-align:right; margin-bottom:14px; }
-  .doc-header-info p { margin-bottom:3px; line-height:1.4; }
-  p { margin-bottom:6px; line-height:1.4; }
-  .doc-spacer { height:8px; }
-  .pkg-heading { font-size:13pt; font-weight:bold; margin:14px 0 4px 0; }
-  .pkg-subheading { font-size:12pt; font-weight:bold; font-style:italic; margin:0 0 6px 0; }
-  table { width:100%; border-collapse:collapse; margin-bottom:18px; font-size:12pt; }
-  th, td { border:1px solid #b8cce4; padding:7px 9px; vertical-align:top; text-align:left; line-height:1.3; }
-  thead th { text-align:center; font-weight:bold; background-color:#1e3a5f; color:#fff; vertical-align:middle; padding:9px; }
-  .col-stt { width:5%;  text-align:center; }
-  .col-nd  { width:44%; }
-  .col-dvt { width:10%; text-align:center; }
-  .col-dg  { width:13%; text-align:right; }
-  .col-tg  { width:11%; text-align:center; }
-  .col-tt  { width:13%; text-align:right; }
-  .row-summary td { font-weight:bold; background-color:#eaf1fb; color:#1e3a5f; }
-  .row-vat td { font-weight:bold; background-color:#fdf6e3; color:#5a3e00; }
-  .row-total td { font-weight:bold; font-size:13pt; background-color:#1e3a5f; color:#fff; }
-  .row-vip td { background-color:#fffbf0; border-left:3px solid #e6a817; }
-  .portfolio-link a { color:#1155cc; text-decoration:underline; font-weight:bold; }
-  .bank-block { margin:6px 0 6px 20px; line-height:1.5; }
-  .closing { font-weight:bold; font-size:13pt; margin-top:18px; }
-</style>
-</head>
-<body>
-${wordBody}
-</body>
-</html>`;
-
-  const blob = new Blob(['﻿', wordDoc], { type: 'application/msword' });
-  await _dlBlob(blob, fname);
-
-  setDone();
-  showToast('📥 File đã tải — kiểm tra mục Tải về hoặc Zalo!');
-  } catch(e) {
-    setLoading(false);
-    showToast('❌ Lỗi xuất file — thử lại!', 4000);
-    console.error('exportWord error:', e);
-  }
-}
+// (old HTML-based export removed)
 
 // ──────────────────────────────────────────────
 // MOBILE: TAB SWITCHING + DOCUMENT SCALE
