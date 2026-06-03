@@ -273,6 +273,19 @@ var GIFT_PRESETS=[
   {id:'g_live',   label:'Can Đăng trực tiếp thực hiện'},
 ];
 
+var DESCRIPTIONS={
+  concept:'Creative Director lên concept, dàn dựng bối cảnh, ánh sáng và trang trí để tạo ra hình ảnh có chiều sâu cảm xúc và giá trị thương mại cao',
+  white:'Chụp ảnh nền trắng chuẩn thương mại, tách phông sạch — phù hợp menu, catalogue, sàn thương mại điện tử',
+  media:'Chụp ảnh sản phẩm trong bối cảnh sử dụng thực tế — kết hợp người, không gian và sản phẩm để tạo cảm xúc',
+  pre:'Foodstylist nghiên cứu thực đơn, lên kế hoạch từng món, đề xuất concept & mood board, chuẩn bị đạo cụ và bối cảnh trước buổi chụp',
+  fs:'Chuẩn bị, trang trí, điều chỉnh và căn chỉnh liên tục từng món — đảm bảo hình ảnh đạt chuẩn thương mại',
+  bar:'Thiết kế và xây dựng set chụp từ không gian thực — tạo môi trường hình ảnh độc đáo và nhất quán với brand',
+  studio:'Studio kiểm soát ánh sáng 100%, backdrop, đạo cụ set design + Canon L-series và hệ thống đèn studio Profoto chuyên nghiệp',
+  post:'Chỉnh màu, retouch chi tiết, composite nền, xuất đa định dạng — bàn giao file gốc RAW + file đã chỉnh. Khách sửa tối đa 3 lần',
+  pm:'Quản lý tiến độ dự án, tổ chức file bàn giao, chèn logo/watermark theo yêu cầu, kiểm duyệt chất lượng đầu ra',
+  bartender:'Bartender chuyên nghiệp pha chế và trình bày đồ uống đạt chuẩn thương mại',
+};
+
 var DEF={
   food:{    concept:{q:15,r:500000},white:{q:30,r:450000},pre:{q:null,r:3000000},fs:{q:1,r:4000000},studio:{q:1,r:2000000},post:{q:30,r:150000},pm:{q:null,r:2000000}},
   drink:{   concept:{q:10,r:500000},white:{q:20,r:350000},pre:{q:null,r:3000000},fs:{q:1,r:4000000},studio:{q:1,r:2000000},post:{q:30,r:150000},pm:{q:null,r:2000000}},
@@ -726,7 +739,8 @@ function copyAllForWord(){
       var def=schema[ri];if(!def)return;
       var amt=rowAmt(pr);tot+=amt;
       var detail=pr.q!=null?(fmtFull(pr.r)+'đ × '+pr.q+' '+def.unit):'Dự án';
-      lines.push(stt+'. '+def.label+' | '+detail+' = '+fmtFull(amt)+'đ');
+      var desc=DESCRIPTIONS[def.id]||'';
+      lines.push(stt+'. '+def.label+(desc?' — '+desc:'')+' | '+detail+' = '+fmtFull(amt)+'đ');
       stt++;
     });
     (extraRows[pi]||[]).forEach(function(ex){
@@ -749,7 +763,7 @@ function copyAllForWord(){
     lines.push('');
   });
 
-  lines.push('YÊU CẦU: Xuất file Word .docx chuẩn layout MinhDinh. Màu navy #1A1A2E, gold #C8972B. Font Arial Unicode. Mỗi gói 1 trang. Có scope box vàng, bảng phân tách hạng mục (STT/Hạng mục/ĐVT/Đơn giá/Thực hiện/Thành tiền), dòng tặng kèm màu xanh lá, tổng cộng màu xanh đậm, box tham chiếu thị trường quốc tế, điều khoản thanh toán ACB 3638 6868 8888, header/footer Can Đăng Studio.');
+  lines.push('YÊU CẦU: Xuất file Word .docx chuẩn layout MinhDinh. Màu navy #1A1A2E, gold #C8972B. Font Arial Unicode. Mỗi gói 1 trang. Có scope box vàng, bảng phân tách hạng mục (STT/Hạng mục/ĐVT/Đơn giá/Thực hiện/Thành tiền), dòng tặng kèm màu xanh lá, tổng cộng màu xanh đậm, box tham chiếu thị trường quốc tế, điều khoản thanh toán ACB 3638 6868 8888, header/footer Can Đăng Studio. QUAN TRỌNG — Mỗi hàng trong cột Hạng mục gồm 2 dòng: (1) Tên hạng mục — bold; (2) Phần sau dấu — trong tên hạng mục là mô tả chi tiết — in nghiêng italic, cỡ chữ nhỏ hơn (9pt), màu xám #888888.');
 
   var text=lines.join('\n');
   navigator.clipboard.writeText(text).then(function(){
@@ -871,8 +885,8 @@ function exportAllWord(){
   var schema=getSchema();
   var pkgData=PKG.map(function(p,pi){
     var rows=[];
-    p.rows.forEach(function(pr,ri){var def=schema[ri];if(!def)return;rows.push({label:def.label,unit:def.unit,on:pr.on,q:pr.q,r:pr.r,amt:rowAmt(pr)});});
-    var extras=(extraRows[pi]||[]).map(function(ex){return{label:ex.label,unit:ex.unit,on:ex.on,q:ex.q,r:ex.r,amt:rowAmt(ex)};});
+    p.rows.forEach(function(pr,ri){var def=schema[ri];if(!def)return;rows.push({label:def.label,unit:def.unit,on:pr.on,q:pr.q,r:pr.r,amt:rowAmt(pr),id:pr.id});});
+    var extras=(extraRows[pi]||[]).map(function(ex){return{label:ex.label,unit:ex.unit,on:ex.on,q:ex.q,r:ex.r,amt:rowAmt(ex),id:ex.id};});
     var gifts=(giftRows[pi]||[]).filter(function(g){return g.on;}).map(function(g){return{label:g.label,r:g.r};});
     var tot=pkgTot(pi);var vat=Math.round(tot*.08);
     return{name:p.name,days:p.days,rows:rows,extras:extras,gifts:gifts,service:tot,vat:vat,total:tot+vat};
@@ -917,6 +931,22 @@ function exportAllWord(){
         children:[new D.Paragraph({alignment:op.al||D.AlignmentType.LEFT,spacing:{before:0,after:0},children:runs})]
       });
     }
+    function tc2(label,desc,o){
+      var op=o||{};
+      var paras=[new D.Paragraph({alignment:op.al||D.AlignmentType.LEFT,spacing:{before:0,after:desc?20:0},
+        children:[new D.TextRun({text:String(label||''),bold:true,size:op.sz||19,color:op.color||tx,font:'Arial'})]})];
+      if(desc)paras.push(new D.Paragraph({alignment:D.AlignmentType.LEFT,spacing:{before:0,after:0},
+        children:[new D.TextRun({text:String(desc),italics:true,size:16,color:'888888',font:'Arial'})]}));
+      return new D.TableCell({
+        shading:{fill:op.fill||wh,type:D.ShadingType.CLEAR},
+        verticalAlign:D.VerticalAlign.TOP,
+        margins:{top:90,bottom:90,left:130,right:130},
+        borders:op.brd||bA(br),
+        width:op.w?{size:op.w,type:D.WidthType.DXA}:undefined,
+        columnSpan:op.cs,
+        children:paras
+      });
+    }
     function buildPkg(pkg,isFirst){
       var ch=[];
       if(!isFirst)ch.push(new D.Paragraph({children:[new D.PageBreak()]}));
@@ -934,7 +964,7 @@ function exportAllWord(){
         var fill=stt%2===0?lt:wh;
         rows2.push(new D.TableRow({children:[
           tc(String(stt++),{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C1}),
-          tc(row.label,{sz:19,fill:fill,w:C2}),
+          tc2(row.label,DESCRIPTIONS[row.id]||'',{sz:19,fill:fill,w:C2}),
           tc(row.unit||'-',{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C3}),
           tc(fmt(row.r),{sz:19,al:D.AlignmentType.RIGHT,fill:fill,w:C4}),
           tc(slS,{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C5}),
@@ -946,7 +976,7 @@ function exportAllWord(){
         var fill=stt%2===0?lt:wh;
         rows2.push(new D.TableRow({children:[
           tc(String(stt++),{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C1}),
-          tc(ex.label,{sz:19,fill:fill,w:C2}),
+          tc2(ex.label,DESCRIPTIONS[ex.id]||'',{sz:19,fill:fill,w:C2}),
           tc(ex.unit||'-',{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C3}),
           tc(fmt(ex.r),{sz:19,al:D.AlignmentType.RIGHT,fill:fill,w:C4}),
           tc(ex.q!=null?(ex.q+' '+ex.unit):'Du an',{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C5}),
