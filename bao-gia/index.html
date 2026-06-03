@@ -318,7 +318,7 @@ body {
 
 .bank-block { margin: 6px 0 6px 20px; line-height: 1.5; }
 
-.closing { margin-top: 18px; font-weight: bold; font-size: 13pt; }
+.closing { margin-top: 18px; font-weight: bold; font-size: 13pt; text-align: center; }
 
 /* ===== MOBILE EXPORT BUTTON (fixed bottom) ===== */
 .mobile-export { display: none; }
@@ -854,9 +854,11 @@ async function exportWord() {
   const BL={style:BorderStyle.SINGLE,size:18,color:'2A5298'};
   const sh=fill=>({fill,type:ShadingType.CLEAR,color:'auto'});
 
-  function mkC(paras,o={}){return new TableCell({width:o.w?{size:o.w,type:WidthType.DXA}:undefined,columnSpan:o.cs,shading:o.bg?sh(o.bg):undefined,verticalAlign:o.va||VerticalAlign.TOP,borders:{top:BG,bottom:BG,left:o.boldL?BL:BG,right:BG},children:paras});}
-  function mkH(text,w){return new TableCell({width:{size:w,type:WidthType.DXA},shading:sh(DB),verticalAlign:VerticalAlign.CENTER,borders:{top:BD,bottom:BD,left:BD,right:BD},children:[P(text,{align:AlignmentType.CENTER,before:60,after:60,bold:true,sz:12,col:WH})]});}
-  function mkDk(paras,o={}){return new TableCell({width:o.w?{size:o.w,type:WidthType.DXA}:undefined,columnSpan:o.cs,shading:sh(DB),verticalAlign:VerticalAlign.CENTER,borders:{top:BD,bottom:BD,left:BD,right:BD},children:paras});}
+  const CM={top:100,bottom:100,left:150,right:120};
+  const CMH={top:110,bottom:110,left:130,right:130};
+  function mkC(paras,o={}){return new TableCell({width:o.w?{size:o.w,type:WidthType.DXA}:undefined,columnSpan:o.cs,shading:o.bg?sh(o.bg):undefined,verticalAlign:o.va||VerticalAlign.TOP,borders:{top:BG,bottom:BG,left:o.boldL?BL:BG,right:BG},margins:CM,children:paras});}
+  function mkH(text,w){return new TableCell({width:{size:w,type:WidthType.DXA},shading:sh(DB),verticalAlign:VerticalAlign.CENTER,borders:{top:BD,bottom:BD,left:BD,right:BD},margins:CMH,children:[P(text,{align:AlignmentType.CENTER,before:0,after:0,bold:true,sz:12,col:WH})]});}
+  function mkDk(paras,o={}){return new TableCell({width:o.w?{size:o.w,type:WidthType.DXA}:undefined,columnSpan:o.cs,shading:sh(DB),verticalAlign:VerticalAlign.CENTER,borders:{top:BD,bottom:BD,left:BD,right:BD},margins:CMH,children:paras});}
 
   // Column widths DXA: STT, Nội dung, ĐVT, Đơn giá, Thời gian, Thành tiền
   const W=[470,4100,940,1210,1030,1210];
@@ -930,7 +932,7 @@ async function exportWord() {
   ch.push(P('Số tài khoản: 3638 6868 8888',{after:40,indent:320}));
   ch.push(P('Ngân hàng TMCP Á Châu ACB – Chi nhánh Hoàng Cầu',{after:80,indent:320}));
   ch.push(SP(60));
-  ch.push(P('Trân trọng !',{bold:true}));
+  ch.push(P('Trân trọng !',{bold:true,align:AlignmentType.CENTER,before:120}));
 
   try {
     const doc=new Document({sections:[{properties:{page:{margin:{top:1134,right:1247,bottom:1247,left:1247}}},children:ch}]});

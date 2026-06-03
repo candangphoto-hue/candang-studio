@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Báo giá chụp món Quốc Tế — Can Đăng Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1A1A2E;--gold:#C8972B;--green:#1E6B3C;--purple:#7C3070;--teal:#1A5276;
+  --bg:#F2F2EE;--sur:#FFFFFF;--bdr:#D4D4CC;--bdr-l:#EAEAE5;
+  --txt:#18181A;--mut:#68686A;--fnt:#9A9A95;
+  --ok:#1E6B3C;--ok-bg:#EBF4EE;
+  --f:'Plus Jakarta Sans',sans-serif;--r:10px;--r-sm:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--f);font-size:14px;color:var(--txt);background:var(--bg);line-height:1.5;min-height:100vh}
+.shell{max-width:1320px;margin:0 auto;padding:1.5rem 1.25rem 3rem}
+
+/* ─── Header ─── */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.brand{display:flex;align-items:center;gap:10px}
+.bsq{width:30px;height:30px;background:var(--navy);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.bsq svg{width:13px;height:13px;fill:var(--gold)}
+.bnm{font-size:15px;font-weight:700;color:var(--navy);letter-spacing:-.025em}
+.bsb{font-size:11px;color:var(--fnt);margin-top:1px}
+.htag{font-size:12px;color:var(--mut)}
+
+/* ─── Info card ─── */
+.info{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:.875rem 1.15rem;margin-bottom:.875rem;display:grid;grid-template-columns:1fr 1fr auto;gap:.875rem;align-items:end}
+.fl{font-size:11px;font-weight:600;letter-spacing:.065em;text-transform:uppercase;color:var(--mut);margin-bottom:4px}
+input[type="text"]{width:100%;height:34px;padding:0 10px;border:1px solid #ccc;border-radius:var(--r-sm);font-family:var(--f);font-size:14px;color:var(--txt);background:#fff;transition:border-color .15s,box-shadow .15s}
+input[type="text"]:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(26,26,46,.07)}
+.pills{display:flex;gap:5px;flex-wrap:wrap}
+.pb{height:32px;padding:0 12px;border:1px solid #ccc;border-radius:99px;background:#fff;color:var(--mut);font-size:13px;font-family:var(--f);font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.pb:hover{border-color:var(--navy);color:var(--navy)}
+.pb.on{background:var(--navy);border-color:var(--navy);color:#fff}
+
+/* ─── Table ─── */
+.tc{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:.75rem}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+
+/* thead */
+.thrt th{padding:0;background:var(--sur);border-bottom:1px solid var(--bdr);vertical-align:top}
+.th-lc{padding:10px 10px 9px 14px;border-right:1px solid var(--bdr);vertical-align:bottom!important}
+.th-lt{font-size:11px;font-weight:600;letter-spacing:.065em;text-transform:uppercase;color:var(--fnt)}
+.th-pc{border-right:1px solid var(--bdr);vertical-align:top}
+.th-pc:last-child{border-right:none}
+.phw{display:flex;flex-direction:column}
+.pht{padding:9px 11px 6px;display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.phey{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:2px}
+.phni{background:transparent!important;border:none!important;border-bottom:1px solid rgba(255,255,255,.22)!important;border-radius:0!important;color:#fff!important;font-size:14px!important;font-weight:700!important;font-family:var(--f)!important;width:100%;padding:0 0 2px!important;height:auto!important;box-shadow:none!important}
+.phni:focus{border-bottom-color:rgba(255,255,255,.5)!important;box-shadow:none!important}
+.days-row{display:flex;align-items:center;gap:6px;padding:5px 11px 6px;border-top:1px solid rgba(255,255,255,.1)}
+.days-lbl{font-size:10px;color:rgba(255,255,255,.5);font-weight:500;white-space:nowrap}
+.days-ctrl{display:flex;align-items:center;background:rgba(255,255,255,.12);border-radius:6px;overflow:hidden}
+.days-btn{width:22px;height:22px;border:none;background:transparent;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.days-btn:hover{background:rgba(255,255,255,.2);color:#fff}
+.days-val{font-size:13px;font-weight:600;color:#fff;min-width:22px;text-align:center;line-height:22px}
+.phpill{display:inline-flex;align-items:center;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);margin:4px 11px 0;white-space:nowrap;letter-spacing:-.01em}
+.phsc{display:grid;grid-template-columns:30px 1fr 1fr 1fr;border-top:1px solid rgba(255,255,255,.1);margin-top:4px}
+.phsc span{padding:4px 5px;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.4);text-align:center}
+.phsc span:first-child{text-align:left;padding-left:8px}
+.delp{width:19px;height:19px;flex-shrink:0;border:none;background:rgba(255,255,255,.16);border-radius:4px;color:rgba(255,255,255,.75);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;margin-top:2px;line-height:1}
+.delp:hover{background:rgba(255,255,255,.3)}
+
+/* sep */
+.septr td{padding:5px 0 4px 14px;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fnt);background:#F8F8F5;border-top:1px solid var(--bdr-l);border-bottom:1px solid var(--bdr-l)}
+.septr td:first-child{border-right:1px solid var(--bdr)}
+.septr td.psep{border-right:1px solid var(--bdr-l);padding-left:9px}
+.septr td.psep:last-child{border-right:none}
+
+/* data rows */
+.dr td{border-bottom:1px solid var(--bdr-l);vertical-align:middle;height:42px}
+.dr:last-of-type td{border-bottom:none}
+.dr.z td{background:#F9F9F7}
+.tdl{padding:0 9px 0 14px;border-right:1px solid var(--bdr)}
+.rn{font-size:14px;font-weight:400;color:var(--txt)}
+.rh{font-size:11px;color:var(--fnt)}
+.tdp{padding:0;border-right:1px solid var(--bdr-l)}
+.tdp:last-child{border-right:none}
+.cg{display:grid;grid-template-columns:30px 1fr 1fr 1fr;height:42px;align-items:stretch}
+.cg>div{display:flex;align-items:center;justify-content:center;border-right:1px solid var(--bdr-l);height:100%}
+.cg>div:last-child{border-right:none}
+
+/* Toggle */
+.tog{position:relative;width:28px;height:16px;cursor:pointer;display:block}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tsl{position:absolute;inset:0;background:#D0D0C8;border-radius:8px;transition:background .18s}
+.tsl::after{content:'';position:absolute;width:10px;height:10px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.tog input:checked~.tsl::after{transform:translateX(12px)}
+
+/* Editable cells — text-type inputs */
+.ei{width:100%;height:100%;border:none;border-radius:0;background:transparent;color:var(--txt);font-size:13px;font-family:var(--f);font-weight:500;text-align:right;padding:0 7px}
+.ei:focus{outline:none;background:#EFF0F8}
+.ei:disabled{color:var(--fnt);cursor:not-allowed}
+.ei.left{text-align:left}
+
+/* qty cell with unit label below */
+.qty-wrap{display:flex;align-items:center;justify-content:flex-end;width:100%;height:100%;padding:0 5px}
+.qty-val{font-size:13px;font-weight:500;color:var(--txt);text-align:right;width:100%}
+.qty-unit{display:none}
+.qty-inp{width:100%;border:none;background:transparent;font-size:13px;font-weight:500;font-family:var(--f);text-align:right;padding:0;color:var(--txt)}
+.qty-inp:focus{outline:none}
+.qty-inp:disabled{color:var(--fnt)}
+
+.da-cell{font-size:11px;color:var(--fnt);font-style:italic}
+.amt{font-size:13px;font-weight:600;color:var(--txt);white-space:nowrap;padding-right:8px;font-variant-numeric:tabular-nums}
+.amt.off{color:var(--fnt);font-weight:400}
+
+/* Gift / Tặng section */
+.gift-sec td{background:#EBF4EE;border-top:1px solid #C5E0CE;border-bottom:1px solid #C5E0CE}
+.gift-sec td:first-child{border-right:1px solid var(--bdr);padding:0 9px 0 14px}
+.gift-sec-lbl{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ok)}
+
+.gift-row td{border-bottom:1px solid rgba(197,224,206,.5);vertical-align:middle;height:40px;background:#F5FAF7}
+.gift-row td:first-child{border-right:1px solid var(--bdr);padding:0 9px 0 14px}
+.gift-row td.tdg{border-right:1px solid rgba(197,224,206,.6);padding:0}
+.gift-row td.tdg:last-child{border-right:none}
+.gift-name-row{font-size:13px;color:var(--ok);font-weight:400}
+.gi{display:grid;grid-template-columns:30px 1fr 1fr 1fr;height:40px}
+.gi>div{display:flex;align-items:center;justify-content:center;border-right:1px solid rgba(197,224,206,.6);height:100%}
+.gi>div:last-child{border-right:none}
+.gtag{font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 9px;border-radius:99px}
+
+.add-gift-tr td{background:#F5FAF7;border-top:1px solid rgba(197,224,206,.4)}
+.add-gift-tr td:first-child{border-right:1px solid var(--bdr)}
+
+/* extra rows */
+.septr td:first-child{border-right:1px solid var(--bdr)}
+.extr td{border-bottom:1px solid var(--bdr-l);vertical-align:middle;height:40px}
+.extr td:first-child{border-right:1px solid var(--bdr);padding:0 4px 0 14px}
+.extr-name{height:26px;border:1px solid #ccc;border-radius:4px;font-family:var(--f);font-size:13px;padding:0 7px;width:calc(100% - 26px)}
+.extr-name:focus{outline:none;border-color:var(--navy)}
+.delr{width:20px;height:20px;border:none;background:#F0F0EA;border-radius:3px;cursor:pointer;font-size:11px;color:var(--mut);display:inline-flex;align-items:center;justify-content:center;margin-left:3px}
+.delr:hover{background:#E0E0D8}
+.tdp-ex{padding:0;border-right:1px solid var(--bdr-l)}
+.tdp-ex:last-child{border-right:none}
+.atr td{background:#FAFAF7;border-top:1px solid var(--bdr-l)}
+.atr td:first-child{border-right:1px solid var(--bdr);padding:7px 9px 7px 14px}
+.arb{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;margin:2px 3px 2px 0;border:1px solid var(--bdr);border-radius:99px;background:#fff;color:var(--mut);font-size:12px;font-family:var(--f);font-weight:500;cursor:pointer;transition:all .15s}
+.arb:hover{border-color:var(--navy);color:var(--navy)}
+.gift-arb{display:inline-flex;align-items:center;gap:3px;padding:3px 10px;margin:2px 3px 2px 0;border:1px solid #C5E0CE;border-radius:99px;background:#fff;color:var(--ok);font-size:12px;font-family:var(--f);font-weight:500;cursor:pointer;transition:all .15s}
+.gift-arb:hover{background:var(--ok-bg)}
+
+/* footer */
+.ftr td{background:#F7F7F4;border-top:1px solid var(--bdr);padding:7px 9px 7px 14px;font-size:13px;color:var(--mut)}
+.ftr td:first-child{border-right:1px solid var(--bdr)}
+.fp{border-right:1px solid var(--bdr-l);text-align:right;padding-right:11px!important;font-weight:600;color:var(--txt)!important;font-variant-numeric:tabular-nums}
+.fp:last-child{border-right:none}
+.ftr.vt .fp{color:var(--fnt)!important;font-weight:400;font-size:12px}
+.gtr-sum td{padding:10px 9px 10px 14px;border-top:1px solid var(--bdr);background:var(--sur)}
+.gtr-sum td:first-child{font-size:13px;font-weight:600;color:var(--mut);border-right:1px solid var(--bdr)}
+.gp{border-right:1px solid var(--bdr-l);text-align:right;padding-right:11px!important}
+.gp:last-child{border-right:none}
+.ga{font-size:17px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* add pkg / actions */
+.add-pkg{width:100%;height:34px;border:1px dashed var(--bdr);border-radius:var(--r);background:transparent;color:var(--fnt);font-size:13px;font-family:var(--f);font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:.75rem;transition:all .15s}
+.add-pkg:hover{border-color:var(--navy);color:var(--navy);background:rgba(26,26,46,.02);border-style:solid}
+.acts{display:flex;gap:7px;flex-wrap:wrap}
+.ab{height:34px;padding:0 14px;border:1px solid var(--bdr);border-radius:var(--r-sm);background:var(--sur);color:var(--txt);font-size:13px;font-family:var(--f);font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.ab:hover{background:#F0F0EA;border-color:#B4B4AC}
+.ab.ghost{color:var(--mut);border-style:dashed;margin-left:auto}
+.ab-word{height:34px;padding:0 14px;border:1.5px solid var(--gold);border-radius:var(--r-sm);background:#fff;color:var(--gold);font-size:13px;font-family:var(--f);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.ab-word:hover{background:var(--gold);color:#fff}
+.export-bar{margin-top:10px;padding:12px 14px;background:#F0F4F8;border:1.5px solid #C5D5E8;border-radius:var(--r);display:none}
+.export-bar.show{display:block}
+.export-bar-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
+.export-textarea{width:100%;height:120px;border:1px solid #ccc;border-radius:var(--r-sm);padding:8px 10px;font-size:12px;font-family:monospace;color:var(--txt);resize:none;background:#fff}
+.export-copy-btn{margin-top:8px;height:34px;width:100%;border:none;border-radius:var(--r-sm);background:var(--navy);color:#fff;font-size:13px;font-family:var(--f);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s}
+.export-copy-btn:hover{background:#2A2A4E}
+.export-note{font-size:11px;color:var(--mut);margin-top:6px;line-height:1.5}
+.ab-export{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:40px;margin-top:10px;border:none;border-radius:var(--r-sm);background:var(--navy);color:#fff;font-size:14px;font-family:var(--f);font-weight:600;cursor:pointer;letter-spacing:.01em;transition:background .15s}
+.ab-export:hover{background:#2A2A4E}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:8px 20px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+<script src="https://unpkg.com/docx@9.0.2/build/index.js"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="hdr">
+    <div class="brand">
+      <div class="bsq"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/></svg></div>
+      <div><div class="bnm">Can Đăng Studio</div><div class="bsb">candangstudio.vn · 090 432 9595</div></div>
+    </div>
+    <div class="htag">Báo giá chụp món Quốc Tế</div>
+  </div>
+
+  <div class="info">
+    <div>
+      <div class="fl">Khách hàng / Thương hiệu</div>
+      <input type="text" id="ic" placeholder="Khách hàng">
+    </div>
+    <div>
+      <div class="fl">Tháng thực hiện</div>
+      <input type="text" id="im" id="im" placeholder="">
+    </div>
+    <div>
+      <div class="fl">Loại dự án</div>
+      <div class="pills" id="tpills">
+        <button class="pb on" data-t="food" onclick="setType(this)">🍽 Món ăn</button>
+        <button class="pb" data-t="drink" onclick="setType(this)">🧋 Đồ uống</button>
+        <button class="pb" data-t="product" onclick="setType(this)">📦 Sản phẩm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc"><table id="tbl"></table></div>
+  <button class="add-pkg" onclick="addPkg()">＋ Thêm gói mới</button>
+  <div class="acts" id="acts"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+
+var COLORS=['#1A1A2E','#C8972B','#1E6B3C','#7C3070','#1A5276'];
+var TYPE='food';
+
+// Set default month
+(function(){
+  var now=new Date();
+  var m=now.getMonth()+1;
+  var y=now.getFullYear();
+  document.getElementById('im').placeholder='Tháng '+m+' / '+y;
+})();
+
+var SCHEMA={
+  food:[
+    {id:'concept',label:'Chụp ảnh Concept',   unit:'Món',      sep:'Phạm vi chụp'},
+    {id:'white',  label:'Chụp ảnh Nền trắng', unit:'Món',      sep:null},
+    {id:'pre',    label:'Pre-production',       unit:'Dự án',    sep:'Dịch vụ kèm'},
+    {id:'fs',     label:'Foodstylist',          unit:'Ngày làm việc',sep:null},
+    {id:'studio', label:'Studio & thiết bị',   unit:'Ngày làm việc',sep:null},
+    {id:'post',   label:'Retouch',             unit:'Ảnh',      sep:null},
+    {id:'pm',     label:'Project management',  unit:'Dự án',    sep:null},
+  ],
+  drink:[
+    {id:'concept',label:'Chụp ảnh Concept',   unit:'Đồ uống',  sep:'Phạm vi chụp'},
+    {id:'white',  label:'Chụp ảnh Nền trắng', unit:'Đồ uống',  sep:null},
+    {id:'pre',    label:'Pre-production',       unit:'Dự án',    sep:'Dịch vụ kèm'},
+    {id:'fs',     label:'Foodstylist',          unit:'Ngày làm việc',sep:null},
+    {id:'studio', label:'Studio & thiết bị',   unit:'Ngày làm việc',sep:null},
+    {id:'post',   label:'Retouch',             unit:'Ảnh',      sep:null},
+    {id:'pm',     label:'Project management',  unit:'Dự án',    sep:null},
+  ],
+  product:[
+    {id:'concept',label:'Chụp ảnh Concept',   unit:'Sản phẩm', sep:'Phạm vi chụp'},
+    {id:'white',  label:'Chụp ảnh Nền trắng', unit:'Sản phẩm', sep:null},
+    {id:'media',  label:'Lifestyle sản phẩm', unit:'Ảnh',      sep:null},
+    {id:'pre',    label:'Pre-production',       unit:'Dự án',    sep:'Dịch vụ kèm'},
+    {id:'fs',     label:'Prop stylist',         unit:'Ngày làm việc',sep:null},
+    {id:'bar',    label:'Set design',           unit:'Ngày làm việc',sep:null},
+    {id:'studio', label:'Studio & thiết bị',   unit:'Ngày làm việc',sep:null},
+    {id:'post',   label:'Retouch',             unit:'Ảnh',      sep:null},
+    {id:'pm',     label:'Project management',  unit:'Dự án',    sep:null},
+  ]
+};
+
+var ADDON_PRESETS=[
+  {id:'bartender',label:'Bartender',         unit:'Ngày làm việc',r:2000000},
+  {id:'model',    label:'Thuê người mẫu',    unit:'Ngày làm việc',r:3000000},
+  {id:'chef',     label:'Thuê đầu bếp',      unit:'Ngày làm việc',r:2500000},
+  {id:'food_cost',label:'Chi phí thực phẩm', unit:'Dự án',        r:0},
+  {id:'custom',   label:'Hạng mục khác',     unit:'Dự án',        r:0},
+];
+
+var GIFT_PRESETS=[
+  {id:'g_white',  label:'Chụp ảnh Nền trắng'},
+  {id:'g_video',  label:'Video giới thiệu'},
+  {id:'g_bts',    label:'Video hậu trường'},
+  {id:'g_live',   label:'Can Đăng trực tiếp thực hiện'},
+];
+
+var DEF={
+  food:{    concept:{q:15,r:500000},white:{q:30,r:450000},pre:{q:null,r:3000000},fs:{q:1,r:4000000},studio:{q:1,r:2000000},post:{q:30,r:150000},pm:{q:null,r:2000000}},
+  drink:{   concept:{q:10,r:500000},white:{q:20,r:350000},pre:{q:null,r:3000000},fs:{q:1,r:4000000},studio:{q:1,r:2000000},post:{q:30,r:150000},pm:{q:null,r:2000000}},
+  product:{ concept:{q:10,r:500000},white:{q:20,r:450000},media:{q:10,r:500000},pre:{q:null,r:3000000},fs:{q:1,r:3500000},bar:{q:1,r:2500000},studio:{q:1,r:2000000},post:{q:30,r:150000},pm:{q:null,r:2000000}},
+};
+
+var PKG=[];
+var extraRows=[];
+var giftRows=[];  // per pkg: [{label, r, on}]
+
+function initPkgs(){
+  // Gói 1 — Cơ bản (1 ngày)
+  var rows1=[
+    {id:'concept',on:true, q:15, r:500000},
+    {id:'white',  on:false,q:30, r:450000},
+    {id:'pre',    on:true, q:null,r:3000000},
+    {id:'fs',     on:true, q:1,  r:4000000},
+    {id:'studio', on:true, q:1,  r:2000000},
+    {id:'post',   on:true, q:30, r:150000},
+    {id:'pm',     on:true, q:null,r:2000000},
+  ];
+  // Gói 2 — Cao cấp (2 ngày)
+  var rows2=[
+    {id:'concept',on:true, q:20, r:500000},
+    {id:'white',  on:true, q:20, r:300000},
+    {id:'pre',    on:true, q:null,r:3000000},
+    {id:'fs',     on:true, q:2,  r:4000000},
+    {id:'studio', on:true, q:2,  r:2000000},
+    {id:'post',   on:true, q:60, r:150000},
+    {id:'pm',     on:true, q:null,r:2000000},
+  ];
+  PKG=[
+    {name:'Cơ bản', ci:0,days:1,rows:rows1,video:false},
+    {name:'Cao cấp',ci:1,days:2,rows:rows2,video:false},
+  ];
+  extraRows=[[],[]];
+  giftRows=[[],[]];
+}
+function makeRows(type,premium){
+  return SCHEMA[type].map(function(s){
+    var d=(DEF[type]||{})[s.id]||{q:1,r:500000};
+    var q=premium&&d.q!=null?Math.round(d.q*1.3):d.q;
+    var r=premium&&d.r?Math.round(d.r*1.05/10000)*10000:d.r;
+    var autoOn=s.id!=='media';
+    return{id:s.id,on:autoOn,q:q,r:r};
+  });
+}
+
+// ─── format helpers ───────────────────────────────────────────────
+function fmtFull(n){if(!n&&n!==0)return'—';return n.toLocaleString('vi-VN');}
+// Format rate with dots as user types
+function fmtRate(raw){
+  var s=String(raw).replace(/\D/g,'');
+  if(!s)return'';
+  return parseInt(s,10).toLocaleString('vi-VN');
+}
+function parseNum(s){
+  var clean=String(s).replace(/[^\d]/g,'');
+  return parseInt(clean,10)||0;
+}
+function rowAmt(r){if(!r.on)return 0;return r.q!=null?Math.round(r.q*r.r):Math.round(r.r);}
+function pkgTot(pi){
+  var p=PKG[pi];
+  var base=p.rows.reduce(function(s,r){return s+rowAmt(r);},0);
+  var ex=(extraRows[pi]||[]).reduce(function(s,r){return s+rowAmt(r);},0);
+  // gifts NOT counted
+  return base+ex;
+}
+function getSchema(){return SCHEMA[TYPE];}
+
+// ─── render ──────────────────────────────────────────────────────
+function render(){
+  var n=PKG.length;
+  var lW=178;
+  var pW=Math.max(200,Math.floor((1280-lW)/n));
+  var cg='<colgroup><col style="width:'+lW+'px">';
+  PKG.forEach(function(){cg+='<col style="width:'+pW+'px">';});
+  cg+='</colgroup>';
+
+  // thead
+  var th='<thead><tr class="thrt">';
+  th+='<th class="th-lc"><span class="th-lt">Hạng mục</span></th>';
+  PKG.forEach(function(p,pi){
+    var c=COLORS[p.ci%COLORS.length];
+    var grand=pkgTot(pi)+Math.round(pkgTot(pi)*.08);
+    th+='<th class="th-pc" style="background:'+c+'">';
+    th+='<div class="phw"><div class="pht">';
+    th+='<div style="flex:1"><div class="phey">Gói '+(pi+1)+'</div>';
+    th+='<input class="phni" value="'+esc(p.name)+'" data-pi="'+pi+'" onchange="PKG[+this.dataset.pi].name=this.value;renderActs()">';
+    th+='</div>';
+    if(PKG.length>1)th+='<button class="delp" onclick="delPkg('+pi+')" title="Xoá">✕</button>';
+    th+='</div>';
+    th+='<div class="days-row"><span class="days-lbl">Số ngày chụp:</span>';
+    th+='<div class="days-ctrl">';
+    th+='<button class="days-btn" onclick="adjDays('+pi+',-1)">−</button>';
+    th+='<span class="days-val" id="dv'+pi+'">'+p.days+'</span>';
+    th+='<button class="days-btn" onclick="adjDays('+pi+',1)">+</button>';
+    th+='</div></div>';
+    th+='<div class="phpill">'+fmtFull(grand)+'đ</div>';
+    th+='<div class="phsc"><span>Bật</span><span>Số lượng</span><span>Đơn giá</span><span>Thành tiền</span></div>';
+    th+='</div></th>';
+  });
+  th+='</tr></thead>';
+
+  var tb='<tbody>';
+  var schema=getSchema();
+  var lastSep='';
+
+  schema.forEach(function(def,ri){
+    if(def.sep&&def.sep!==lastSep){
+      lastSep=def.sep;
+      tb+='<tr class="septr"><td>'+def.sep+'</td>';
+      PKG.forEach(function(p,pi){tb+='<td class="psep" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'">'+def.sep+'</td>';});
+      tb+='</tr>';
+    }
+    var alt=ri%2===0?'':' z';
+    tb+='<tr class="dr'+alt+'"><td class="tdl"><div class="rn">'+def.label+'</div>';
+    if(def.unit&&def.unit!=='Dự án')tb+='<div class="rh">'+def.unit+'</div>';
+    tb+='</td>';
+
+    PKG.forEach(function(p,pi){
+      var pr=p.rows[ri];
+      if(!pr){tb+='<td class="tdp" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'"></td>';return;}
+      var amt=rowAmt(pr);
+      var c=COLORS[p.ci%COLORS.length];
+      var isDA=pr.q==null;
+      tb+='<td class="tdp" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'"><div class="cg">';
+      // toggle
+      tb+='<div><label class="tog"><input type="checkbox"'+(pr.on?' checked':'')+' data-pi="'+pi+'" data-ri="'+ri+'" onchange="onTog(this)"><span class="tsl" style="'+(pr.on?'background:'+c:'')+'"></span></label></div>';
+      // qty
+      if(!isDA){
+        tb+='<div><div class="qty-wrap">';
+        tb+='<input class="qty-inp" type="text" inputmode="numeric" value="'+pr.q+'" '+(pr.on?'':'disabled')+' data-pi="'+pi+'" data-ri="'+ri+'" data-f="q"';
+        tb+=' oninput="onQtyInput(this)" onblur="onQtyBlur(this)" onkeydown="onEnter(this,event)">';
+
+        tb+='</div></div>';
+      }else{
+        tb+='<div><span class="da-cell">Dự án</span></div>';
+      }
+      // rate — formatted text input
+      tb+='<div><input class="ei" type="text" inputmode="numeric" value="'+fmtRate(pr.r)+'" '+(pr.on?'':'disabled')+' data-pi="'+pi+'" data-ri="'+ri+'" data-f="r"';
+      tb+=' oninput="onRateInput(this)" onblur="onRateBlur(this)" onkeydown="onEnter(this,event)"></div>';
+      // amount
+      tb+='<div><span class="amt'+(pr.on?'':' off')+'">'+(pr.on?fmtFull(amt):'—')+'</span></div>';
+      tb+='</div></td>';
+    });
+    tb+='</tr>';
+  });
+
+  // ── Extra rows (Cộng thêm)
+  tb+='<tr class="septr"><td>Cộng thêm</td>';
+  PKG.forEach(function(p,pi){tb+='<td class="psep" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'">Cộng thêm</td>';});
+  tb+='</tr>';
+  var maxEx=extraRows.reduce(function(m,ea){return Math.max(m,(ea||[]).length);},0);
+  for(var ei=0;ei<maxEx;ei++){
+    var firstEx=extraRows[0]&&extraRows[0][ei];
+    tb+='<tr class="extr"><td style="border-right:1px solid var(--bdr);padding:0 4px 0 14px;">';
+    if(firstEx){
+      tb+='<input class="extr-name" value="'+esc(firstEx.label||'')+'" placeholder="Tên hạng mục..." data-ei="'+ei+'" onchange="onExLabel(this)">';
+      tb+='<button class="delr" onclick="delEx('+ei+')" title="Xoá">✕</button>';
+    }
+    tb+='</td>';
+    PKG.forEach(function(p,pi){
+      var ex=extraRows[pi]&&extraRows[pi][ei];
+      var c=COLORS[p.ci%COLORS.length];
+      tb+='<td class="tdp-ex" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'"><div class="cg">';
+      if(ex){
+        var amt=rowAmt(ex);
+        var isDaEx=ex.unit==='Dự án';
+        tb+='<div><label class="tog"><input type="checkbox"'+(ex.on?' checked':'')+' data-pi="'+pi+'" data-ei="'+ei+'" onchange="onExTog(this)"><span class="tsl" style="'+(ex.on?'background:'+c:'')+'"></span></label></div>';
+        if(!isDaEx){
+          tb+='<div><div class="qty-wrap">';
+          tb+='<input class="qty-inp" type="text" inputmode="numeric" value="'+(ex.q||1)+'" '+(ex.on?'':'disabled')+' data-pi="'+pi+'" data-ei="'+ei+'" data-f="q"';
+          tb+=' oninput="onExQtyInput(this)" onblur="onExQtyBlur(this)" onkeydown="onEnter(this,event)">';
+          tb+='</div></div>';
+        }else{
+          tb+='<div><span class="da-cell">Dự án</span></div>';
+        }
+        tb+='<div><input class="ei" type="text" inputmode="numeric" value="'+fmtRate(ex.r)+'" '+(ex.on?'':'disabled')+' data-pi="'+pi+'" data-ei="'+ei+'" data-f="r"';
+        tb+=' oninput="onExRateInput(this)" onblur="onExRateBlur(this)" onkeydown="onEnter(this,event)"></div>';
+        tb+='<div><span class="amt'+(ex.on?'':' off')+'">'+(ex.on?fmtFull(amt):'—')+'</span></div>';
+      }else{tb+='<div></div><div></div><div></div><div></div>';}
+      tb+='</div></td>';
+    });
+    tb+='</tr>';
+  }
+  tb+='<tr class="atr"><td colspan="'+(n+1)+'" style="padding:6px 14px;border-top:1px solid var(--bdr-l)">';
+  ADDON_PRESETS.forEach(function(ap){tb+='<button class="arb" onclick="addEx(\''+ap.id+'\',\''+esc(ap.label)+'\',\''+ap.unit+'\','+ap.r+')">+ '+ap.label+'</button>';});
+  tb+='</td></tr>';
+
+  // -- Gift / Tang kem section
+  tb+='<tr class="gift-sec"><td><span class="gift-sec-lbl">Tặng kèm</span></td>';
+  PKG.forEach(function(p,pi){tb+='<td style="border-right:'+(pi<n-1?'1px solid #C5E0CE':'none')+'"></td>';});
+  tb+='</tr>';
+  var maxG=giftRows.reduce(function(m,ga){return Math.max(m,(ga||[]).length);},0);
+  for(var gi=0;gi<maxG;gi++){
+    var fg=giftRows[0]&&giftRows[0][gi];
+    tb+='<tr class="gift-row"><td style="border-right:1px solid var(--bdr);padding:0 6px 0 14px;">';
+    if(fg){
+      tb+='<span class="gift-name-row">'+esc(fg.label)+'</span>';
+      tb+=' <button class="delr" onclick="delGift('+gi+')" title="Xoa">X</button>';
+    }
+    tb+='</td>';
+    PKG.forEach(function(p,pi){
+      var g=giftRows[pi]&&giftRows[pi][gi];
+      var c=COLORS[p.ci%COLORS.length];
+      tb+='<td class="tdg" style="border-right:'+(pi<n-1?'1px solid rgba(197,224,206,.6)':'none')+'"><div class="gi">';
+      if(g!=null){
+        tb+='<div><label class="tog"><input type="checkbox"'+(g.on?' checked':'')+' data-pi="'+pi+'" data-gi="'+gi+'" onchange="onGiftTog(this)"><span class="tsl" style="'+(g.on?'background:'+c:'')+'"></span></label></div>';
+        tb+='<div><span style="font-size:11px;color:var(--fnt)">--</span></div>';
+        tb+='<div><input class="ei" type="text" inputmode="numeric" style="font-size:12px;color:var(--fnt)" value="'+(g.r?fmtRate(g.r):'')+'" placeholder="Gia tri..." '+(g.on?'':'disabled')+' data-pi="'+pi+'" data-gi="'+gi+'"';
+        tb+=' oninput="onGiftRate(this)" onblur="onGiftRateBlur(this)" onkeydown="onEnter(this,event)"></div>';
+        tb+='<div>'+(g.on?'<span class="gtag" style="background:'+c+'22;color:'+c+'">TANG</span>':'<span style="font-size:11px;color:var(--fnt)">--</span>')+'</div>';
+      }else{tb+='<div></div><div></div><div></div><div></div>';}
+      tb+='</div></td>';
+    });
+    tb+='</tr>';
+  }
+  tb+='<tr class="add-gift-tr"><td colspan="'+(n+1)+'" style="padding:6px 14px;border-top:1px solid rgba(197,224,206,.4)">';
+  GIFT_PRESETS.forEach(function(gp){tb+='<button class="gift-arb" onclick="addGift(\''+esc(gp.label)+'\')">'+'+ '+gp.label+'</button>';});
+  tb+='<button class="gift-arb" onclick="addGift(\'\')">+ Khac...</button>';
+  tb+='</td></tr>';
+
+    // footer
+  tb+='<tr class="ftr"><td>Phí dịch vụ</td>';
+  PKG.forEach(function(p,pi){tb+='<td class="fp" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'">'+fmtFull(pkgTot(pi))+'đ</td>';});
+  tb+='</tr>';
+  tb+='<tr class="ftr vt"><td>VAT 8%</td>';
+  PKG.forEach(function(p,pi){tb+='<td class="fp" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'">'+fmtFull(Math.round(pkgTot(pi)*.08))+'đ</td>';});
+  tb+='</tr>';
+  tb+='<tr class="gtr-sum"><td>Tổng thanh toán</td>';
+  PKG.forEach(function(p,pi){
+    var c=COLORS[p.ci%COLORS.length];
+    var g=pkgTot(pi)+Math.round(pkgTot(pi)*.08);
+    tb+='<td class="gp" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'"><span class="ga" style="color:'+c+'">'+fmtFull(g)+'đ</span></td>';
+  });
+  tb+='</tr></tbody>';
+
+  document.getElementById('tbl').innerHTML=cg+th+tb;
+  renderActs();
+}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function renderActs(){
+  var h='<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px">';
+  PKG.forEach(function(p,pi){
+    var c=COLORS[p.ci%COLORS.length];
+    h+='<button class="ab" id="cpb'+pi+'" style="border-color:'+c+'50;color:'+c+'" onclick="copyPkg('+pi+')">⎘ Copy nhanh '+p.name+'</button>';
+  });
+  h+='</div>';
+  h+='<button class="ab-export" onclick="copyAllForWord()">📋 Copy tất cả gói — xuất Word trên Claude</button>';
+  h+='<div id="export-bar" style="display:none;margin-top:10px;padding:12px 16px;background:#EBF4EE;border:1.5px solid #C5E0CE;border-radius:10px">';
+  h+='<div style="font-size:12px;font-weight:600;color:#1E6B3C;margin-bottom:4px">✓ Đã copy! Mở Claude → Paste → Claude tự xuất Word.</div>';
+  h+='<div style="font-size:12px;color:#555;line-height:1.55">Không cần giải thích thêm — Claude đọc dữ liệu và xuất file .docx đúng layout Can Đăng Studio ngay lập tức.</div>';
+  h+='</div>';
+  document.getElementById('acts').innerHTML=h;
+}
+
+// ─── qty input handlers (text type, live) ─────────────────────────
+function onQtyInput(inp){
+  var raw=inp.value.replace(/[^\d]/g,'');
+  inp.value=raw;
+  var pi=+inp.dataset.pi,ri=+inp.dataset.ri;
+  PKG[pi].rows[ri].q=parseInt(raw)||0;
+  // live update amount
+  var row=document.querySelectorAll('.dr')[ri];
+  if(row){
+    var amtSpans=row.querySelectorAll('.amt');
+    if(amtSpans[pi]){
+      var pr=PKG[pi].rows[ri];
+      var a=rowAmt(pr);
+      amtSpans[pi].textContent=pr.on?fmtFull(a):'—';
+    }
+  }
+  updateTotals();
+}
+function onQtyBlur(inp){render();}
+
+function onRateInput(inp){
+  var raw=inp.value.replace(/[^\d]/g,'');
+  var formatted=raw?parseInt(raw).toLocaleString('vi-VN'):'';
+  var pos=inp.selectionStart;
+  var oldLen=inp.value.length;
+  inp.value=formatted;
+  // restore cursor
+  var newLen=formatted.length;
+  inp.selectionStart=inp.selectionEnd=pos+(newLen-oldLen);
+  // update model
+  var pi=+inp.dataset.pi,ri=+inp.dataset.ri;
+  PKG[pi].rows[ri].r=parseInt(raw)||0;
+  updateTotals();
+}
+function onRateBlur(inp){render();}
+function onEnter(inp,e){if(e.key==='Enter'){inp.blur();}}
+
+// extra rows
+function onExQtyInput(inp){
+  var raw=inp.value.replace(/[^\d]/g,'');
+  inp.value=raw;
+  var pi=+inp.dataset.pi,ei=+inp.dataset.ei;
+  if(extraRows[pi]&&extraRows[pi][ei])extraRows[pi][ei].q=parseInt(raw)||0;
+  updateTotals();
+}
+function onExQtyBlur(inp){render();}
+function onExRateInput(inp){
+  var raw=inp.value.replace(/[^\d]/g,'');
+  var fmt=raw?parseInt(raw).toLocaleString('vi-VN'):'';
+  var p=inp.selectionStart,ol=inp.value.length;
+  inp.value=fmt;
+  inp.selectionStart=inp.selectionEnd=p+(fmt.length-ol);
+  var pi=+inp.dataset.pi,ei=+inp.dataset.ei;
+  if(extraRows[pi]&&extraRows[pi][ei])extraRows[pi][ei].r=parseInt(raw)||0;
+  updateTotals();
+}
+function onExRateBlur(inp){render();}
+
+// gift rate
+function onGiftRate(inp){
+  var raw=inp.value.replace(/[^\d]/g,'');
+  var fmt=raw?parseInt(raw).toLocaleString('vi-VN'):'';
+  var p=inp.selectionStart,ol=inp.value.length;
+  inp.value=fmt;
+  inp.selectionStart=inp.selectionEnd=p+(fmt.length-ol);
+  var pi=+inp.dataset.pi,gi=+inp.dataset.gi;
+  if(giftRows[pi]&&giftRows[pi][gi])giftRows[pi][gi].r=parseInt(raw)||0;
+}
+function onGiftRateBlur(inp){render();}
+
+function updateTotals(){
+  // lightweight: update pill + foot without full re-render
+  try{
+    PKG.forEach(function(p,pi){
+      var tot=pkgTot(pi);
+      var grand=tot+Math.round(tot*.08);
+      var pill=document.getElementById('tbl').querySelectorAll('.phpill')[pi];
+      if(pill)pill.textContent=fmtFull(grand)+'đ';
+    });
+  }catch(e){}
+}
+
+// ─── toggle handlers ──────────────────────────────────────────────
+function onTog(cb){PKG[+cb.dataset.pi].rows[+cb.dataset.ri].on=cb.checked;render();}
+function onExTog(cb){if(extraRows[+cb.dataset.pi]&&extraRows[+cb.dataset.pi][+cb.dataset.ei])extraRows[+cb.dataset.pi][+cb.dataset.ei].on=cb.checked;render();}
+function onGiftTog(cb){if(giftRows[+cb.dataset.pi]&&giftRows[+cb.dataset.pi][+cb.dataset.gi])giftRows[+cb.dataset.pi][+cb.dataset.gi].on=cb.checked;render();}
+function onExLabel(inp){var ei=+inp.dataset.ei;extraRows.forEach(function(ea){if(ea&&ea[ei])ea[ei].label=inp.value;});}
+
+// ─── add / del ────────────────────────────────────────────────────
+function adjDays(pi,d){
+  PKG[pi].days=Math.max(1,PKG[pi].days+d);
+  document.getElementById('dv'+pi).textContent=PKG[pi].days;
+  var schema=getSchema();
+  schema.forEach(function(def,ri){
+    if(def.unit==='Ngày làm việc'&&PKG[pi].rows[ri]&&PKG[pi].rows[ri].q!=null)
+      PKG[pi].rows[ri].q=PKG[pi].days;
+  });
+  render();
+}
+function addEx(id,label,unit,r){
+  PKG.forEach(function(p,pi){
+    if(!extraRows[pi])extraRows[pi]=[];
+    extraRows[pi].push({id:id,label:label,unit:unit,q:1,r:r,on:true});
+  });
+  render();
+}
+function delEx(ei){extraRows.forEach(function(ea){if(ea)ea.splice(ei,1);});render();}
+function addGift(label){
+  var name=label||prompt('Tên mục tặng kèm:','');
+  if(!name)return;
+  PKG.forEach(function(p,pi){
+    if(!giftRows[pi])giftRows[pi]=[];
+    giftRows[pi].push({label:name,r:0,on:true});
+  });
+  render();
+}
+function delGift(gi){giftRows.forEach(function(ga){if(ga)ga.splice(gi,1);});render();}
+function setType(el){
+  document.querySelectorAll('.pb').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  TYPE=el.dataset.t;
+  PKG=[
+    {name:'Cơ bản', ci:0,days:2,rows:makeRows(TYPE,false),video:false},
+    {name:'Cao cấp',ci:1,days:3,rows:makeRows(TYPE,true), video:true},
+  ];
+  extraRows=[[],[]];giftRows=[[],[]];
+  render();
+}
+function addPkg(){
+  var ci=PKG.length%COLORS.length;
+  PKG.push({name:'Gói '+(PKG.length+1),ci:ci,days:2,rows:makeRows(TYPE,false),video:false});
+  extraRows.push([]);giftRows.push([]);
+  render();
+}
+function delPkg(pi){if(PKG.length<=1)return;PKG.splice(pi,1);extraRows.splice(pi,1);giftRows.splice(pi,1);render();}
+
+// ─── copy ─────────────────────────────────────────────────────────
+function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
+function copyPkg(pi){
+  var p=PKG[pi];var schema=getSchema();
+  var client=document.getElementById('ic').value||'Khách hàng';
+  var month=document.getElementById('im').value||document.getElementById('im').placeholder;
+  var lines=[p.name.toUpperCase()+' — CAN ĐĂNG STUDIO'];
+  if(client)lines.push('Khách: '+client);
+  if(month)lines.push('Tháng: '+month);
+  lines.push('Số ngày chụp: '+p.days+' ngày');lines.push('');
+  var tot=0;
+  p.rows.forEach(function(pr,ri){
+    if(!pr.on)return;
+    var lbl=schema[ri]?schema[ri].label:pr.id;
+    var amt=rowAmt(pr);tot+=amt;
+    var d=pr.q!=null?(fmtFull(pr.r)+'đ × '+pr.q):'Dự án';
+    lines.push('• '+lbl+': '+d+' = '+fmtFull(amt)+'đ');
+  });
+  (extraRows[pi]||[]).forEach(function(ex){
+    if(!ex.on)return;
+    var amt=rowAmt(ex);tot+=amt;
+    lines.push('• '+ex.label+': '+fmtFull(ex.r)+'đ × '+ex.q+' = '+fmtFull(amt)+'đ');
+  });
+  if((giftRows[pi]||[]).length){
+    lines.push('');lines.push('TẶNG KÈM:');
+    (giftRows[pi]||[]).forEach(function(g){if(g.on)lines.push('• [TẶNG] '+g.label+(g.r?' (trị giá '+fmtFull(g.r)+'đ)':''));});
+  }
+  var vat=Math.round(tot*.08);
+  lines.push('');lines.push('Phí dịch vụ: '+fmtFull(tot)+'đ');
+  lines.push('VAT 8%: '+fmtFull(vat)+'đ');
+  lines.push('TỔNG THANH TOÁN: '+fmtFull(tot+vat)+'đ');
+  lines.push('');lines.push('Can Đăng Studio · candangstudio.vn · 090 432 9595');
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){showToast('✓ Đã copy '+p.name);});
+}
+
+function copyAllForWord(){
+  var client=document.getElementById('ic').value||'Khách hàng';
+  var month=document.getElementById('im').value||(document.getElementById('im').placeholder||'');
+  var schema=getSchema();
+
+  var lines=[];
+  lines.push('XUẤT FILE WORD BÁO GIÁ — CAN ĐĂNG STUDIO');
+  lines.push('Khách hàng: '+client);
+  lines.push('Tháng: '+month);
+  lines.push('Loại dự án: '+(TYPE==='food'?'Món ăn':TYPE==='drink'?'Đồ uống':'Sản phẩm'));
+  lines.push('Số gói: '+PKG.length);
+  lines.push('');
+
+  PKG.forEach(function(p,pi){
+    var tot=0;
+    lines.push('=== GÓI '+(pi+1)+': '+p.name.toUpperCase()+' — '+p.days+' NGÀY CHỤP ===');
+    lines.push('HẠNG MỤC:');
+    var stt=1;
+    p.rows.forEach(function(pr,ri){
+      if(!pr.on)return;
+      var def=schema[ri];if(!def)return;
+      var amt=rowAmt(pr);tot+=amt;
+      var detail=pr.q!=null?(fmtFull(pr.r)+'đ × '+pr.q+' '+def.unit):'Dự án';
+      lines.push(stt+'. '+def.label+' | '+detail+' = '+fmtFull(amt)+'đ');
+      stt++;
+    });
+    (extraRows[pi]||[]).forEach(function(ex){
+      if(!ex.on)return;
+      var amt=rowAmt(ex);tot+=amt;
+      lines.push(stt+'. '+ex.label+' | '+fmtFull(ex.r)+'đ × '+ex.q+' '+ex.unit+' = '+fmtFull(amt)+'đ');
+      stt++;
+    });
+    var gifts=(giftRows[pi]||[]).filter(function(g){return g.on;});
+    if(gifts.length){
+      lines.push('TẶNG KÈM:');
+      gifts.forEach(function(g){
+        lines.push('• [TẶNG] '+g.label+(g.r?' (trị giá '+fmtFull(g.r)+'đ)':''));
+      });
+    }
+    var vat=Math.round(tot*.08);
+    lines.push('Phí dịch vụ: '+fmtFull(tot)+'đ');
+    lines.push('VAT 8%: '+fmtFull(vat)+'đ');
+    lines.push('TỔNG: '+fmtFull(tot+vat)+'đ');
+    lines.push('');
+  });
+
+  lines.push('YÊU CẦU: Xuất file Word .docx chuẩn layout MinhDinh. Màu navy #1A1A2E, gold #C8972B. Font Arial Unicode. Mỗi gói 1 trang. Có scope box vàng, bảng phân tách hạng mục (STT/Hạng mục/ĐVT/Đơn giá/Thực hiện/Thành tiền), dòng tặng kèm màu xanh lá, tổng cộng màu xanh đậm, box tham chiếu thị trường quốc tế, điều khoản thanh toán ACB 3638 6868 8888, header/footer Can Đăng Studio.');
+
+  var text=lines.join('\n');
+  navigator.clipboard.writeText(text).then(function(){
+    var bar=document.getElementById('export-bar');
+    if(bar)bar.style.display='block';
+    showToast('✓ Đã copy — paste vào Claude!');
+  });
+}
+
+function fmtJ(n){return n?n.toLocaleString('vi-VN'):'0';}
+
+function buildWordPayload(pi){
+  var p=PKG[pi];
+  var schema=getSchema();
+  var client=document.getElementById('ic').value||'Khách hàng';
+  var month=document.getElementById('im').value||document.getElementById('im').placeholder||'';
+  var payload={
+    client:client,
+    month:month,
+    pkg:{
+      name:p.name,
+      days:p.days,
+      color:COLORS[p.ci%COLORS.length],
+      rows:[],
+      extras:[],
+      gifts:[],
+      service:0,vat:0,total:0
+    }
+  };
+  var tot=0;
+  p.rows.forEach(function(pr,ri){
+    if(!pr.on)return;
+    var def=schema[ri];if(!def)return;
+    var amt=rowAmt(pr);tot+=amt;
+    payload.pkg.rows.push({
+      label:def.label,
+      unit:def.unit,
+      isDuAn:pr.q==null,
+      q:pr.q,
+      r:pr.r,
+      r_fmt:fmtJ(pr.r),
+      qty_str:pr.q==null?'Dự án':(pr.q+' '+def.unit),
+      amt:amt,
+      amt_fmt:fmtJ(amt)
+    });
+  });
+  (extraRows[pi]||[]).forEach(function(ex){
+    if(!ex.on)return;
+    var amt=rowAmt(ex);tot+=amt;
+    payload.pkg.extras.push({
+      label:ex.label,unit:ex.unit,
+      isDuAn:ex.unit==='Dự án',
+      q:ex.q,r:ex.r,
+      r_fmt:fmtJ(ex.r),
+      qty_str:ex.unit==='Dự án'?'Dự án':(ex.q+' '+ex.unit),
+      amt:amt,amt_fmt:fmtJ(amt)
+    });
+  });
+  (giftRows[pi]||[]).forEach(function(g){
+    if(!g.on)return;
+    payload.pkg.gifts.push({label:g.label,r:g.r,r_fmt:g.r?fmtJ(g.r):''});
+  });
+  payload.pkg.service=tot;
+  payload.pkg.vat=Math.round(tot*.08);
+  payload.pkg.total=tot+payload.pkg.vat;
+  payload.pkg.service_fmt=fmtJ(payload.pkg.service);
+  payload.pkg.vat_fmt=fmtJ(payload.pkg.vat);
+  payload.pkg.total_fmt=fmtJ(payload.pkg.total);
+  return payload;
+}
+
+function prepareWordCopy(pi){
+  var payload=buildWordPayload(pi);
+  var prompt='[XUẤT WORD BÁO GIÁ CAN ĐĂNG STUDIO]\n';
+  prompt+='Khách hàng: '+payload.client+'\n';
+  prompt+='Tháng: '+payload.month+'\n';
+  prompt+='Gói: '+payload.pkg.name+' — '+payload.pkg.days+' ngày chụp\n\n';
+  prompt+='HẠNG MỤC ('+payload.pkg.rows.length+' mục):\n';
+  payload.pkg.rows.forEach(function(r,i){
+    prompt+=(i+1)+'. '+r.label+' | '+r.qty_str+' | Đơn giá: '+r.r_fmt+'đ | Thành tiền: '+r.amt_fmt+'đ\n';
+  });
+  if(payload.pkg.extras.length){
+    prompt+='\nCỘNG THÊM:\n';
+    payload.pkg.extras.forEach(function(r,i){
+      prompt+=(i+1)+'. '+r.label+' | '+r.qty_str+' | Đơn giá: '+r.r_fmt+'đ | Thành tiền: '+r.amt_fmt+'đ\n';
+    });
+  }
+  if(payload.pkg.gifts.length){
+    prompt+='\nTẶNG KÈM:\n';
+    payload.pkg.gifts.forEach(function(g){
+      prompt+='• [TẶNG] '+g.label+(g.r_fmt?' (trị giá '+g.r_fmt+'đ)':'')+'\n';
+    });
+  }
+  prompt+='\nPhí dịch vụ: '+payload.pkg.service_fmt+'đ\n';
+  prompt+='VAT 8%: '+payload.pkg.vat_fmt+'đ\n';
+  prompt+='TỔNG THANH TOÁN: '+payload.pkg.total_fmt+'đ\n\n';
+  prompt+='Yêu cầu: Xuất file Word .docx theo đúng layout MinhDinh (màu navy #1A1A2E, gold #C8972B, bảng phân tách hạng mục, box thị trường quốc tế, điều khoản thanh toán ACB 3638 6868 8888, header/footer Can Đăng Studio, font Arial, chuẩn tiếng Việt Unicode).';
+  var bar=document.getElementById('export-bar');
+  var ta=document.getElementById('export-ta');
+  if(bar&&ta){bar.className='export-bar show';ta.value=prompt;}
+}
+
+function doCopyWord(){
+  var ta=document.getElementById('export-ta');
+  if(!ta)return;
+  navigator.clipboard.writeText(ta.value).then(function(){
+    showToast('✓ Đã copy — paste vào Claude để xuất Word!');
+  });
+}
+
+initPkgs();
+render();
+</script>
+<script>
+function exportAllWord(){
+  var client=document.getElementById('ic').value||'Khach hang';
+  var rawMonth=document.getElementById('im').value;
+  var month=rawMonth||(document.getElementById('im').placeholder||'');
+  var schema=getSchema();
+  var pkgData=PKG.map(function(p,pi){
+    var rows=[];
+    p.rows.forEach(function(pr,ri){var def=schema[ri];if(!def)return;rows.push({label:def.label,unit:def.unit,on:pr.on,q:pr.q,r:pr.r,amt:rowAmt(pr)});});
+    var extras=(extraRows[pi]||[]).map(function(ex){return{label:ex.label,unit:ex.unit,on:ex.on,q:ex.q,r:ex.r,amt:rowAmt(ex)};});
+    var gifts=(giftRows[pi]||[]).filter(function(g){return g.on;}).map(function(g){return{label:g.label,r:g.r};});
+    var tot=pkgTot(pi);var vat=Math.round(tot*.08);
+    return{name:p.name,days:p.days,rows:rows,extras:extras,gifts:gifts,service:tot,vat:vat,total:tot+vat};
+  });
+  if(typeof docx==='undefined'){showToast('Dang tai thu vien, thu lai sau 3 giay...');return;}
+  try{
+    var D=docx;
+    var TW=9500;
+    var navy='1A1A2E',gold='C8972B',wh='FFFFFF',bg='F7F7F4',tx='2C2C2C',mu='777777',
+        gn='1E6B3C',gnBg='EBF4EE',totBg='D6EAD8',totC='0D3B1E',br='DDDDDD',lt='F0F0EC';
+    function fmt(n){return n?n.toLocaleString('vi-VN'):'0';}
+    function bd(c,s){return{style:D.BorderStyle.SINGLE,size:s||4,color:c||br};}
+    function nb(){return{style:D.BorderStyle.NIL,size:0,color:'FFFFFF'};}
+    function bA(c,s){var b=bd(c,s);return{top:b,bottom:b,left:b,right:b};}
+    function ru(t,o){return new D.TextRun(Object.assign({text:String(t||''),font:'Arial',size:20,color:tx},o||{}));}
+    function rb(t,o){return ru(t,Object.assign({bold:true},o||{}));}
+    function ri(t,o){return ru(t,Object.assign({italics:true,color:mu},o||{}));}
+    function sp(pt){return new D.Paragraph({spacing:{before:0,after:pt||160},children:[new D.TextRun('')]});}
+    function hr(c,s){return new D.Paragraph({spacing:{before:0,after:0},border:{bottom:{style:D.BorderStyle.SINGLE,size:s||8,color:c||gold,space:1}},children:[new D.TextRun('')]});}
+    function tc(text,o){
+      var op=o||{};
+      return new D.TableCell({
+        shading:{fill:op.fill||wh,type:D.ShadingType.CLEAR},
+        verticalAlign:op.va||D.VerticalAlign.CENTER,
+        margins:{top:90,bottom:90,left:130,right:130},
+        borders:op.brd||bA(br),
+        width:op.w?{size:op.w,type:D.WidthType.DXA}:undefined,
+        columnSpan:op.cs,
+        children:[new D.Paragraph({alignment:op.al||D.AlignmentType.LEFT,spacing:{before:0,after:0},
+          children:[new D.TextRun({text:String(text||''),bold:!!op.bold,size:op.sz||20,color:op.color||tx,font:'Arial',italics:!!op.it})]})]
+      });
+    }
+    function tmc(runs,o){
+      var op=o||{};
+      return new D.TableCell({
+        shading:{fill:op.fill||wh,type:D.ShadingType.CLEAR},
+        verticalAlign:op.va||D.VerticalAlign.CENTER,
+        margins:{top:90,bottom:90,left:130,right:130},
+        borders:op.brd||bA(br),
+        width:op.w?{size:op.w,type:D.WidthType.DXA}:undefined,
+        columnSpan:op.cs,
+        children:[new D.Paragraph({alignment:op.al||D.AlignmentType.LEFT,spacing:{before:0,after:0},children:runs})]
+      });
+    }
+    function buildPkg(pkg,isFirst){
+      var ch=[];
+      if(!isFirst)ch.push(new D.Paragraph({children:[new D.PageBreak()]}));
+      ch.push(new D.Paragraph({spacing:{before:isFirst?0:160,after:80},children:[rb(pkg.name.toUpperCase()+' - ',{size:28,color:navy}),rb(pkg.days+' NGAY CHUP',{size:28,color:gold})]}));
+      ch.push(hr(gold,6));ch.push(sp(120));
+      var C1=480,C2=3500,C3=650,C4=1200,C5=870,C6=1800;
+      var cW=[C1,C2,C3,C4,C5,C6];
+      function hc(t,w,al){return tc(t,{bold:true,sz:18,color:wh,fill:navy,al:al||D.AlignmentType.CENTER,w:w,brd:bA(navy)});}
+      var rows2=[new D.TableRow({tableHeader:true,children:[hc('STT',C1),hc('Hang muc dich vu',C2,D.AlignmentType.LEFT),hc('DVT',C3),hc('Don gia (VND)',C4),hc('Thuc hien',C5),hc('Thanh tien (VND)',C6)]})];
+      var stt=1;
+      pkg.rows.forEach(function(row){
+        if(!row.on)return;
+        var isDA=row.q==null;
+        var slS=isDA?'Du an':(row.q+' '+row.unit);
+        var fill=stt%2===0?lt:wh;
+        rows2.push(new D.TableRow({children:[
+          tc(String(stt++),{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C1}),
+          tc(row.label,{sz:19,fill:fill,w:C2}),
+          tc(row.unit||'-',{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C3}),
+          tc(fmt(row.r),{sz:19,al:D.AlignmentType.RIGHT,fill:fill,w:C4}),
+          tc(slS,{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C5}),
+          tc(fmt(row.amt),{sz:19,bold:true,al:D.AlignmentType.RIGHT,fill:fill,w:C6}),
+        ]}));
+      });
+      (pkg.extras||[]).forEach(function(ex){
+        if(!ex.on)return;
+        var fill=stt%2===0?lt:wh;
+        rows2.push(new D.TableRow({children:[
+          tc(String(stt++),{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C1}),
+          tc(ex.label,{sz:19,fill:fill,w:C2}),
+          tc(ex.unit||'-',{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C3}),
+          tc(fmt(ex.r),{sz:19,al:D.AlignmentType.RIGHT,fill:fill,w:C4}),
+          tc(ex.q!=null?(ex.q+' '+ex.unit):'Du an',{sz:19,al:D.AlignmentType.CENTER,fill:fill,w:C5}),
+          tc(fmt(ex.amt),{sz:19,bold:true,al:D.AlignmentType.RIGHT,fill:fill,w:C6}),
+        ]}));
+      });
+      (pkg.gifts||[]).forEach(function(g){
+        rows2.push(new D.TableRow({children:[
+          tc('*',{sz:18,al:D.AlignmentType.CENTER,fill:gnBg,color:gn,w:C1}),
+          tmc([new D.TextRun({text:'[TANG] '+g.label,bold:true,size:20,font:'Arial',color:gn})],{fill:gnBg,w:C2}),
+          tc('-',{sz:18,al:D.AlignmentType.CENTER,fill:gnBg,w:C3}),
+          tc(g.r?fmt(g.r):'-',{sz:18,al:D.AlignmentType.RIGHT,fill:gnBg,color:mu,w:C4}),
+          tc('-',{sz:18,al:D.AlignmentType.CENTER,fill:gnBg,w:C5}),
+          tc('MIEN PHI',{sz:18,bold:true,al:D.AlignmentType.RIGHT,fill:gnBg,color:gn,w:C6}),
+        ]}));
+      });
+      rows2.push(new D.TableRow({children:[new D.TableCell({columnSpan:6,shading:{fill:wh,type:D.ShadingType.CLEAR},borders:{top:bd(navy,6),bottom:bd(),left:bd(),right:bd()},margins:{top:40,bottom:40,left:130,right:130},children:[new D.Paragraph({children:[new D.TextRun('')]})]})]}));
+      function totR(lbl,val,bld,fl,lc){return new D.TableRow({children:[
+        tc('',{fill:fl||bg,w:C1,brd:{top:bd(),bottom:bd(),left:bd(),right:nb()}}),
+        tmc([new D.TextRun({text:lbl,bold:!!bld,size:bld?22:20,font:'Arial',color:lc||tx})],{fill:fl||bg,w:C2+C3+C4+C5,brd:{top:bd(),bottom:bd(),left:nb(),right:nb()}}),
+        tc(val,{bold:!!bld,sz:bld?22:20,al:D.AlignmentType.RIGHT,fill:fl||bg,color:lc||tx,w:C6,brd:{top:bd(),bottom:bd(),left:nb(),right:bd()}}),
+      ]});}
+      rows2.push(totR('Phi dich vu',fmt(pkg.service)+'d',true,bg));
+      rows2.push(totR('Thue GTGT (8% VAT)',fmt(pkg.vat)+'d',false,wh,mu));
+      rows2.push(new D.TableRow({children:[
+        tc('',{fill:totBg,w:C1,brd:{top:bd(totC,6),bottom:bd(totC,6),left:bd(totC,6),right:nb()}}),
+        tmc([new D.TextRun({text:'TONG CONG (DA BAO GOM VAT)',bold:true,size:22,font:'Arial',color:totC})],{fill:totBg,w:C2+C3+C4+C5,brd:{top:bd(totC,6),bottom:bd(totC,6),left:nb(),right:nb()}}),
+        tc(fmt(pkg.total)+'d',{bold:true,sz:24,al:D.AlignmentType.RIGHT,fill:totBg,color:totC,w:C6,brd:{top:bd(totC,6),bottom:bd(totC,6),left:nb(),right:bd(totC,6)}}),
+      ]}));
+      ch.push(new D.Table({width:{size:TW,type:D.WidthType.DXA},columnWidths:cW,rows:rows2}));
+      ch.push(sp(80));
+      ch.push(new D.Paragraph({spacing:{before:0,after:0},children:[ri('* Bao gia chua bao gom chi phi thuc pham cua du an.')]}));
+      return ch;
+    }
+    var allCh=[];
+    allCh.push(new D.Paragraph({spacing:{before:80,after:40},children:[rb('BAO GIA DICH VU CHUP ANH',{size:40,color:navy})]}));
+    allCh.push(new D.Paragraph({spacing:{before:0,after:40},children:[rb('DICH VU NHIEP ANH THUONG MAI',{size:28,color:gold})]}));
+    allCh.push(hr(gold,8));allCh.push(sp(160));
+    allCh.push(new D.Table({width:{size:TW,type:D.WidthType.DXA},columnWidths:[TW/2,TW/2],rows:[new D.TableRow({children:[
+      new D.TableCell({shading:{fill:'F0F4F8',type:D.ShadingType.CLEAR},borders:{top:bd(gold,8),bottom:bd(),left:bd(gold,8),right:bd()},margins:{top:160,bottom:160,left:200,right:160},children:[
+        new D.Paragraph({spacing:{before:0,after:60},children:[ru('GUI DEN',{size:16,bold:true,color:mu})]}),
+        new D.Paragraph({spacing:{before:0,after:40},children:[rb(client,{size:26,color:navy})]}),
+        new D.Paragraph({spacing:{before:0,after:0},children:[ri('Du an chup anh - '+month)]}),
+      ]}),
+      new D.TableCell({shading:{fill:navy,type:D.ShadingType.CLEAR},borders:{top:bd(gold,8),bottom:bd(),left:bd(),right:bd(gold,8)},margins:{top:160,bottom:160,left:200,right:200},children:[
+        new D.Paragraph({spacing:{before:0,after:60},children:[ru('DON VI THUC HIEN',{size:16,bold:true,color:gold})]}),
+        new D.Paragraph({spacing:{before:0,after:40},children:[rb('Can Dang Studio',{size:26,color:wh})]}),
+        new D.Paragraph({spacing:{before:0,after:20},children:[ru('Cong ty TNHH Can Creative',{size:18,color:'CCCCCC'})]}),
+        new D.Paragraph({spacing:{before:0,after:20},children:[ru('219 Dang Tien Dong, Dong Da, Ha Noi',{size:18,color:'CCCCCC'})]}),
+        new D.Paragraph({spacing:{before:0,after:0},children:[ru('090 432 9595  |  candangstudio.vn',{size:18,color:'CCCCCC'})]}),
+      ]})
+    ]})]});
+    allCh.push(sp(240));
+    pkgData.forEach(function(pkg,i){buildPkg(pkg,i===0).forEach(function(c){allCh.push(c);});allCh.push(sp(160));});
+    allCh.push(new D.Table({width:{size:TW,type:D.WidthType.DXA},columnWidths:[TW],rows:[new D.TableRow({children:[new D.TableCell({shading:{fill:'FDF0E0',type:D.ShadingType.CLEAR},borders:bA(gold,8),margins:{top:160,bottom:160,left:240,right:240},children:[
+      new D.Paragraph({spacing:{before:0,after:80},children:[ru('Dich vu tuong duong tai Singapore/Australia bao tu ',{size:20,color:'7B3F00'}),rb('3.000-4.000 USD/ngay (70-90 trieu VND)',{size:20,color:'7B3F00'}),ru('.',{size:20,color:'7B3F00'})]}),
+      new D.Paragraph({spacing:{before:0,after:0},children:[ru('Can Dang Studio cung cap chat luong tuong duong, chi phi toi uu. KH: KFC Vietnam, Golden Gate, LIXIL, Bibica, Fortuna Hotel.',{size:20,color:'7B3F00'})]})
+    ]})]})]});
+    allCh.push(sp(220));
+    allCh.push(new D.Paragraph({spacing:{before:0,after:80},children:[rb('DIEU KHOAN THANH TOAN',{size:24,color:navy})]}));
+    allCh.push(hr(gold,4));allCh.push(sp(80));
+    allCh.push(new D.Table({width:{size:TW,type:D.WidthType.DXA},columnWidths:[700,TW-700],rows:[
+      ['Dot 1','50% khi chot thuc hien du an'],['Dot 2','50% con lai sau khi ket thuc chinh sua'],
+      ['Ban giao','Sau khi nhan thanh toan day du'],['Ngan hang','ACB - Chi nhanh Hoang Cau'],
+      ['So tai khoan','3638 6868 8888'],['Chu tai khoan','Cong ty TNHH Can Creative'],
+    ].map(function(row,i){return new D.TableRow({children:[tc(row[0],{bold:true,sz:19,color:navy,fill:i%2===0?'F0F4F8':wh,w:700}),tc(row[1],{sz:19,fill:i%2===0?'F0F4F8':wh,w:TW-700})];});})}));
+    allCh.push(sp(200));allCh.push(hr(gold,6));allCh.push(sp(140));
+    allCh.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{before:0,after:0},children:[rb('Tran trong cam on '+client+' da tin tuong Can Dang Studio!',{size:22,color:navy})]}));
+    var doc=new D.Document({
+      styles:{default:{document:{run:{font:'Arial',size:22,color:tx}}}},
+      sections:[{
+        properties:{page:{size:{width:11906,height:16838},margin:{top:1134,right:1134,bottom:1134,left:1134}}},
+        headers:{default:new D.Header({children:[new D.Paragraph({tabStops:[{type:D.TabStopType.RIGHT,position:D.TabStopPosition.MAX}],border:{bottom:{style:D.BorderStyle.SINGLE,size:6,color:gold,space:1}},spacing:{before:0,after:160},children:[new D.TextRun({text:'CAN DANG STUDIO',bold:true,size:22,font:'Arial',color:navy}),new D.TextRun({text:'\t',size:22,font:'Arial'}),new D.TextRun({text:'Bao Gia Dich Vu Chup Anh',size:18,font:'Arial',color:mu})]})]})}  ,
+        footers:{default:new D.Footer({children:[new D.Paragraph({border:{top:{style:D.BorderStyle.SINGLE,size:4,color:gold,space:1}},spacing:{before:120,after:0},children:[new D.TextRun({text:'candangstudio.vn  |  090 432 9595  |  candangphoto@gmail.com',size:16,font:'Arial',color:mu})]})]})} ,
+        children:allCh
+      }]
+    });
+    showToast('Dang tao file Word...');
+    D.Packer.toBlob(doc).then(function(blob){
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');a.href=url;
+      a.download='BaoGia_'+client.replace(/\s+/g,'_')+'_CanDangStudio.docx';
+      document.body.appendChild(a);a.click();
+      setTimeout(function(){URL.revokeObjectURL(url);document.body.removeChild(a);},1000);
+      showToast('Da tai file Word!');
+    }).catch(function(e){showToast('Loi: '+e.message);console.error(e);});
+  }catch(e){showToast('Loi: '+e.message);console.error(e);}
+}
+
+</script>
+
+</body>
+</html>
