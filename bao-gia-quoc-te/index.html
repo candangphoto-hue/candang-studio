@@ -57,6 +57,13 @@ table{width:100%;border-collapse:collapse;table-layout:fixed}
 .days-btn{width:22px;height:22px;border:none;background:transparent;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
 .days-btn:hover{background:rgba(255,255,255,.2);color:#fff}
 .days-val{font-size:13px;font-weight:600;color:#fff;min-width:22px;text-align:center;line-height:22px}
+.tgt-row{display:flex;align-items:center;gap:6px;padding:5px 11px 7px;border-top:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.18)}
+.tgt-lbl{font-size:10px;color:rgba(255,255,255,.6);font-weight:600;white-space:nowrap;letter-spacing:.04em}
+.tgt-inp{flex:1;min-width:0;background:rgba(255,255,255,.1);border:none;border-bottom:1.5px solid rgba(255,255,255,.35);color:#fff;font-size:12px;font-weight:600;font-family:var(--f);padding:3px 6px;border-radius:3px 3px 0 0;transition:background .15s}
+.tgt-inp:focus{outline:none;background:rgba(255,255,255,.18);border-bottom-color:var(--gold)}
+.tgt-inp::placeholder{color:rgba(255,255,255,.3);font-size:10px;font-weight:400}
+.tgt-btn{height:22px;padding:0 9px;background:var(--gold);border:none;border-radius:4px;color:#fff;font-size:10px;font-family:var(--f);font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:.04em;transition:background .15s;flex-shrink:0}
+.tgt-btn:hover{background:#e0a830}
 .phpill{display:inline-flex;align-items:center;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);margin:4px 11px 0;white-space:nowrap;letter-spacing:-.01em}
 .phsc{display:grid;grid-template-columns:30px 1fr 1fr 1fr;border-top:1px solid rgba(255,255,255,.1);margin-top:4px}
 .phsc span{padding:4px 5px;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.4);text-align:center}
@@ -295,6 +302,7 @@ var DEF={
 var PKG=[];
 var extraRows=[];
 var giftRows=[];  // per pkg: [{label, r, on}]
+var tgtValues=[];  // per pkg: formatted string của giá mục tiêu
 
 function initPkgs(){
   // Gói 1 — Cơ bản (1 ngày)
@@ -323,6 +331,7 @@ function initPkgs(){
   ];
   extraRows=[[],[]];
   giftRows=[[],[]];
+  tgtValues=['',''];
 }
 function makeRows(type,premium){
   return SCHEMA[type].map(function(s){
@@ -384,6 +393,12 @@ function render(){
     th+='<span class="days-val" id="dv'+pi+'">'+p.days+'</span>';
     th+='<button class="days-btn" onclick="adjDays('+pi+',1)">+</button>';
     th+='</div></div>';
+    th+='<div class="tgt-row">';
+    th+='<span class="tgt-lbl">🎯 Mục tiêu:</span>';
+    th+='<input class="tgt-inp" type="text" inputmode="numeric" id="tgt'+pi+'" value="'+(tgtValues[pi]||'')+'" placeholder="VD: 20.000.000"';
+    th+=' oninput="onTgtInput(this,'+pi+')" onkeydown="if(event.key===\'Enter\')allocate('+pi+')">';
+    th+='<button class="tgt-btn" onclick="allocate('+pi+')">Phân bổ</button>';
+    th+='</div>';
     th+='<div class="phpill">'+fmtFull(grand)+'đ</div>';
     th+='<div class="phsc"><span>Bật</span><span>Số lượng</span><span>Đơn giá</span><span>Thành tiền</span></div>';
     th+='</div></th>';
@@ -662,6 +677,50 @@ function addGift(label){
   render();
 }
 function delGift(gi){giftRows.forEach(function(ga){if(ga)ga.splice(gi,1);});render();}
+
+// ─── Target price ─────────────────────────────────────────────────
+function onTgtInput(inp,pi){
+  var raw=inp.value.replace(/[^\d]/g,'');
+  var fmt=raw?parseInt(raw).toLocaleString('vi-VN'):'';
+  var pos=inp.selectionStart,ol=inp.value.length;
+  inp.value=fmt;
+  inp.selectionStart=inp.selectionEnd=Math.max(0,pos+(fmt.length-ol));
+  tgtValues[pi]=fmt;
+}
+function allocate(pi){
+  var raw=(tgtValues[pi]||'').replace(/[^\d]/g,'');
+  var target=parseInt(raw)||0;
+  if(!target){showToast('Nhập giá mục tiêu trước!');return;}
+  var p=PKG[pi];
+  var items=[];
+  p.rows.forEach(function(pr){
+    if(!pr.on)return;
+    var amt=rowAmt(pr);
+    if(amt>0)items.push({obj:pr,amt:amt});
+  });
+  (extraRows[pi]||[]).forEach(function(ex){
+    if(!ex.on)return;
+    var amt=rowAmt(ex);
+    if(amt>0)items.push({obj:ex,amt:amt});
+  });
+  var curTotal=items.reduce(function(s,x){return s+x.amt;},0);
+  if(!curTotal){showToast('Không có hạng mục nào đang bật!');return;}
+  items.forEach(function(item,idx){
+    var ratio=item.amt/curTotal;
+    var newAmt=Math.round(target*ratio/200000)*200000;
+    if(newAmt<200000)newAmt=200000;
+    var obj=item.obj;
+    if(obj.q!=null&&obj.q>0){
+      obj.r=Math.round(newAmt/obj.q/200000)*200000;
+      if(obj.r<200000)obj.r=200000;
+    }else{
+      obj.r=newAmt;
+    }
+  });
+  showToast('✓ Đã phân bổ theo '+fmtFull(target)+'đ');
+  render();
+}
+
 function setType(el){
   document.querySelectorAll('.pb').forEach(function(b){b.classList.remove('on');});
   el.classList.add('on');
@@ -670,16 +729,16 @@ function setType(el){
     {name:'Cơ bản', ci:0,days:2,rows:makeRows(TYPE,false),video:false},
     {name:'Cao cấp',ci:1,days:3,rows:makeRows(TYPE,true), video:true},
   ];
-  extraRows=[[],[]];giftRows=[[],[]];
+  extraRows=[[],[]];giftRows=[[],[]];tgtValues=['',''];
   render();
 }
 function addPkg(){
   var ci=PKG.length%COLORS.length;
   PKG.push({name:'Gói '+(PKG.length+1),ci:ci,days:2,rows:makeRows(TYPE,false),video:false});
-  extraRows.push([]);giftRows.push([]);
+  extraRows.push([]);giftRows.push([]);tgtValues.push('');
   render();
 }
-function delPkg(pi){if(PKG.length<=1)return;PKG.splice(pi,1);extraRows.splice(pi,1);giftRows.splice(pi,1);render();}
+function delPkg(pi){if(PKG.length<=1)return;PKG.splice(pi,1);extraRows.splice(pi,1);giftRows.splice(pi,1);tgtValues.splice(pi,1);render();}
 
 // ─── copy ─────────────────────────────────────────────────────────
 function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
