@@ -395,7 +395,8 @@ body {
 </div>
 
 <script>
-const GAS = 'https://script.google.com/macros/s/AKfycbzmquW1Ri0TJeEHMTIq0ZwR9SArtOl9a-58CQIf9S5cCeBdR-nb3i92BYe-THFsWFhB/exec';
+const GAS_DEFAULT = 'https://script.google.com/macros/s/AKfycbzmquW1Ri0TJeEHMTIq0ZwR9SArtOl9a-58CQIf9S5cCeBdR-nb3i92BYe-THFsWFhB/exec';
+let GAS = localStorage.getItem('lich_gas_url') || GAS_DEFAULT;
 
 const urlP   = new URLSearchParams(location.search);
 const TOKEN  = urlP.get('staff');
@@ -574,14 +575,15 @@ function h(str) {
 // ── Admin render ──────────────────────────────────────────────
 function renderAdmin() {
   const tabs = `<div class="tabs">
-    ${['lich','nhansu','duan'].map((t, i) => {
-      const labels = ['Lịch tổng','Nhân sự','Dự án'];
+    ${['lich','nhansu','duan','caidat'].map((t, i) => {
+      const labels = ['Lịch tổng','Nhân sự','Dự án','Cài đặt'];
       return `<button class="tab-btn${activeTab===t?' active':''}" data-tab="${t}">${labels[i]}</button>`;
     }).join('')}
   </div>`;
-  const content = activeTab === 'lich'   ? tabLichHTML()
-                : activeTab === 'nhansu' ? tabNhanSuHTML()
-                :                          tabDuAnHTML();
+  const content = activeTab === 'lich'    ? tabLichHTML()
+                : activeTab === 'nhansu'  ? tabNhanSuHTML()
+                : activeTab === 'duan'    ? tabDuAnHTML()
+                :                           tabCaiDatHTML();
   return headerHTML() + tabs + `<div id="tabContent">${content}</div>`;
 }
 
@@ -704,6 +706,41 @@ function tabDuAnHTML() {
   </div>`;
 }
 
+function tabCaiDatHTML() {
+  const saved = localStorage.getItem('lich_gas_url') || '';
+  return `<div style="max-width:640px;margin-top:20px">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
+        <span style="font-size:18px">⚙️</span>
+        <span style="font-size:15px;font-weight:600">Kết nối Google Sheets</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;font-size:13px;color:var(--text2)">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span>
+          <span>Vào <a href="https://script.google.com" target="_blank" style="color:var(--accent)">script.google.com</a> → Tạo project mới → paste file <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">apps-script.gs</code></span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span>
+          <span><strong>Deploy → Web App</strong> → Execute as: <em>Me</em> → Access: <em>Anyone</em> → Deploy</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span>
+          <span>Copy URL → Paste vào ô bên dưới → Nhấn <strong>Test</strong></span>
+        </div>
+      </div>
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Apps Script URL</label>
+      <div style="display:flex;gap:8px">
+        <input class="inp" id="inpGasUrl" style="flex:1;font-size:12px" placeholder="https://script.google.com/macros/s/..." value="${h(saved)}">
+        <button class="btn btn-primary" id="btnTestGas" style="white-space:nowrap">Test</button>
+      </div>
+      <div id="gasStatus" style="margin-top:10px;font-size:12px;display:none"></div>
+      ${saved ? `<div style="margin-top:12px;padding:8px 12px;background:var(--bg3);border-radius:6px;font-size:11px;color:var(--text2)">
+        URL hiện tại: <span style="font-family:monospace;word-break:break-all">${h(saved)}</span>
+      </div>` : ''}
+    </div>
+  </div>`;
+}
+
 // ── Staff render ──────────────────────────────────────────────
 function renderStaff() {
   const name = myStaff ? myStaff.name : '...';
@@ -812,6 +849,42 @@ function bindAdmin() {
       await apiWrite({ action: 'adminSetBusyDay', staff_id: btn.dataset.sid, date: btn.dataset.date, status: btn.dataset.st });
       await fetchAdmin(); render(); // re-fetch ngay sau khi ghi xong
     });
+  });
+
+  // Cài đặt GAS URL
+  document.getElementById('btnTestGas')?.addEventListener('click', async () => {
+    const inp = document.getElementById('inpGasUrl');
+    const url = inp.value.trim();
+    const statusEl = document.getElementById('gasStatus');
+    if (!url || !url.startsWith('https://script.google.com')) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = '❌ URL không hợp lệ. Phải bắt đầu bằng https://script.google.com';
+      return;
+    }
+    const btn = document.getElementById('btnTestGas');
+    btn.disabled = true; btn.textContent = 'Đang test...';
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--text2)';
+    statusEl.textContent = '⏳ Đang kết nối...';
+    try {
+      const res = await fetch(`${url}?action=getStaff&_t=${Date.now()}`);
+      const data = await res.json();
+      if (data.staff !== undefined) {
+        GAS = url;
+        localStorage.setItem('lich_gas_url', url);
+        statusEl.style.color = '#276749';
+        statusEl.textContent = `✅ Kết nối thành công! Tìm thấy ${data.staff.length} nhân sự.`;
+        btn.textContent = '✓ Đã lưu';
+        setTimeout(() => { btn.disabled = false; btn.textContent = 'Test'; render(); }, 1500);
+      } else {
+        throw new Error(data.error || 'Phản hồi không đúng định dạng');
+      }
+    } catch (e) {
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = `❌ Lỗi: ${e.message}`;
+      btn.disabled = false; btn.textContent = 'Test';
+    }
   });
 
   // Project form
