@@ -474,18 +474,34 @@ async function fetchAdmin() {
   }
 }
 
+function staffCacheKey() { return `lich_${TOKEN}_${mStr(Y,M)}`; }
+
 async function fetchStaff() {
+  // 1. Hiện cache ngay nếu có (load tức thì)
+  const cached = localStorage.getItem(staffCacheKey());
+  if (cached) {
+    try {
+      const c = JSON.parse(cached);
+      busyDays = c.days  || [];
+      myStaff  = c.staff || null;
+      render(); // hiện ngay từ cache
+    } catch(_) {}
+  }
+  // 2. Fetch GAS ngầm để refresh
   const data = await apiGet({ action: 'getMyDays', token: TOKEN, month: mStr(Y, M) });
   if (data.error) {
-    document.getElementById('app').innerHTML =
-      `<div style="padding:60px 20px;text-align:center;color:var(--red)">
-        Token không hợp lệ hoặc đã hết hạn.<br>
-        <span style="font-size:12px;color:var(--text2);margin-top:8px;display:block">Liên hệ Can Đăng để nhận link mới.</span>
-      </div>`;
-    return false;
+    if (!cached) {
+      document.getElementById('app').innerHTML =
+        `<div style="padding:60px 20px;text-align:center;color:var(--red)">
+          Token không hợp lệ.<br>
+          <span style="font-size:12px;color:var(--text2);margin-top:8px;display:block">Liên hệ Can Đăng để nhận link mới.</span>
+        </div>`;
+    }
+    return !!cached;
   }
   busyDays = data.days  || [];
   myStaff  = data.staff || null;
+  localStorage.setItem(staffCacheKey(), JSON.stringify({ days: busyDays, staff: myStaff }));
   return true;
 }
 
@@ -830,10 +846,30 @@ function bindStaff() {
 }
 
 async function setStatus(status) {
-  document.querySelectorAll('.action-btn').forEach(b => b.disabled = true);
+  // Optimistic update — cập nhật UI ngay, không chờ GAS
+  const idx = busyDays.findIndex(b => b.date === selDay);
+  if (status) {
+    if (idx >= 0) busyDays[idx].status = status;
+    else busyDays.push({ staff_id: myStaff?.id || '', date: selDay, status });
+  } else {
+    if (idx >= 0) busyDays.splice(idx, 1);
+  }
+  // Cập nhật cache ngay
+  localStorage.setItem(staffCacheKey(), JSON.stringify({ days: busyDays, staff: myStaff }));
+  render(); // hiện ngay
+
+  // Gửi lên GAS ngầm
   await apiPost({ action: 'setBusyDay', token: TOKEN, date: selDay, status });
-  // GAS với no-cors: chờ 1.2s cho server ghi xong rồi re-fetch
-  setTimeout(async () => { await fetchStaff(); render(); }, 1200);
+
+  // Re-fetch sau 2s để đồng bộ chắc chắn
+  setTimeout(async () => {
+    const data = await apiGet({ action: 'getMyDays', token: TOKEN, month: mStr(Y, M) });
+    if (!data.error) {
+      busyDays = data.days || [];
+      localStorage.setItem(staffCacheKey(), JSON.stringify({ days: busyDays, staff: myStaff }));
+      render();
+    }
+  }, 2000);
 }
 
 // ── Navigation ────────────────────────────────────────────────
