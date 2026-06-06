@@ -1,22 +1,28 @@
 // ============================================================
-// LỊCH BẬN NHÂN SỰ — Can Đăng Studio
-// Thêm toàn bộ code này vào Google Apps Script hiện tại
-// Sau đó deploy lại (Deploy > Manage deployments > Update)
+// LỊCH BẬN NHÂN SỰ — Can Đăng Studio · Standalone GAS
+// Hướng dẫn deploy:
+//   1. Vào script.google.com → New project
+//   2. Paste toàn bộ file này vào editor
+//   3. Chạy initSheets() một lần (Run > initSheets) để tạo dữ liệu mặc định
+//   4. Deploy → New deployment → Web app
+//      - Execute as: Me
+//      - Who has access: Anyone
+//   5. Copy URL → Paste vào trang lich-ban-nhan-su khi được hỏi
 // ============================================================
 
-const LICH_SHEET_ID = '1KF8Iab6Oo2xMQMXR64SxaO5GZCGRxit7JHtd9v3r8sE';
+const SHEET_ID = '1KF8Iab6Oo2xMQMXR64SxaO5GZCGRxit7JHtd9v3r8sE';
 
-// Gọi hàm này 1 lần để tạo 3 sheet tabs + nhân sự mặc định
-// Chạy từ Apps Script editor: Run > initLichBanSheets
-function initLichBanSheets() {
-  const ss = SpreadsheetApp.openById(LICH_SHEET_ID);
+function getSS() { return SpreadsheetApp.openById(SHEET_ID); }
+
+// Gọi 1 lần để tạo 3 sheet tabs + nhân sự mặc định
+function initSheets() {
+  const ss = getSS();
 
   let staffSheet = ss.getSheetByName('Staff');
   if (!staffSheet) {
     staffSheet = ss.insertSheet('Staff');
     staffSheet.appendRow(['id', 'name', 'token', 'role']);
-    const defaultStaff = ['Thanh', 'Huy', 'Hiếu', 'Tú', 'Hiền', 'Trung'];
-    defaultStaff.forEach(name => {
+    ['Thanh', 'Huy', 'Hiếu', 'Tú', 'Hiền', 'Trung'].forEach(name => {
       staffSheet.appendRow([genId(), name, genToken(), 'staff']);
     });
   }
@@ -37,125 +43,109 @@ function genId() {
 }
 
 function genToken() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let t = '';
-  for (let i = 0; i < 8; i++) t += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 8; i++) t += c[Math.floor(Math.random() * c.length)];
   return t;
 }
 
-// ── Hook vào doGet / doPost hiện có ──────────────────────────
-// Trong doGet(e) của bạn, thêm vào switch hoặc thêm đoạn sau:
-//
-//   const lichResult = handleLichGet(e.parameter);
-//   if (lichResult !== null) return jsonOut(lichResult);
-//
-// Trong doPost(e) của bạn:
-//   let body; try { body = JSON.parse(e.postData.contents); } catch(_) { body = e.parameter; }
-//   const lichResult = handleLichPost(body);
-//   if (lichResult !== null) return jsonOut(lichResult);
-
-function jsonOut(data) {
+function out(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-const LICH_ACTIONS_GET  = ['getBusyDays','getMyDays','getStaff','getProjects','initSheets'];
-const LICH_ACTIONS_POST = ['setBusyDay','addStaff','removeStaff','addProject'];
-
-function handleLichGet(p) {
-  if (!LICH_ACTIONS_GET.includes(p.action)) return null;
+function doGet(e) {
+  const p = e.parameter;
   try {
     switch (p.action) {
-      case 'getBusyDays': return lichGetBusyDays(p.month);
-      case 'getMyDays':   return lichGetMyDays(p.token, p.month);
-      case 'getStaff':    return lichGetStaff();
-      case 'getProjects': return lichGetProjects(p.month);
-      case 'initSheets':  initLichBanSheets(); return { ok: true };
+      case 'getBusyDays': return out(getBusyDays(p.month));
+      case 'getMyDays':   return out(getMyDays(p.token, p.month));
+      case 'getStaff':    return out(getStaff());
+      case 'getProjects': return out(getProjects(p.month));
+      case 'initSheets':  initSheets(); return out({ ok: true });
+      default: return out({ error: 'Unknown action' });
     }
-  } catch (e) { return { error: e.message }; }
+  } catch (err) { return out({ error: err.message }); }
 }
 
-function handleLichPost(body) {
-  if (!LICH_ACTIONS_POST.includes(body.action)) return null;
+function doPost(e) {
+  let p;
+  try { p = JSON.parse(e.postData.contents); } catch (_) { p = e.parameter; }
   try {
-    switch (body.action) {
-      case 'setBusyDay':   return lichSetBusyDay(body);
-      case 'addStaff':     return lichAddStaff(body);
-      case 'removeStaff':  return lichRemoveStaff(body);
-      case 'addProject':   return lichAddProject(body);
+    switch (p.action) {
+      case 'setBusyDay':  return out(setBusyDay(p));
+      case 'addStaff':    return out(addStaff(p));
+      case 'removeStaff': return out(removeStaff(p));
+      case 'addProject':  return out(addProject(p));
+      default: return out({ error: 'Unknown action' });
     }
-  } catch (e) { return { error: e.message }; }
+  } catch (err) { return out({ error: err.message }); }
 }
 
-// ── Helpers ──────────────────────────────────────────────────
+// ── Handlers ─────────────────────────────────────────────────
 
-function lichGetSS() { return SpreadsheetApp.openById(LICH_SHEET_ID); }
-
-function lichGetStaff() {
-  const sheet = lichGetSS().getSheetByName('Staff');
+function getStaff() {
+  const sheet = getSS().getSheetByName('Staff');
   if (!sheet) return { staff: [] };
   const rows = sheet.getDataRange().getValues().slice(1);
   return { staff: rows.filter(r => r[0]).map(r => ({ id: r[0], name: r[1], token: r[2], role: r[3] })) };
 }
 
-function lichGetBusyDays(month) {
-  const ss = lichGetSS();
-  const busySheet = ss.getSheetByName('BusyDays');
-  if (!busySheet) return { days: [] };
-  const { staff } = lichGetStaff();
-  const staffMap = {};
-  staff.forEach(s => staffMap[s.id] = s.name);
-  const rows = busySheet.getDataRange().getValues().slice(1);
-  const days = rows
-    .filter(r => r[0] && r[1] && String(r[1]).startsWith(month))
-    .map(r => ({ staff_id: r[0], date: r[1], status: r[2], staff_name: staffMap[r[0]] || '' }));
-  return { days };
+function getBusyDays(month) {
+  const ss = getSS();
+  const sheet = ss.getSheetByName('BusyDays');
+  if (!sheet) return { days: [] };
+  const { staff } = getStaff();
+  const map = {};
+  staff.forEach(s => map[s.id] = s.name);
+  const rows = sheet.getDataRange().getValues().slice(1);
+  return {
+    days: rows
+      .filter(r => r[0] && r[1] && String(r[1]).startsWith(month))
+      .map(r => ({ staff_id: r[0], date: r[1], status: r[2], staff_name: map[r[0]] || '' }))
+  };
 }
 
-function lichGetMyDays(token, month) {
-  const staffSheet = lichGetSS().getSheetByName('Staff');
-  if (!staffSheet) return { error: 'Not found', days: [], staff: null };
-  const staffRows = staffSheet.getDataRange().getValues().slice(1);
+function getMyDays(token, month) {
+  const ss = getSS();
+  const staffRows = ss.getSheetByName('Staff').getDataRange().getValues().slice(1);
   const row = staffRows.find(r => r[2] === token);
   if (!row) return { error: 'Invalid token', days: [], staff: null };
   const staffId = row[0], staffName = row[1];
-  const busySheet = lichGetSS().getSheetByName('BusyDays');
+  const busySheet = ss.getSheetByName('BusyDays');
   if (!busySheet) return { days: [], staff: { id: staffId, name: staffName } };
-  const rows = busySheet.getDataRange().getValues().slice(1);
-  const days = rows
+  const days = busySheet.getDataRange().getValues().slice(1)
     .filter(r => r[0] === staffId && r[1] && String(r[1]).startsWith(month))
     .map(r => ({ staff_id: r[0], date: r[1], status: r[2] }));
   return { days, staff: { id: staffId, name: staffName } };
 }
 
-function lichSetBusyDay(data) {
-  const ss = lichGetSS();
-  const staffSheet = ss.getSheetByName('Staff');
-  const staffRow = staffSheet.getDataRange().getValues().slice(1).find(r => r[2] === data.token);
+function setBusyDay(data) {
+  const ss = getSS();
+  const staffRow = ss.getSheetByName('Staff').getDataRange().getValues().slice(1).find(r => r[2] === data.token);
   if (!staffRow) return { error: 'Invalid token' };
   const staffId = staffRow[0];
-  const busySheet = ss.getSheetByName('BusyDays');
-  const rows = busySheet.getDataRange().getValues();
+  const sheet = ss.getSheetByName('BusyDays');
+  const rows = sheet.getDataRange().getValues();
   for (let i = 1; i < rows.length; i++) {
     if (rows[i][0] === staffId && rows[i][1] === data.date) {
-      if (!data.status) busySheet.deleteRow(i + 1);
-      else busySheet.getRange(i + 1, 3).setValue(data.status);
+      if (!data.status) sheet.deleteRow(i + 1);
+      else sheet.getRange(i + 1, 3).setValue(data.status);
       return { ok: true };
     }
   }
-  if (data.status) busySheet.appendRow([staffId, data.date, data.status]);
+  if (data.status) sheet.appendRow([staffId, data.date, data.status]);
   return { ok: true };
 }
 
-function lichAddStaff(data) {
-  const sheet = lichGetSS().getSheetByName('Staff');
+function addStaff(data) {
   const id = genId(), token = genToken();
-  sheet.appendRow([id, data.name, token, 'staff']);
+  getSS().getSheetByName('Staff').appendRow([id, data.name, token, 'staff']);
   return { ok: true, id, name: data.name, token, role: 'staff' };
 }
 
-function lichRemoveStaff(data) {
-  const sheet = lichGetSS().getSheetByName('Staff');
+function removeStaff(data) {
+  const sheet = getSS().getSheetByName('Staff');
   const rows = sheet.getDataRange().getValues();
   for (let i = 1; i < rows.length; i++) {
     if (rows[i][0] === data.id) { sheet.deleteRow(i + 1); return { ok: true }; }
@@ -163,23 +153,22 @@ function lichRemoveStaff(data) {
   return { error: 'Not found' };
 }
 
-function lichGetProjects(month) {
-  const sheet = lichGetSS().getSheetByName('Projects');
+function getProjects(month) {
+  const sheet = getSS().getSheetByName('Projects');
   if (!sheet) return { projects: [] };
   const [y, m] = month.split('-').map(Number);
-  const monthStart = new Date(y, m - 1, 1);
-  const monthEnd   = new Date(y, m, 0);
+  const mStart = new Date(y, m - 1, 1), mEnd = new Date(y, m, 0);
   const rows = sheet.getDataRange().getValues().slice(1);
-  const projects = rows
-    .filter(r => r[0] && new Date(r[2]) <= monthEnd && new Date(r[3]) >= monthStart)
-    .map(r => ({ id: r[0], name: r[1], start_date: r[2], end_date: r[3], assigned_staff: r[4] ? String(r[4]).split(',') : [] }));
-  return { projects };
+  return {
+    projects: rows
+      .filter(r => r[0] && new Date(r[2]) <= mEnd && new Date(r[3]) >= mStart)
+      .map(r => ({ id: r[0], name: r[1], start_date: r[2], end_date: r[3], assigned_staff: r[4] ? String(r[4]).split(',') : [] }))
+  };
 }
 
-function lichAddProject(data) {
-  const sheet = lichGetSS().getSheetByName('Projects');
+function addProject(data) {
   const id = genId();
-  const assigned = Array.isArray(data.staff) ? data.staff.join(',') : (data.staff || '');
-  sheet.appendRow([id, data.name, data.start, data.end, assigned]);
+  const staff = Array.isArray(data.staff) ? data.staff.join(',') : (data.staff || '');
+  getSS().getSheetByName('Projects').appendRow([id, data.name, data.start, data.end, staff]);
   return { ok: true, id };
 }
