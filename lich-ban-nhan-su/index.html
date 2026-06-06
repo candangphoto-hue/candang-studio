@@ -136,14 +136,13 @@ body {
   border: 1.5px solid var(--border);
 }
 .cal-cell {
-  min-height: 78px;
+  min-height: 120px;
   padding: 7px 8px;
   border-right: 1.5px solid var(--border);
   border-bottom: 1.5px solid var(--border);
   cursor: pointer;
   transition: background 0.1s;
   position: relative;
-  overflow: hidden;
 }
 .cal-cell:nth-child(7n) { border-right: none; }
 .cal-grid .cal-cell:nth-last-child(-n+7) { border-bottom: none; }
@@ -164,22 +163,25 @@ body {
 }
 .cal-cell.today .day-num { background: var(--today); color: #fff; }
 
-.bars { display: flex; flex-direction: column; gap: 2px; }
+.bars { display: flex; flex-direction: column; gap: 3px; margin-top: 2px; }
 .bar {
-  border-radius: 3px;
-  padding: 2px 6px;
-  font-size: 10px;
-  font-weight: 700;
+  border-radius: 4px;
+  padding: 3px 7px;
+  font-size: 11px;
+  font-weight: 600;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.5;
+  line-height: 1.6;
+  height: 22px;
+  display: flex;
+  align-items: center;
 }
 .bar-red    { background: var(--red); }
 .bar-orange { background: var(--orange); }
 .bar-blue   { background: var(--blue); }
-.bar-more   { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); font-weight: 600; }
+.bar-more   { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); font-weight: 600; height: 20px; }
 
 /* ── Day panel ── */
 .day-panel {
@@ -933,16 +935,14 @@ async function setStatus(status) {
   localStorage.setItem(staffCacheKey(), JSON.stringify({ days: busyDays, staff: myStaff }));
   render(); // hiện ngay
 
-  // Ghi lên GAS — GET nên đọc được response
-  const res = await apiWrite({ action: 'setBusyDay', token: TOKEN, date: selDay, status });
-  if (res && res.ok) {
-    // Xác nhận thành công — sync lại từ Sheets
-    const data = await apiGet({ action: 'getMyDays', token: TOKEN, month: mStr(Y, M) });
-    if (!data.error) {
-      busyDays = data.days || [];
-      localStorage.setItem(staffCacheKey(), JSON.stringify({ days: busyDays, staff: myStaff }));
-      render();
-    }
+  // Ghi lên GAS
+  await apiWrite({ action: 'setBusyDay', token: TOKEN, date: selDay, status });
+  // Luôn sync lại từ Sheets (bất kể ok hay lỗi)
+  const data = await apiGet({ action: 'getMyDays', token: TOKEN, month: mStr(Y, M) });
+  if (!data.error) {
+    busyDays = data.days || [];
+    localStorage.setItem(staffCacheKey(), JSON.stringify({ days: busyDays, staff: myStaff }));
+    render();
   }
 }
 
@@ -984,17 +984,22 @@ async function reload() {
 
 // ── Init ──────────────────────────────────────────────────────
 
+let _syncTimer = null;
+
 async function init() {
   const n = new Date();
   Y = n.getFullYear(); M = n.getMonth() + 1;
   if (IS_ADM) {
-    try {
-      await fetchAdmin();
-    } catch(e) {
-      // GAS lỗi → vẫn render (hiện trang trống, tab Cài đặt để fix URL)
-      console.warn('fetchAdmin failed:', e.message);
-    }
+    try { await fetchAdmin(); } catch(e) { console.warn('fetchAdmin failed:', e.message); }
     render();
+    // Auto-sync lịch tổng mỗi 30s
+    if (_syncTimer) clearInterval(_syncTimer);
+    _syncTimer = setInterval(async () => {
+      try {
+        await fetchAdmin();
+        render();
+      } catch(_) {}
+    }, 30000);
   } else {
     const ok = await fetchStaff();
     if (ok) render();

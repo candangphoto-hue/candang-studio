@@ -54,6 +54,12 @@ function initSheets() {
 
 function genId() { return Utilities.getUuid().replace(/-/g, '').substring(0, 8); }
 
+// Google Sheets tự convert chuỗi ngày thành Date object — cần format lại
+function fmtDate(v) {
+  if (v instanceof Date) return Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  return String(v);
+}
+
 function out(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
@@ -107,7 +113,9 @@ function getBusyDays(month) {
   const sheet = ss.getSheetByName('BusyDays');
   if (!sheet) return { days: [] };
   const { staff } = getStaff(); const map = {}; staff.forEach(s => map[s.id] = s.name);
-  return { days: sheet.getDataRange().getValues().slice(1).filter(r => r[0] && r[1] && String(r[1]).startsWith(month)).map(r => ({ staff_id: r[0], date: r[1], status: r[2], staff_name: map[r[0]] || '' })) };
+  return { days: sheet.getDataRange().getValues().slice(1)
+    .filter(r => r[0] && r[1] && fmtDate(r[1]).startsWith(month))
+    .map(r => ({ staff_id: r[0], date: fmtDate(r[1]), status: r[2], staff_name: map[r[0]] || '' })) };
 }
 
 function getMyDays(token, month) {
@@ -115,7 +123,9 @@ function getMyDays(token, month) {
   const row = staffRows.find(r => r[2] === token);
   if (!row) return { error: 'Invalid token', days: [], staff: null };
   const busySheet = getSS().getSheetByName('BusyDays');
-  const days = busySheet ? busySheet.getDataRange().getValues().slice(1).filter(r => r[0] === row[0] && r[1] && String(r[1]).startsWith(month)).map(r => ({ staff_id: r[0], date: r[1], status: r[2] })) : [];
+  const days = busySheet ? busySheet.getDataRange().getValues().slice(1)
+    .filter(r => r[0] === row[0] && r[1] && fmtDate(r[1]).startsWith(month))
+    .map(r => ({ staff_id: r[0], date: fmtDate(r[1]), status: r[2] })) : [];
   return { days, staff: { id: row[0], name: row[1] } };
 }
 
@@ -125,7 +135,7 @@ function setBusyDay(data) {
   const sheet = getSS().getSheetByName('BusyDays');
   const rows = sheet.getDataRange().getValues();
   for (let i = 1; i < rows.length; i++) {
-    if (rows[i][0] === staffRow[0] && rows[i][1] === data.date) {
+    if (rows[i][0] === staffRow[0] && fmtDate(rows[i][1]) === data.date) {
       if (!data.status) sheet.deleteRow(i + 1); else sheet.getRange(i + 1, 3).setValue(data.status);
       return { ok: true };
     }
@@ -139,7 +149,7 @@ function adminSetBusyDay(data) {
   if (!sheet) return { error: 'No sheet' };
   const rows = sheet.getDataRange().getValues();
   for (let i = 1; i < rows.length; i++) {
-    if (rows[i][0] === data.staff_id && rows[i][1] === data.date) {
+    if (rows[i][0] === data.staff_id && fmtDate(rows[i][1]) === data.date) {
       if (!data.status) sheet.deleteRow(i + 1); else sheet.getRange(i + 1, 3).setValue(data.status);
       return { ok: true };
     }
