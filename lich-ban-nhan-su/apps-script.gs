@@ -73,8 +73,9 @@ function doPost(e) {
   try { p = JSON.parse(e.postData.contents); } catch (_) { p = e.parameter; }
   try {
     switch (p.action) {
-      case 'setBusyDay':  return out(setBusyDay(p));
-      case 'addStaff':    return out(addStaff(p));
+      case 'setBusyDay':       return out(setBusyDay(p));
+      case 'adminSetBusyDay':  return out(adminSetBusyDay(p));
+      case 'addStaff':         return out(addStaff(p));
       case 'removeStaff': return out(removeStaff(p));
       case 'addProject':  return out(addProject(p));
       default: return out({ error: 'Unknown action' });
@@ -135,6 +136,22 @@ function setBusyDay(data) {
     }
   }
   if (data.status) sheet.appendRow([staffId, data.date, data.status]);
+  return { ok: true };
+}
+
+// Admin ghi lịch bận trực tiếp bằng staff_id (không cần token)
+function adminSetBusyDay(data) {
+  const sheet = getSS().getSheetByName('BusyDays');
+  if (!sheet) return { error: 'BusyDays sheet not found' };
+  const rows = sheet.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][0] === data.staff_id && rows[i][1] === data.date) {
+      if (!data.status) sheet.deleteRow(i + 1);
+      else sheet.getRange(i + 1, 3).setValue(data.status);
+      return { ok: true };
+    }
+  }
+  if (data.status) sheet.appendRow([data.staff_id, data.date, data.status]);
   return { ok: true };
 }
 
