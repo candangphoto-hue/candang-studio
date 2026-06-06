@@ -963,10 +963,23 @@ async function goToday() {
   await reload();
 }
 
+function showError(msg) {
+  document.getElementById('app').innerHTML =
+    `<div style="padding:60px 20px;text-align:center;color:var(--red)">
+      ⚠️ ${msg}<br>
+      <span style="font-size:12px;color:var(--text2);margin-top:8px;display:block">Kiểm tra Apps Script URL trong tab Cài đặt.</span>
+      <button class="btn" style="margin-top:16px" onclick="init()">Thử lại</button>
+    </div>`;
+}
+
 async function reload() {
   document.getElementById('app').innerHTML = '<div class="loading"><span class="spinner"></span> Đang tải...</div>';
-  if (IS_ADM) await fetchAdmin(); else await fetchStaff();
-  render();
+  try {
+    if (IS_ADM) await fetchAdmin(); else await fetchStaff();
+    render();
+  } catch(e) {
+    showError('Không kết nối được GAS. ' + e.message);
+  }
 }
 
 // ── Init ──────────────────────────────────────────────────────
@@ -975,7 +988,12 @@ async function init() {
   const n = new Date();
   Y = n.getFullYear(); M = n.getMonth() + 1;
   if (IS_ADM) {
-    await fetchAdmin();
+    try {
+      await fetchAdmin();
+    } catch(e) {
+      // GAS lỗi → vẫn render (hiện trang trống, tab Cài đặt để fix URL)
+      console.warn('fetchAdmin failed:', e.message);
+    }
     render();
   } else {
     const ok = await fetchStaff();
