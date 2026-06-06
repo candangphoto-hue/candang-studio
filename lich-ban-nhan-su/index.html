@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lịch Bận Nhân Sự — Can Đăng Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #ffffff;
+  --bg2:     #f7f8fa;
+  --bg3:     #edf2f7;
+  --border:  #e2e8f0;
+  --text:    #1a202c;
+  --text2:   #718096;
+  --text3:   #a0aec0;
+  --today:   #1a56db;
+  --red:     #e53e3e;
+  --orange:  #dd6b20;
+  --blue:    #2b6cb0;
+  --accent:  #1a56db;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:     #0f1117;
+    --bg2:    #1a1f2e;
+    --bg3:    #252b3b;
+    --border: #2d3748;
+    --text:   #e2e8f0;
+    --text2:  #a0aec0;
+    --text3:  #718096;
+  }
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+  min-width: 600px;
+}
+
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px 48px; }
+
+/* ── Header ── */
+.page-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 0 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.month-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.nav-row { display: flex; gap: 6px; align-items: center; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--bg3); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.btn-icon { padding: 0; width: 34px; height: 34px; font-size: 16px; }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { opacity: 0.88; }
+.btn-danger { color: var(--red); }
+.btn-danger:hover { background: #fff5f5; border-color: var(--red); }
+@media (prefers-color-scheme: dark) { .btn-danger:hover { background: #3b1515; } }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+  gap: 2px;
+}
+.tab-btn {
+  padding: 9px 20px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Calendar ── */
+.cal-hd {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1.5px solid var(--border);
+  border-bottom: none;
+}
+.cal-hd-cell {
+  text-align: center;
+  padding: 8px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text2);
+  border-right: 1.5px solid var(--border);
+}
+.cal-hd-cell:last-child { border-right: none; }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1.5px solid var(--border);
+}
+.cal-cell {
+  min-height: 78px;
+  padding: 7px 8px;
+  border-right: 1.5px solid var(--border);
+  border-bottom: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+  overflow: hidden;
+}
+.cal-cell:nth-child(7n) { border-right: none; }
+.cal-grid .cal-cell:nth-last-child(-n+7) { border-bottom: none; }
+.cal-cell:hover { background: var(--bg2); }
+.cal-cell.sel { background: var(--bg3); }
+.cal-cell.othermon { opacity: 0.45; pointer-events: none; }
+
+.day-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+.cal-cell.today .day-num { background: var(--today); color: #fff; }
+
+.bars { display: flex; flex-direction: column; gap: 2px; }
+.bar {
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.5;
+}
+.bar-red    { background: var(--red); }
+.bar-orange { background: var(--orange); }
+.bar-blue   { background: var(--blue); }
+.bar-more   { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); font-weight: 600; }
+
+/* ── Day panel ── */
+.day-panel {
+  margin-top: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.day-panel-hd {
+  padding: 12px 16px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 14px;
+}
+.day-panel-body { padding: 14px 16px; }
+.panel-hint { padding: 12px 0; color: var(--text3); font-size: 13px; }
+
+.staff-status-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.staff-status-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  min-width: 140px;
+}
+.staff-name-lbl { font-weight: 500; font-size: 13px; flex: 1; }
+
+.badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-red    { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+.badge-orange { background: #fffaf0; color: #c05621; border: 1px solid #fbd38d; }
+.badge-free   { background: var(--bg3); color: var(--text3); border: 1px solid var(--border); }
+@media (prefers-color-scheme: dark) {
+  .badge-red    { background: #3b1515; color: #fc8181; border-color: #742a2a; }
+  .badge-orange { background: #3b1f0a; color: #f6ad55; border-color: #7b341e; }
+  .badge-free   { background: var(--bg3); }
+}
+
+.proj-list-panel { margin-bottom: 10px; }
+.proj-panel-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--blue);
+  border-bottom: 1px solid var(--border);
+}
+.proj-panel-item:last-child { border-bottom: none; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+/* Staff action buttons */
+.day-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.action-btn {
+  padding: 9px 18px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.action-btn:disabled { opacity: 0.45; cursor: default; }
+.action-btn:hover:not(:disabled) { opacity: 0.82; }
+.action-busy  { background: var(--red);    color: #fff; }
+.action-flex  { background: var(--orange); color: #fff; }
+.action-clear { background: transparent;  color: var(--text2); border-color: var(--border); }
+.cur-status-lbl { margin-top: 10px; font-size: 12px; color: var(--text2); }
+
+/* Staff banner */
+.staff-banner {
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #ebf8ff, #bee3f8);
+  border: 1px solid #90cdf4;
+  color: #2b6cb0;
+}
+@media (prefers-color-scheme: dark) {
+  .staff-banner { background: linear-gradient(135deg, #1a365d, #2a4a7f); border-color: #2c5282; color: #90cdf4; }
+}
+.staff-banner-title { font-weight: 600; font-size: 15px; }
+.staff-banner-sub   { font-size: 12px; opacity: 0.75; margin-top: 3px; }
+
+/* Tab: Nhân sự */
+.staff-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.staff-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.staff-card-info { flex: 1; min-width: 0; }
+.staff-card-name { font-weight: 600; font-size: 14px; }
+.staff-card-meta { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.staff-card-link {
+  font-size: 11px;
+  color: var(--text3);
+  word-break: break-all;
+  margin-top: 3px;
+  font-family: monospace;
+}
+.staff-card-actions { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; flex-shrink: 0; }
+
+.add-row {
+  display: flex; gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.inp {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+  flex: 1;
+}
+.inp:focus { border-color: var(--accent); }
+
+/* Tab: Dự án */
+.proj-list { display: flex; flex-direction: column; gap: 10px; }
+.proj-card {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.proj-card-title { font-weight: 600; font-size: 14px; margin-bottom: 3px; }
+.proj-card-date  { font-size: 12px; color: var(--text2); }
+.proj-card-staff { font-size: 12px; color: var(--text3); margin-top: 3px; }
+
+.add-proj-form {
+  margin-top: 14px;
+  padding: 16px;
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.form-lbl { font-size: 12px; font-weight: 600; color: var(--text2); display: block; margin-bottom: 4px; }
+.inp-full { width: 100%; }
+.cb-group { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+.cb-item { display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer; }
+.cb-item input { cursor: pointer; }
+.form-btns { display: flex; gap: 8px; }
+
+/* Avatar */
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.av-lg { width: 42px; height: 42px; font-size: 17px; }
+.av0 { background: #2b6cb0; } .av1 { background: #276749; } .av2 { background: #7b341e; }
+.av3 { background: #6b46c1; } .av4 { background: #c05621; } .av5 { background: #b83280; }
+.av6 { background: #2c5282; } .av7 { background: #285e61; }
+
+/* Loading / spinner */
+.loading { text-align: center; padding: 60px 20px; color: var(--text2); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block; width: 18px; height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle; margin-right: 6px;
+}
+.empty { color: var(--text3); font-size: 13px; padding: 8px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="app"><div class="loading"><span class="spinner"></span> Đang tải...</div></div>
+</div>
+
+<script>
+const GAS = 'https://script.google.com/macros/s/AKfycbwdIlXaPOArfIo6eh_KQuIBrr-RxS9YlO1Cphzi6AiEYJS9-OKXKHERDVZvsl-o3PWn/exec';
+
+const urlP   = new URLSearchParams(location.search);
+const TOKEN  = urlP.get('staff');
+const IS_ADM = !TOKEN;
+
+const DOW_VI     = ['T2','T3','T4','T5','T6','T7','CN'];
+const MONTHS_VI  = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
+                    'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+const AV_COLS    = ['av0','av1','av2','av3','av4','av5','av6','av7'];
+
+// ── State ────────────────────────────────────────────────────
+let Y, M;           // current year/month
+let busyDays  = []; // {staff_id, date, status, staff_name}
+let staffList = []; // {id, name, token, role}
+let projects  = []; // {id, name, start_date, end_date, assigned_staff[]}
+let myStaff   = null;
+let activeTab = 'lich';
+let selDay    = null; // selected date string 'YYYY-MM-DD'
+let showAddProj = false;
+
+// ── Utilities ────────────────────────────────────────────────
+const pad2  = n => String(n).padStart(2, '0');
+const mStr  = (y, m) => `${y}-${pad2(m)}`;
+const dStr  = (y, m, d) => `${y}-${pad2(m)}-${pad2(d)}`;
+const fmtDate = iso => { if (!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; };
+
+function avCls(i)    { return AV_COLS[i % AV_COLS.length]; }
+function avLetter(n) { return n ? n.charAt(0).toUpperCase() : '?'; }
+
+function isToday(y, m, d) {
+  const n = new Date();
+  return n.getFullYear() === y && n.getMonth() + 1 === m && n.getDate() === d;
+}
+
+// ── API ──────────────────────────────────────────────────────
+async function apiGet(params) {
+  const res = await fetch(`${GAS}?${new URLSearchParams(params)}`);
+  return res.json();
+}
+
+async function apiPost(body) {
+  // fire-and-forget (no-cors) — same pattern as dashboard
+  await fetch(GAS, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(body)
+  });
+}
+
+// ── Data fetching ─────────────────────────────────────────────
+async function fetchAdmin() {
+  const ms = mStr(Y, M);
+  const [bd, st, pr] = await Promise.all([
+    apiGet({ action: 'getBusyDays', month: ms }),
+    apiGet({ action: 'getStaff' }),
+    apiGet({ action: 'getProjects', month: ms })
+  ]);
+  busyDays  = bd.days     || [];
+  staffList = st.staff    || [];
+  projects  = pr.projects || [];
+}
+
+async function fetchStaff() {
+  const data = await apiGet({ action: 'getMyDays', token: TOKEN, month: mStr(Y, M) });
+  if (data.error) {
+    document.getElementById('app').innerHTML =
+      `<div style="padding:60px 20px;text-align:center;color:var(--red)">
+        Token không hợp lệ hoặc đã hết hạn.<br>
+        <span style="font-size:12px;color:var(--text2);margin-top:8px;display:block">Liên hệ Can Đăng để nhận link mới.</span>
+      </div>`;
+    return false;
+  }
+  busyDays = data.days  || [];
+  myStaff  = data.staff || null;
+  return true;
+}
+
+// ── Calendar helpers ──────────────────────────────────────────
+function calDays() {
+  const firstDow = new Date(Y, M - 1, 1).getDay(); // 0=Sun
+  const offset   = firstDow === 0 ? 6 : firstDow - 1; // Mon-start
+  const inCur    = new Date(Y, M, 0).getDate();
+  const inPrev   = new Date(Y, M - 1, 0).getDate();
+  const pY = M === 1  ? Y - 1 : Y, pM = M === 1  ? 12 : M - 1;
+  const nY = M === 12 ? Y + 1 : Y, nM = M === 12 ? 1  : M + 1;
+  const days = [];
+  for (let i = offset - 1; i >= 0; i--) days.push({ y: pY, m: pM, d: inPrev - i, cur: false });
+  for (let d = 1; d <= inCur; d++)      days.push({ y: Y,  m: M,  d,              cur: true  });
+  let nd = 1;
+  while (days.length < 42) days.push({ y: nY, m: nM, d: nd++, cur: false });
+  return days;
+}
+
+function barsFor(ds) {
+  const bars = [];
+  if (IS_ADM) {
+    projects.filter(p => ds >= p.start_date && ds <= p.end_date)
+      .forEach(p => bars.push({ label: p.name, cls: 'bar-blue' }));
+    busyDays.filter(b => b.date === ds)
+      .forEach(b => bars.push({ label: b.staff_name || b.staff_id, cls: b.status === 'red' ? 'bar-red' : 'bar-orange' }));
+  } else {
+    busyDays.filter(b => b.date === ds)
+      .forEach(b => bars.push({ label: b.status === 'red' ? 'Bận cả ngày' : 'Có thể sắp xếp', cls: b.status === 'red' ? 'bar-red' : 'bar-orange' }));
+  }
+  return bars;
+}
+
+// ── Render helpers ────────────────────────────────────────────
+function headerHTML() {
+  const title = `${MONTHS_VI[M - 1].replace('Tháng ', 'THÁNG ')} ${Y}`;
+  return `<div class="page-hd">
+    <div class="month-title">${title}</div>
+    <div class="nav-row">
+      <button class="btn" id="btnToday">Hôm nay</button>
+      <button class="btn btn-icon" id="btnPrev">‹</button>
+      <button class="btn btn-icon" id="btnNext">›</button>
+    </div>
+  </div>`;
+}
+
+function calHTML() {
+  const today = new Date();
+  const todayStr = dStr(today.getFullYear(), today.getMonth() + 1, today.getDate());
+  const hdr = DOW_VI.map(d => `<div class="cal-hd-cell">${d}</div>`).join('');
+  const cells = calDays().map(({ y, m, d, cur }) => {
+    const ds    = dStr(y, m, d);
+    const bars  = barsFor(ds);
+    const shown = bars.slice(0, 3);
+    const extra = bars.length - 3;
+    const barsHtml = shown.map(b => `<div class="bar ${b.cls}">${h(b.label)}</div>`).join('')
+      + (extra > 0 ? `<div class="bar bar-more">+${extra} người</div>` : '');
+    const cls = ['cal-cell', cur ? '' : 'othermon', ds === todayStr ? 'today' : '', ds === selDay ? 'sel' : ''].filter(Boolean).join(' ');
+    return `<div class="${cls}" data-date="${ds}"><div class="day-num">${d}</div><div class="bars">${barsHtml}</div></div>`;
+  }).join('');
+  return `<div class="cal-hd">${hdr}</div><div class="cal-grid" id="calGrid">${cells}</div>`;
+}
+
+function h(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Admin render ──────────────────────────────────────────────
+function renderAdmin() {
+  const tabs = `<div class="tabs">
+    ${['lich','nhansu','duan'].map((t, i) => {
+      const labels = ['Lịch tổng','Nhân sự','Dự án'];
+      return `<button class="tab-btn${activeTab===t?' active':''}" data-tab="${t}">${labels[i]}</button>`;
+    }).join('')}
+  </div>`;
+  const content = activeTab === 'lich'   ? tabLichHTML()
+                : activeTab === 'nhansu' ? tabNhanSuHTML()
+                :                          tabDuAnHTML();
+  return headerHTML() + tabs + `<div id="tabContent">${content}</div>`;
+}
+
+function tabLichHTML() {
+  const panel = selDay ? adminPanelHTML() : `<div class="panel-hint">Nhấn vào ngày để xem chi tiết.</div>`;
+  return calHTML() + panel;
+}
+
+function adminPanelHTML() {
+  const [py, pm, pd] = selDay.split('-');
+  const lbl = `${parseInt(pd)} tháng ${parseInt(pm)}, ${py}`;
+  const dayProj  = projects.filter(p => selDay >= p.start_date && selDay <= p.end_date);
+  const dayBusy  = busyDays.filter(b => b.date === selDay);
+
+  const projHTML = dayProj.map(p => {
+    const names = (p.assigned_staff || [])
+      .map(sid => (staffList.find(s => s.id === sid) || {}).name || '').filter(Boolean).join(', ');
+    return `<div class="proj-panel-item">🎬 <strong>${h(p.name)}</strong>${names ? ` — ${h(names)}` : ''}</div>`;
+  }).join('');
+
+  const staffHTML = staffList.map((s, i) => {
+    const busy = dayBusy.find(b => b.staff_id === s.id);
+    const badgeCls = busy ? (busy.status === 'red' ? 'badge-red' : 'badge-orange') : 'badge-free';
+    const badgeLbl = busy ? (busy.status === 'red' ? 'Bận'       : 'Linh hoạt')    : 'Rảnh';
+    return `<div class="staff-status-item">
+      <div class="avatar ${avCls(i)}">${avLetter(s.name)}</div>
+      <span class="staff-name-lbl">${h(s.name)}</span>
+      <span class="badge ${badgeCls}">${badgeLbl}</span>
+    </div>`;
+  }).join('');
+
+  return `<div class="day-panel">
+    <div class="day-panel-hd">${lbl}</div>
+    <div class="day-panel-body">
+      ${dayProj.length ? `<div class="proj-list-panel">${projHTML}</div><hr class="divider">` : ''}
+      <div class="staff-status-grid">${staffHTML || '<span class="empty">Chưa có nhân sự nào.</span>'}</div>
+    </div>
+  </div>`;
+}
+
+function tabNhanSuHTML() {
+  const base = location.origin + location.pathname;
+  const cards = staffList.map((s, i) => {
+    const cnt  = busyDays.filter(b => b.staff_id === s.id).length;
+    const link = `${base}?staff=${s.token}`;
+    return `<div class="staff-card">
+      <div class="avatar av-lg ${avCls(i)}">${avLetter(s.name)}</div>
+      <div class="staff-card-info">
+        <div class="staff-card-name">${h(s.name)}</div>
+        <div class="staff-card-meta">${cnt} ngày bận tháng này</div>
+        <div class="staff-card-link">${h(link)}</div>
+      </div>
+      <div class="staff-card-actions">
+        <button class="btn" style="font-size:11px;padding:4px 10px" data-copy="${h(link)}">Copy link</button>
+        <button class="btn btn-danger" style="font-size:11px;padding:4px 10px" data-rm="${h(s.id)}" data-rmname="${h(s.name)}">Xóa</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div>
+    <div class="staff-grid">${cards || '<div class="empty">Chưa có nhân sự.</div>'}</div>
+    <div class="add-row">
+      <input class="inp" id="inpNewStaff" placeholder="Tên nhân sự mới..." maxlength="50">
+      <button class="btn btn-primary" id="btnAddStaff">+ Thêm</button>
+    </div>
+  </div>`;
+}
+
+function tabDuAnHTML() {
+  const cards = projects.map(p => {
+    const names = (p.assigned_staff || [])
+      .map(sid => (staffList.find(s => s.id === sid) || {}).name || '').filter(Boolean).join(', ');
+    return `<div class="proj-card">
+      <div class="proj-card-title">🎬 ${h(p.name)}</div>
+      <div class="proj-card-date">${fmtDate(p.start_date)} → ${fmtDate(p.end_date)}</div>
+      ${names ? `<div class="proj-card-staff">Nhân sự: ${h(names)}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  const cbStaff = staffList.map(s =>
+    `<label class="cb-item"><input type="checkbox" name="pstaff" value="${h(s.id)}"> ${h(s.name)}</label>`
+  ).join('');
+
+  const addForm = showAddProj
+    ? `<div class="add-proj-form">
+        <div class="form-row">
+          <div>
+            <label class="form-lbl">Tên dự án</label>
+            <input class="inp inp-full" id="projName" placeholder="Tên dự án...">
+          </div>
+          <div></div>
+          <div>
+            <label class="form-lbl">Ngày bắt đầu</label>
+            <input type="date" class="inp inp-full" id="projStart">
+          </div>
+          <div>
+            <label class="form-lbl">Ngày kết thúc</label>
+            <input type="date" class="inp inp-full" id="projEnd">
+          </div>
+        </div>
+        <label class="form-lbl">Nhân sự assign</label>
+        <div class="cb-group">${cbStaff}</div>
+        <div class="form-btns">
+          <button class="btn btn-primary" id="btnSaveProj">Lưu dự án</button>
+          <button class="btn" id="btnCancelProj">Hủy</button>
+        </div>
+      </div>`
+    : `<button class="btn btn-primary" id="btnShowAddProj" style="margin-top:14px">+ Thêm dự án mới</button>`;
+
+  return `<div>
+    <div class="proj-list">${cards || '<div class="empty">Chưa có dự án nào trong tháng này.</div>'}</div>
+    ${addForm}
+  </div>`;
+}
+
+// ── Staff render ──────────────────────────────────────────────
+function renderStaff() {
+  const name = myStaff ? myStaff.name : '...';
+  const panel = selDay ? staffPanelHTML() : `<div class="panel-hint">Nhấn vào ngày để đánh dấu lịch bận.</div>`;
+  return `${headerHTML()}
+    <div class="staff-banner">
+      <div class="staff-banner-title">Xin chào ${h(name)} 👋</div>
+      <div class="staff-banner-sub">Đây là lịch của bạn. Chỉ bạn nhìn thấy dữ liệu này.</div>
+    </div>
+    ${calHTML()}
+    ${panel}`;
+}
+
+function staffPanelHTML() {
+  const [py, pm, pd] = selDay.split('-');
+  const lbl      = `${parseInt(pd)} tháng ${parseInt(pm)}, ${py}`;
+  const existing = busyDays.find(b => b.date === selDay);
+  const curSt    = existing ? existing.status : null;
+  const curLbl   = curSt ? (curSt === 'red' ? 'Bận cả ngày' : 'Có thể sắp xếp') : null;
+
+  return `<div class="day-panel">
+    <div class="day-panel-hd">${lbl}</div>
+    <div class="day-panel-body">
+      <div class="day-actions">
+        <button class="action-btn action-busy"  id="btnBusy">🔴 Bận cả ngày</button>
+        <button class="action-btn action-flex"  id="btnFlex">🟠 Có thể sắp xếp</button>
+        ${existing ? '<button class="action-btn action-clear" id="btnClear">✕ Xóa</button>' : ''}
+      </div>
+      ${curLbl ? `<div class="cur-status-lbl">Trạng thái hiện tại: <strong>${curLbl}</strong></div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── Mount & bind ──────────────────────────────────────────────
+function render() {
+  document.getElementById('app').innerHTML = IS_ADM ? renderAdmin() : renderStaff();
+  IS_ADM ? bindAdmin() : bindStaff();
+}
+
+function bindNav() {
+  document.getElementById('btnPrev')?.addEventListener('click', () => nav(-1));
+  document.getElementById('btnNext')?.addEventListener('click', () => nav(1));
+  document.getElementById('btnToday')?.addEventListener('click', goToday);
+}
+
+function bindAdmin() {
+  bindNav();
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn =>
+    btn.addEventListener('click', () => {
+      activeTab = btn.dataset.tab;
+      selDay = null;
+      showAddProj = false;
+      render();
+    })
+  );
+
+  // Calendar click
+  document.getElementById('calGrid')?.addEventListener('click', e => {
+    const cell = e.target.closest('.cal-cell');
+    if (!cell || cell.classList.contains('othermon')) return;
+    selDay = selDay === cell.dataset.date ? null : cell.dataset.date;
+    render();
+  });
+
+  // Copy link
+  document.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Đã copy';
+        setTimeout(() => btn.textContent = orig, 1800);
+      });
+    });
+  });
+
+  // Remove staff
+  document.querySelectorAll('[data-rm]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm(`Xóa nhân sự "${btn.dataset.rmname}"? Không thể hoàn tác.`)) return;
+      btn.disabled = true; btn.textContent = '...';
+      await apiPost({ action: 'removeStaff', id: btn.dataset.rm });
+      await reload();
+    });
+  });
+
+  // Add staff
+  document.getElementById('btnAddStaff')?.addEventListener('click', async () => {
+    const inp  = document.getElementById('inpNewStaff');
+    const name = inp.value.trim();
+    if (!name) { inp.focus(); return; }
+    const btn = document.getElementById('btnAddStaff');
+    btn.disabled = true; btn.textContent = '...';
+    await apiPost({ action: 'addStaff', name });
+    await reload();
+  });
+  document.getElementById('inpNewStaff')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btnAddStaff')?.click();
+  });
+
+  // Project form
+  document.getElementById('btnShowAddProj')?.addEventListener('click', () => { showAddProj = true; render(); });
+  document.getElementById('btnCancelProj')?.addEventListener('click', () => { showAddProj = false; render(); });
+  document.getElementById('btnSaveProj')?.addEventListener('click', async () => {
+    const name  = document.getElementById('projName').value.trim();
+    const start = document.getElementById('projStart').value;
+    const end   = document.getElementById('projEnd').value;
+    if (!name || !start || !end) { alert('Vui lòng điền đầy đủ tên, ngày bắt đầu và ngày kết thúc.'); return; }
+    const staffIds = [...document.querySelectorAll('input[name="pstaff"]:checked')].map(cb => cb.value);
+    const btn = document.getElementById('btnSaveProj');
+    btn.disabled = true; btn.textContent = 'Đang lưu...';
+    await apiPost({ action: 'addProject', name, start, end, staff: staffIds });
+    showAddProj = false;
+    await reload();
+  });
+}
+
+function bindStaff() {
+  bindNav();
+
+  // Calendar click (no other-month)
+  document.getElementById('calGrid')?.addEventListener('click', e => {
+    const cell = e.target.closest('.cal-cell');
+    if (!cell || cell.classList.contains('othermon')) return;
+    selDay = selDay === cell.dataset.date ? null : cell.dataset.date;
+    render();
+  });
+
+  document.getElementById('btnBusy')?.addEventListener('click', () => setStatus('red'));
+  document.getElementById('btnFlex')?.addEventListener('click', () => setStatus('orange'));
+  document.getElementById('btnClear')?.addEventListener('click', () => setStatus(''));
+}
+
+async function setStatus(status) {
+  document.querySelectorAll('.action-btn').forEach(b => b.disabled = true);
+  await apiPost({ action: 'setBusyDay', token: TOKEN, date: selDay, status });
+  // GAS với no-cors: chờ 1.2s cho server ghi xong rồi re-fetch
+  setTimeout(async () => { await fetchStaff(); render(); }, 1200);
+}
+
+// ── Navigation ────────────────────────────────────────────────
+async function nav(delta) {
+  M += delta;
+  if (M > 12) { M = 1; Y++; }
+  if (M < 1)  { M = 12; Y--; }
+  selDay = null;
+  showAddProj = false;
+  await reload();
+}
+
+async function goToday() {
+  const n = new Date();
+  Y = n.getFullYear(); M = n.getMonth() + 1;
+  selDay = null;
+  await reload();
+}
+
+async function reload() {
+  document.getElementById('app').innerHTML = '<div class="loading"><span class="spinner"></span> Đang tải...</div>';
+  if (IS_ADM) await fetchAdmin(); else await fetchStaff();
+  render();
+}
+
+// ── Init ──────────────────────────────────────────────────────
+async function init() {
+  const n = new Date();
+  Y = n.getFullYear(); M = n.getMonth() + 1;
+  if (IS_ADM) {
+    await fetchAdmin();
+    render();
+  } else {
+    const ok = await fetchStaff();
+    if (ok) render();
+  }
+}
+
+init();
+</script>
+</body>
+</html>
