@@ -81,6 +81,7 @@ function doGet(e) {
       case 'addStaff':         return out(addStaff(p));
       case 'removeStaff':      return out(removeStaff(p));
       case 'addProject':       return out(addProject(p));
+      case 'clearBusyDays':   return out(clearBusyDays());
       default:                 return out({ error: 'Unknown action' });
     }
   } catch (err) { return out({ error: err.message }); }
@@ -184,6 +185,14 @@ function getProjects(month) {
   const [y, m] = month.split('-').map(Number);
   const mStart = new Date(y, m - 1, 1), mEnd = new Date(y, m, 0);
   return { projects: sheet.getDataRange().getValues().slice(1).filter(r => r[0] && new Date(r[2]) <= mEnd && new Date(r[3]) >= mStart).map(r => ({ id: r[0], name: r[1], start_date: r[2], end_date: r[3], assigned_staff: r[4] ? String(r[4]).split(',') : [] })) };
+}
+
+function clearBusyDays() {
+  const sheet = getSS().getSheetByName('BusyDays');
+  if (!sheet) return { ok: true };
+  const last = sheet.getLastRow();
+  if (last > 1) sheet.deleteRows(2, last - 1);
+  return { ok: true, cleared: last - 1 };
 }
 
 function addProject(data) {
