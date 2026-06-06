@@ -398,6 +398,7 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
       <div class="ni" onclick="sw('salary',this)"><span class="ni-ic">👤</span>Nhân sự & Lương</div>
       <div class="ni" onclick="sw('expenses',this)"><span class="ni-ic">🏢</span>Chi phí vận hành</div>
       <div class="ni" onclick="sw('clients',this)"><span class="ni-ic">👥</span>Khách hàng</div>
+      <div class="ni" onclick="sw('lichban',this)"><span class="ni-ic">📆</span>Lịch bận nhân sự</div>
     </div>
     <div class="sb-sec">
       <div class="sb-lbl">AI Tools</div>
@@ -653,6 +654,11 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
         </table></div>
       </div>
       <div id="expInlineForm" style="display:none;margin-top:14px"></div>
+    </div>
+
+    <!-- LICH BAN NHAN SU -->
+    <div id="v-lichban" class="view">
+      <iframe src="../lich-ban-nhan-su/" style="width:100%;height:calc(100vh - 120px);border:none;border-radius:8px;" loading="lazy"></iframe>
     </div>
 
     <!-- CLAUDE -->
@@ -3234,6 +3240,7 @@ const VIEWS={
   salary:['Nhân sự & Lương','Bảng lương theo tháng'],
   expenses:['Chi phí vận hành','Thuê nhà · Phần mềm · Cố định hàng tháng'],
   clients:['Khách hàng','Danh sách & lịch sử'],
+  lichban:['Lịch bận nhân sự','Theo dõi lịch bận · assign dự án'],
   claude:['Claude Shortcut','Nhập liệu nhanh từ điện thoại'],
   settings:['Cài đặt','Nhân sự cố định & cấu hình studio'],
 };
