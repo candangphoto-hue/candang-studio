@@ -157,7 +157,9 @@ function adminSetBusyDay(data) {
 
 function addStaff(data) {
   const id = genId(), token = genToken();
-  getSS().getSheetByName('Staff').appendRow([id, data.name, token, 'staff']);
+  let sheet = getSS().getSheetByName('Staff');
+  if (!sheet) { initSheets(); sheet = getSS().getSheetByName('Staff'); }
+  sheet.appendRow([id, data.name, token, 'staff']);
   return { ok: true, id, name: data.name, token, role: 'staff' };
 }
 

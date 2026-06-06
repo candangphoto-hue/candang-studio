@@ -465,6 +465,13 @@ async function fetchAdmin() {
   busyDays  = bd.days     || [];
   staffList = st.staff    || [];
   projects  = pr.projects || [];
+
+  // Lần đầu chưa có sheet/nhân sự → tự động khởi tạo
+  if (staffList.length === 0) {
+    await apiGet({ action: 'initSheets' });
+    const st2 = await apiGet({ action: 'getStaff' });
+    staffList = st2.staff || [];
+  }
 }
 
 async function fetchStaff() {
