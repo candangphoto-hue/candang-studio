@@ -375,7 +375,7 @@ body {
 </div>
 
 <script>
-let GAS = localStorage.getItem('lich_gas_url') || '';
+const GAS = 'https://script.google.com/macros/s/AKfycbyGiv3LlwayJlItT1S6JRNyIwU-DLObVDrEQnYRCbp698Id5fajaNXorRVsV2q6PWZM/exec';
 
 const urlP   = new URLSearchParams(location.search);
 const TOKEN  = urlP.get('staff');
@@ -809,50 +809,10 @@ async function reload() {
 }
 
 // ── Init ──────────────────────────────────────────────────────
-function showSetup() {
-  document.getElementById('app').innerHTML = `
-    <div style="max-width:520px;margin:80px auto;padding:32px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg)">
-      <div style="font-size:22px;font-weight:700;margin-bottom:6px">⚙️ Cài đặt ban đầu</div>
-      <div style="color:var(--text2);font-size:13px;margin-bottom:24px">Cần deploy Google Apps Script riêng cho tính năng lịch bận. Làm 1 lần duy nhất.</div>
-
-      <div style="background:var(--bg2);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:13px;line-height:1.8">
-        <strong>Hướng dẫn nhanh:</strong><br>
-        1. Vào <a href="https://script.google.com" target="_blank" style="color:var(--accent)">script.google.com</a> → <em>New project</em><br>
-        2. Paste toàn bộ nội dung file <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">apps-script.gs</code> vào editor<br>
-        3. Chạy hàm <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">initSheets()</code> một lần (Run → initSheets)<br>
-        4. <em>Deploy → New deployment → Web app</em><br>
-        &nbsp;&nbsp;&nbsp;· Execute as: <strong>Me</strong><br>
-        &nbsp;&nbsp;&nbsp;· Who has access: <strong>Anyone</strong><br>
-        5. Copy URL → Paste vào ô bên dưới
-      </div>
-
-      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">URL Web App (Apps Script)</label>
-      <input id="setupUrl" class="inp" placeholder="https://script.google.com/macros/s/..." style="width:100%;margin-bottom:12px">
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-primary" style="flex:1" onclick="saveSetup()">Lưu & bắt đầu</button>
-      </div>
-      <div id="setupErr" style="color:var(--red);font-size:12px;margin-top:8px;display:none"></div>
-    </div>`;
-}
-
-async function saveSetup() {
-  const url = document.getElementById('setupUrl').value.trim();
-  const errEl = document.getElementById('setupErr');
-  if (!url.startsWith('https://script.google.com/macros/s/')) {
-    errEl.textContent = 'URL không hợp lệ. Phải bắt đầu bằng https://script.google.com/macros/s/';
-    errEl.style.display = 'block'; return;
-  }
-  errEl.style.display = 'none';
-  localStorage.setItem('lich_gas_url', url);
-  GAS = url;
-  document.getElementById('app').innerHTML = '<div class="loading"><span class="spinner"></span> Đang khởi tạo...</div>';
-  // Gọi initSheets tự động qua GET để đảm bảo sheet đã có
-  try { await apiGet({ action: 'initSheets' }); } catch (_) {}
-  await init();
+function showSetup() { init(); }
 }
 
 async function init() {
-  if (!GAS) { showSetup(); return; }
   const n = new Date();
   Y = n.getFullYear(); M = n.getMonth() + 1;
   if (IS_ADM) {
