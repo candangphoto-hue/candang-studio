@@ -444,14 +444,16 @@ async function apiGet(params) {
   }
 }
 
-async function apiPost(body) {
-  // fire-and-forget (no-cors) — same pattern as dashboard
-  await fetch(GAS, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(body)
-  });
+// Dùng GET thay POST — tránh CORS preflight, đọc được response
+async function apiWrite(params) {
+  params._t = Date.now(); // cache buster
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const res = await fetch(`${GAS}?${new URLSearchParams(params)}`, { signal: ctrl.signal });
+    clearTimeout(tid);
+    return res.json();
+  } catch (e) { clearTimeout(tid); return { error: String(e) }; }
 }
 
 // ── Data fetching ─────────────────────────────────────────────
@@ -784,7 +786,7 @@ function bindAdmin() {
     btn.addEventListener('click', async () => {
       if (!confirm(`Xóa nhân sự "${btn.dataset.rmname}"? Không thể hoàn tác.`)) return;
       btn.disabled = true; btn.textContent = '...';
-      await apiPost({ action: 'removeStaff', id: btn.dataset.rm });
+      await apiWrite({ action: 'removeStaff', id: btn.dataset.rm });
       await reload();
     });
   });
@@ -796,7 +798,7 @@ function bindAdmin() {
     if (!name) { inp.focus(); return; }
     const btn = document.getElementById('btnAddStaff');
     btn.disabled = true; btn.textContent = '...';
-    await apiPost({ action: 'addStaff', name });
+    await apiWrite({ action: 'addStaff', name });
     await reload();
   });
   document.getElementById('inpNewStaff')?.addEventListener('keydown', e => {
@@ -807,8 +809,8 @@ function bindAdmin() {
   document.querySelectorAll('.aeb').forEach(btn => {
     btn.addEventListener('click', async () => {
       document.querySelectorAll('.aeb').forEach(b => b.disabled = true);
-      await apiPost({ action: 'adminSetBusyDay', staff_id: btn.dataset.sid, date: btn.dataset.date, status: btn.dataset.st });
-      setTimeout(async () => { await fetchAdmin(); render(); }, 1200);
+      await apiWrite({ action: 'adminSetBusyDay', staff_id: btn.dataset.sid, date: btn.dataset.date, status: btn.dataset.st });
+      await fetchAdmin(); render(); // re-fetch ngay sau khi ghi xong
     });
   });
 
@@ -823,7 +825,7 @@ function bindAdmin() {
     const staffIds = [...document.querySelectorAll('input[name="pstaff"]:checked')].map(cb => cb.value);
     const btn = document.getElementById('btnSaveProj');
     btn.disabled = true; btn.textContent = 'Đang lưu...';
-    await apiPost({ action: 'addProject', name, start, end, staff: staffIds });
+    await apiWrite({ action: 'addProject', name, start, end, staff: staffIds });
     showAddProj = false;
     await reload();
   });
@@ -858,18 +860,17 @@ async function setStatus(status) {
   localStorage.setItem(staffCacheKey(), JSON.stringify({ days: busyDays, staff: myStaff }));
   render(); // hiện ngay
 
-  // Gửi lên GAS ngầm
-  await apiPost({ action: 'setBusyDay', token: TOKEN, date: selDay, status });
-
-  // Re-fetch sau 2s để đồng bộ chắc chắn
-  setTimeout(async () => {
+  // Ghi lên GAS — GET nên đọc được response
+  const res = await apiWrite({ action: 'setBusyDay', token: TOKEN, date: selDay, status });
+  if (res && res.ok) {
+    // Xác nhận thành công — sync lại từ Sheets
     const data = await apiGet({ action: 'getMyDays', token: TOKEN, month: mStr(Y, M) });
     if (!data.error) {
       busyDays = data.days || [];
       localStorage.setItem(staffCacheKey(), JSON.stringify({ days: busyDays, staff: myStaff }));
       render();
     }
-  }, 2000);
+  }
 }
 
 // ── Navigation ────────────────────────────────────────────────

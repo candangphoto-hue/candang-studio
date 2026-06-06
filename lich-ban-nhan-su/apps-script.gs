@@ -63,12 +63,19 @@ function doGet(e) {
   const p = e.parameter;
   try {
     switch (p.action) {
-      case 'getBusyDays':  return out(getBusyDays(p.month));
-      case 'getMyDays':    return out(getMyDays(p.token, p.month));
-      case 'getStaff':     return out(getStaff());
-      case 'getProjects':  return out(getProjects(p.month));
-      case 'initSheets':   getSS(); return out({ ok: true });
-      default:             return out({ error: 'Unknown action' });
+      // Read
+      case 'getBusyDays':      return out(getBusyDays(p.month));
+      case 'getMyDays':        return out(getMyDays(p.token, p.month));
+      case 'getStaff':         return out(getStaff());
+      case 'getProjects':      return out(getProjects(p.month));
+      case 'initSheets':       getSS(); return out({ ok: true });
+      // Write via GET (tránh CORS)
+      case 'setBusyDay':       return out(setBusyDay(p));
+      case 'adminSetBusyDay':  return out(adminSetBusyDay(p));
+      case 'addStaff':         return out(addStaff(p));
+      case 'removeStaff':      return out(removeStaff(p));
+      case 'addProject':       return out(addProject(p));
+      default:                 return out({ error: 'Unknown action' });
     }
   } catch (err) { return out({ error: err.message }); }
 }
