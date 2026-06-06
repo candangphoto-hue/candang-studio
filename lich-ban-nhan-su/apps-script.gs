@@ -1,53 +1,58 @@
 // ============================================================
-// LỊCH BẬN NHÂN SỰ — Can Đăng Studio · Standalone GAS
-// Hướng dẫn deploy:
-//   1. Vào script.google.com → New project
-//   2. Paste toàn bộ file này vào editor
-//   3. Chạy initSheets() một lần (Run > initSheets) để tạo dữ liệu mặc định
-//   4. Deploy → New deployment → Web app
-//      - Execute as: Me
-//      - Who has access: Anyone
-//   5. Copy URL → Paste vào trang lich-ban-nhan-su khi được hỏi
+// LỊCH BẬN NHÂN SỰ — Can Đăng Studio
+// GAS tự tạo Google Sheet mới, không cần setup thủ công
+// Deploy: Web app · Execute as Me · Access: Anyone
 // ============================================================
 
-const SHEET_ID = '1KF8Iab6Oo2xMQMXR64SxaO5GZCGRxit7JHtd9v3r8sE';
+// Token cố định cho 6 nhân sự mặc định
+const DEFAULT_STAFF = [
+  { name: 'Thanh', token: 'CDThanh1' },
+  { name: 'Huy',   token: 'CDHuy001' },
+  { name: 'Hiếu',  token: 'CDHieu01' },
+  { name: 'Tú',    token: 'CDTu0001' },
+  { name: 'Hiền',  token: 'CDHien01' },
+  { name: 'Trung', token: 'CDTrung1' },
+];
 
-function getSS() { return SpreadsheetApp.openById(SHEET_ID); }
+// Tự tạo Sheet nếu chưa có, lưu ID vào ScriptProperties
+function getSS() {
+  const props = PropertiesService.getScriptProperties();
+  let id = props.getProperty('SS_ID');
+  if (id) {
+    try { return SpreadsheetApp.openById(id); } catch (_) {}
+  }
+  // Tạo mới
+  const ss = SpreadsheetApp.create('Lịch Bận Nhân Sự — Can Đăng Studio');
+  props.setProperty('SS_ID', ss.getId());
+  _setupSheets(ss);
+  return ss;
+}
 
-// Gọi 1 lần để tạo 3 sheet tabs + nhân sự mặc định
+function _setupSheets(ss) {
+  // Xóa sheet mặc định
+  const def = ss.getSheets()[0];
+
+  const staffSheet = ss.insertSheet('Staff');
+  staffSheet.appendRow(['id', 'name', 'token', 'role']);
+  DEFAULT_STAFF.forEach(s => staffSheet.appendRow([genId(), s.name, s.token, 'staff']));
+
+  const busy = ss.insertSheet('BusyDays');
+  busy.appendRow(['staff_id', 'date', 'status']);
+
+  const proj = ss.insertSheet('Projects');
+  proj.appendRow(['id', 'name', 'start_date', 'end_date', 'assigned_staff']);
+
+  try { ss.deleteSheet(def); } catch (_) {}
+}
+
+// Gọi từ editor nếu muốn reset dữ liệu
 function initSheets() {
-  const ss = getSS();
-
-  let staffSheet = ss.getSheetByName('Staff');
-  if (!staffSheet) {
-    staffSheet = ss.insertSheet('Staff');
-    staffSheet.appendRow(['id', 'name', 'token', 'role']);
-    ['Thanh', 'Huy', 'Hiếu', 'Tú', 'Hiền', 'Trung'].forEach(name => {
-      staffSheet.appendRow([genId(), name, genToken(), 'staff']);
-    });
-  }
-
-  if (!ss.getSheetByName('BusyDays')) {
-    const s = ss.insertSheet('BusyDays');
-    s.appendRow(['staff_id', 'date', 'status']);
-  }
-
-  if (!ss.getSheetByName('Projects')) {
-    const s = ss.insertSheet('Projects');
-    s.appendRow(['id', 'name', 'start_date', 'end_date', 'assigned_staff']);
-  }
+  const props = PropertiesService.getScriptProperties();
+  props.deleteProperty('SS_ID');
+  getSS(); // recreate
 }
 
-function genId() {
-  return Utilities.getUuid().replace(/-/g, '').substring(0, 8);
-}
-
-function genToken() {
-  const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let t = '';
-  for (let i = 0; i < 8; i++) t += c[Math.floor(Math.random() * c.length)];
-  return t;
-}
+function genId() { return Utilities.getUuid().replace(/-/g, '').substring(0, 8); }
 
 function out(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
@@ -58,27 +63,26 @@ function doGet(e) {
   const p = e.parameter;
   try {
     switch (p.action) {
-      case 'getBusyDays': return out(getBusyDays(p.month));
-      case 'getMyDays':   return out(getMyDays(p.token, p.month));
-      case 'getStaff':    return out(getStaff());
-      case 'getProjects': return out(getProjects(p.month));
-      case 'initSheets':  initSheets(); return out({ ok: true });
-      default: return out({ error: 'Unknown action' });
+      case 'getBusyDays':  return out(getBusyDays(p.month));
+      case 'getMyDays':    return out(getMyDays(p.token, p.month));
+      case 'getStaff':     return out(getStaff());
+      case 'getProjects':  return out(getProjects(p.month));
+      case 'initSheets':   getSS(); return out({ ok: true });
+      default:             return out({ error: 'Unknown action' });
     }
   } catch (err) { return out({ error: err.message }); }
 }
 
 function doPost(e) {
-  let p;
-  try { p = JSON.parse(e.postData.contents); } catch (_) { p = e.parameter; }
+  let p; try { p = JSON.parse(e.postData.contents); } catch (_) { p = e.parameter; }
   try {
     switch (p.action) {
-      case 'setBusyDay':       return out(setBusyDay(p));
-      case 'adminSetBusyDay':  return out(adminSetBusyDay(p));
-      case 'addStaff':         return out(addStaff(p));
-      case 'removeStaff': return out(removeStaff(p));
-      case 'addProject':  return out(addProject(p));
-      default: return out({ error: 'Unknown action' });
+      case 'setBusyDay':      return out(setBusyDay(p));
+      case 'adminSetBusyDay': return out(adminSetBusyDay(p));
+      case 'addStaff':        return out(addStaff(p));
+      case 'removeStaff':     return out(removeStaff(p));
+      case 'addProject':      return out(addProject(p));
+      default:                return out({ error: 'Unknown action' });
     }
   } catch (err) { return out({ error: err.message }); }
 }
@@ -88,66 +92,48 @@ function doPost(e) {
 function getStaff() {
   const sheet = getSS().getSheetByName('Staff');
   if (!sheet) return { staff: [] };
-  const rows = sheet.getDataRange().getValues().slice(1);
-  return { staff: rows.filter(r => r[0]).map(r => ({ id: r[0], name: r[1], token: r[2], role: r[3] })) };
+  return { staff: sheet.getDataRange().getValues().slice(1).filter(r => r[0]).map(r => ({ id: r[0], name: r[1], token: r[2], role: r[3] })) };
 }
 
 function getBusyDays(month) {
   const ss = getSS();
   const sheet = ss.getSheetByName('BusyDays');
   if (!sheet) return { days: [] };
-  const { staff } = getStaff();
-  const map = {};
-  staff.forEach(s => map[s.id] = s.name);
-  const rows = sheet.getDataRange().getValues().slice(1);
-  return {
-    days: rows
-      .filter(r => r[0] && r[1] && String(r[1]).startsWith(month))
-      .map(r => ({ staff_id: r[0], date: r[1], status: r[2], staff_name: map[r[0]] || '' }))
-  };
+  const { staff } = getStaff(); const map = {}; staff.forEach(s => map[s.id] = s.name);
+  return { days: sheet.getDataRange().getValues().slice(1).filter(r => r[0] && r[1] && String(r[1]).startsWith(month)).map(r => ({ staff_id: r[0], date: r[1], status: r[2], staff_name: map[r[0]] || '' })) };
 }
 
 function getMyDays(token, month) {
-  const ss = getSS();
-  const staffRows = ss.getSheetByName('Staff').getDataRange().getValues().slice(1);
+  const staffRows = getSS().getSheetByName('Staff').getDataRange().getValues().slice(1);
   const row = staffRows.find(r => r[2] === token);
   if (!row) return { error: 'Invalid token', days: [], staff: null };
-  const staffId = row[0], staffName = row[1];
-  const busySheet = ss.getSheetByName('BusyDays');
-  if (!busySheet) return { days: [], staff: { id: staffId, name: staffName } };
-  const days = busySheet.getDataRange().getValues().slice(1)
-    .filter(r => r[0] === staffId && r[1] && String(r[1]).startsWith(month))
-    .map(r => ({ staff_id: r[0], date: r[1], status: r[2] }));
-  return { days, staff: { id: staffId, name: staffName } };
+  const busySheet = getSS().getSheetByName('BusyDays');
+  const days = busySheet ? busySheet.getDataRange().getValues().slice(1).filter(r => r[0] === row[0] && r[1] && String(r[1]).startsWith(month)).map(r => ({ staff_id: r[0], date: r[1], status: r[2] })) : [];
+  return { days, staff: { id: row[0], name: row[1] } };
 }
 
 function setBusyDay(data) {
-  const ss = getSS();
-  const staffRow = ss.getSheetByName('Staff').getDataRange().getValues().slice(1).find(r => r[2] === data.token);
+  const staffRow = getSS().getSheetByName('Staff').getDataRange().getValues().slice(1).find(r => r[2] === data.token);
   if (!staffRow) return { error: 'Invalid token' };
-  const staffId = staffRow[0];
-  const sheet = ss.getSheetByName('BusyDays');
+  const sheet = getSS().getSheetByName('BusyDays');
   const rows = sheet.getDataRange().getValues();
   for (let i = 1; i < rows.length; i++) {
-    if (rows[i][0] === staffId && rows[i][1] === data.date) {
-      if (!data.status) sheet.deleteRow(i + 1);
-      else sheet.getRange(i + 1, 3).setValue(data.status);
+    if (rows[i][0] === staffRow[0] && rows[i][1] === data.date) {
+      if (!data.status) sheet.deleteRow(i + 1); else sheet.getRange(i + 1, 3).setValue(data.status);
       return { ok: true };
     }
   }
-  if (data.status) sheet.appendRow([staffId, data.date, data.status]);
+  if (data.status) sheet.appendRow([staffRow[0], data.date, data.status]);
   return { ok: true };
 }
 
-// Admin ghi lịch bận trực tiếp bằng staff_id (không cần token)
 function adminSetBusyDay(data) {
   const sheet = getSS().getSheetByName('BusyDays');
-  if (!sheet) return { error: 'BusyDays sheet not found' };
+  if (!sheet) return { error: 'No sheet' };
   const rows = sheet.getDataRange().getValues();
   for (let i = 1; i < rows.length; i++) {
     if (rows[i][0] === data.staff_id && rows[i][1] === data.date) {
-      if (!data.status) sheet.deleteRow(i + 1);
-      else sheet.getRange(i + 1, 3).setValue(data.status);
+      if (!data.status) sheet.deleteRow(i + 1); else sheet.getRange(i + 1, 3).setValue(data.status);
       return { ok: true };
     }
   }
@@ -156,11 +142,14 @@ function adminSetBusyDay(data) {
 }
 
 function addStaff(data) {
-  const id = genId(), token = genToken();
-  let sheet = getSS().getSheetByName('Staff');
-  if (!sheet) { initSheets(); sheet = getSS().getSheetByName('Staff'); }
-  sheet.appendRow([id, data.name, token, 'staff']);
+  const id = genId(), token = genToken8();
+  getSS().getSheetByName('Staff').appendRow([id, data.name, token, 'staff']);
   return { ok: true, id, name: data.name, token, role: 'staff' };
+}
+
+function genToken8() {
+  const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let t = ''; for (let i = 0; i < 8; i++) t += c[Math.floor(Math.random() * c.length)]; return t;
 }
 
 function removeStaff(data) {
@@ -177,17 +166,11 @@ function getProjects(month) {
   if (!sheet) return { projects: [] };
   const [y, m] = month.split('-').map(Number);
   const mStart = new Date(y, m - 1, 1), mEnd = new Date(y, m, 0);
-  const rows = sheet.getDataRange().getValues().slice(1);
-  return {
-    projects: rows
-      .filter(r => r[0] && new Date(r[2]) <= mEnd && new Date(r[3]) >= mStart)
-      .map(r => ({ id: r[0], name: r[1], start_date: r[2], end_date: r[3], assigned_staff: r[4] ? String(r[4]).split(',') : [] }))
-  };
+  return { projects: sheet.getDataRange().getValues().slice(1).filter(r => r[0] && new Date(r[2]) <= mEnd && new Date(r[3]) >= mStart).map(r => ({ id: r[0], name: r[1], start_date: r[2], end_date: r[3], assigned_staff: r[4] ? String(r[4]).split(',') : [] })) };
 }
 
 function addProject(data) {
   const id = genId();
-  const staff = Array.isArray(data.staff) ? data.staff.join(',') : (data.staff || '');
-  getSS().getSheetByName('Projects').appendRow([id, data.name, data.start, data.end, staff]);
+  getSS().getSheetByName('Projects').appendRow([id, data.name, data.start, data.end, Array.isArray(data.staff) ? data.staff.join(',') : '']);
   return { ok: true, id };
 }
