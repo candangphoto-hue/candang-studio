@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Báo giá TVC — Can Đăng Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1A1A2E;--gold:#C8972B;--green:#1E6B3C;
+  --bg:#F0F0EC;--sur:#FFFFFF;--bdr:#D0D0C8;--bdr-l:#E8E8E2;
+  --txt:#18181A;--mut:#68686A;--fnt:#9A9A95;--ok:#1E6B3C;--ok-bg:#EBF4EE;
+  --f:'Plus Jakarta Sans',sans-serif;--r:10px;--r-sm:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--f);font-size:14px;color:var(--txt);background:var(--bg);line-height:1.5;min-height:100vh}
+.shell{max-width:1380px;margin:0 auto;padding:1.75rem 1.5rem 3rem}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.brand{display:flex;align-items:center;gap:10px}
+.bsq{width:32px;height:32px;background:var(--navy);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.bsq svg{width:14px;height:14px;fill:var(--gold)}
+.bnm{font-size:15px;font-weight:700;color:var(--navy);letter-spacing:-.025em}
+.bsb{font-size:11px;color:var(--fnt);margin-top:1px}
+.htag{font-size:12px;color:var(--mut)}
+
+/* Info card */
+.info{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1rem}
+.info-grid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:1rem;align-items:end}
+.fl{font-size:11px;font-weight:600;letter-spacing:.065em;text-transform:uppercase;color:var(--mut);margin-bottom:5px}
+input[type="text"]{width:100%;height:36px;padding:0 10px;border:1px solid #ccc;border-radius:var(--r-sm);font-family:var(--f);font-size:14px;color:var(--txt);background:#fff;transition:border-color .15s}
+input[type="text"]:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(26,26,46,.07)}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pb{height:32px;padding:0 12px;border:1px solid #ccc;border-radius:99px;background:#fff;color:var(--mut);font-size:13px;font-family:var(--f);font-weight:500;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s;white-space:nowrap}
+.pb:hover{border-color:var(--navy);color:var(--navy)}
+.pb.on{background:var(--navy);border-color:var(--navy);color:#fff}
+
+/* Specs bar */
+.specs-bar{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:.875rem 1.25rem;margin-bottom:1rem;display:flex;gap:1.75rem;flex-wrap:wrap;align-items:center}
+.spec-item{display:flex;align-items:center;gap:8px}
+.spec-lbl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);white-space:nowrap}
+.spec-ctrl{display:flex;align-items:center;background:#F0F0EA;border-radius:6px;overflow:hidden;border:1px solid var(--bdr)}
+.spec-btn{width:28px;height:30px;border:none;background:transparent;color:var(--mut);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background .15s}
+.spec-btn:hover{background:var(--bdr-l);color:var(--navy)}
+.spec-val{font-size:13px;font-weight:600;color:var(--txt);min-width:30px;text-align:center;padding:0 2px}
+.spec-unit{font-size:11px;color:var(--mut)}
+.spec-text-in{width:52px;height:30px;border:none;background:transparent;font-family:var(--f);font-size:13px;font-weight:600;color:var(--txt);text-align:center;padding:0 4px;-moz-appearance:textfield}
+.spec-text-in::-webkit-outer-spin-button,.spec-text-in::-webkit-inner-spin-button{-webkit-appearance:none}
+.spec-text-in:focus{outline:none;background:#EEF0F8}
+.spec-sep{width:1px;height:22px;background:var(--bdr)}
+
+/* Target bar */
+.target-bar{background:#fff;border:1px solid var(--bdr);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1rem}
+.target-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:.875rem}
+.target-head{flex:1}
+.target-lbl{font-size:13px;font-weight:600;letter-spacing:.04em;color:var(--txt);margin-bottom:3px}
+.target-hint{font-size:11px;color:var(--mut);line-height:1.5}
+.target-pkgs{display:flex;gap:10px;flex-wrap:wrap;flex:3}
+.tpkg-card{background:#F8F8F4;border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;min-width:200px;flex:1}
+.tpkg-name{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+.tpkg-input-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.tpkg-input{background:#fff;border:1px solid #ccc;border-radius:var(--r-sm);height:34px;padding:0 10px;font-family:var(--f);font-size:14px;font-weight:600;color:var(--txt);width:100%;text-align:right;-moz-appearance:textfield}
+.tpkg-input::-webkit-outer-spin-button,.tpkg-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.tpkg-input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(26,26,46,.07)}
+.tpkg-curr{font-size:12px;color:var(--fnt);white-space:nowrap}
+/* Checkboxes for which rows to distribute */
+.tpkg-rows{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.tpkg-row-cb{display:flex;align-items:center;gap:4px;padding:3px 7px;background:#fff;border:1px solid var(--bdr);border-radius:99px;cursor:pointer;transition:all .15s}
+.tpkg-row-cb:hover{background:#eee;border-color:#aaa}
+.tpkg-row-cb.sel{background:#ccc;border-color:#aaa}
+.tpkg-row-cb.sel span{color:#000}
+.tpkg-row-cb input{width:12px;height:12px;cursor:pointer;accent-color:#555}
+.tpkg-row-cb span{font-size:11px;color:var(--mut);white-space:nowrap;transition:color .15s}
+.tpkg-apply{width:100%;height:30px;border:1px solid;border-radius:var(--r-sm);font-family:var(--f);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.03em}
+.tpkg-hint{font-size:10px;color:var(--fnt);margin-top:5px;font-style:italic}
+
+/* Table */
+.tc{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:.875rem}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+.thrt th{padding:0;background:var(--sur);border-bottom:1px solid var(--bdr);vertical-align:top}
+.th-lc{padding:10px 12px 10px 16px;border-right:1px solid var(--bdr);vertical-align:bottom!important}
+.th-lt{font-size:11px;font-weight:600;letter-spacing:.065em;text-transform:uppercase;color:var(--fnt)}
+.th-pc{border-right:1px solid var(--bdr);vertical-align:top}
+.th-pc:last-child{border-right:none}
+.phw{display:flex;flex-direction:column}
+.pht{padding:10px 12px 7px;display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.phey{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:2px}
+.phni{background:transparent!important;border:none!important;border-bottom:1px solid rgba(255,255,255,.22)!important;border-radius:0!important;color:#fff!important;font-size:14px!important;font-weight:700!important;font-family:var(--f)!important;width:100%;padding:0 0 2px!important;height:auto!important;box-shadow:none!important}
+.phni:focus{border-bottom-color:rgba(255,255,255,.5)!important;box-shadow:none!important}
+.phpill{display:inline-flex;align-items:center;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);margin:5px 12px 0;white-space:nowrap}
+.phsc{display:grid;grid-template-columns:32px 1fr 80px 100px 1fr;border-top:1px solid rgba(255,255,255,.1);margin-top:5px}
+.phsc span{padding:5px 6px;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.4);text-align:center}
+.phsc span:first-child{text-align:left;padding-left:9px}
+.delp{width:20px;height:20px;flex-shrink:0;border:none;background:rgba(255,255,255,.16);border-radius:4px;color:rgba(255,255,255,.75);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;margin-top:2px;line-height:1}
+.delp:hover{background:rgba(255,255,255,.3)}
+
+/* Sep */
+.septr td{padding:6px 0 5px 16px;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--fnt);background:#F6F6F2;border-top:1px solid var(--bdr-l);border-bottom:1px solid var(--bdr-l)}
+.septr td:first-child{border-right:1px solid var(--bdr)}
+.septr td.psep{border-right:1px solid var(--bdr-l);padding-left:10px}
+.septr td.psep:last-child{border-right:none}
+
+/* Data rows */
+.dr td{border-bottom:1px solid var(--bdr-l);vertical-align:middle;height:46px}
+.dr:last-of-type td{border-bottom:none}
+.dr.z td{background:#F9F9F7}
+.tdl{padding:0 10px 0 16px;border-right:1px solid var(--bdr)}
+.rn{font-size:14px;font-weight:400;color:var(--txt)}
+.rh{font-size:11px;color:var(--fnt);margin-top:1px}
+.tdp{padding:0;border-right:1px solid var(--bdr-l)}
+.tdp:last-child{border-right:none}
+/* 5-col grid: toggle | qty(80px) | rate(100px) | amt */
+.cg{display:grid;grid-template-columns:32px 80px 100px 1fr;height:46px;align-items:stretch}
+.cg>div{display:flex;align-items:center;justify-content:center;border-right:1px solid var(--bdr-l);height:100%}
+.cg>div:last-child{border-right:none}
+
+/* Toggle */
+.tog{position:relative;width:28px;height:16px;cursor:pointer;display:block}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tsl{position:absolute;inset:0;background:#D0D0C8;border-radius:8px;transition:background .18s}
+.tsl::after{content:'';position:absolute;width:10px;height:10px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.tog input:checked~.tsl::after{transform:translateX(12px)}
+
+/* Number inputs */
+.ei{width:100%;height:100%;border:none;background:transparent;color:var(--txt);font-size:13px;font-family:var(--f);font-weight:500;text-align:right;padding:0 8px;-moz-appearance:textfield}
+.ei:focus{outline:none;background:#EFF0F8}
+.ei:disabled{color:var(--fnt)}
+.ei::-webkit-outer-spin-button,.ei::-webkit-inner-spin-button{-webkit-appearance:none}
+.da-cell{font-size:11px;color:var(--fnt);font-style:italic;padding:0 8px}
+.amt{font-size:13px;font-weight:600;color:var(--txt);white-space:nowrap;padding-right:10px;font-variant-numeric:tabular-nums}
+.amt.off{color:var(--fnt);font-weight:400}
+
+/* Gift rows */
+.gift-sec td{background:#EBF4EE;border-top:1px solid #C5E0CE;border-bottom:1px solid #C5E0CE}
+.gift-sec td:first-child{border-right:1px solid var(--bdr);padding:0 10px 0 16px}
+.gift-sec-lbl{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ok)}
+.gift-row td{border-bottom:1px solid rgba(197,224,206,.5);vertical-align:middle;height:42px;background:#F5FAF7}
+.gift-row td:first-child{border-right:1px solid var(--bdr);padding:0 10px 0 16px}
+.gift-name-row{font-size:13px;color:var(--ok);font-weight:400}
+.gi{display:grid;grid-template-columns:32px 80px 100px 1fr;height:42px}
+.gi>div{display:flex;align-items:center;justify-content:center;border-right:1px solid rgba(197,224,206,.6);height:100%}
+.gi>div:last-child{border-right:none}
+.gtag{font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 9px;border-radius:99px}
+.add-gift-tr td{background:#F5FAF7;border-top:1px solid rgba(197,224,206,.4)}
+.add-gift-tr td:first-child{border-right:1px solid var(--bdr)}
+
+/* Extra rows */
+.extr td{border-bottom:1px solid var(--bdr-l);vertical-align:middle;height:42px}
+.extr td:first-child{border-right:1px solid var(--bdr);padding:0 5px 0 16px}
+.extr-name{height:28px;border:1px solid #ccc;border-radius:4px;font-family:var(--f);font-size:13px;padding:0 8px;width:calc(100% - 28px)}
+.extr-name:focus{outline:none;border-color:var(--navy)}
+.delr{width:22px;height:22px;border:none;background:#F0F0EA;border-radius:3px;cursor:pointer;font-size:11px;color:var(--mut);display:inline-flex;align-items:center;justify-content:center;margin-left:3px}
+.delr:hover{background:#E0E0D8}
+.tdp-ex{padding:0;border-right:1px solid var(--bdr-l)}
+.tdp-ex:last-child{border-right:none}
+.atr td{background:#FAFAF7;border-top:1px solid var(--bdr-l)}
+.atr td:first-child{border-right:1px solid var(--bdr);padding:8px 10px 8px 16px}
+.arb{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;margin:2px 3px 2px 0;border:1px solid var(--bdr);border-radius:99px;background:#fff;color:var(--mut);font-size:12px;font-family:var(--f);font-weight:500;cursor:pointer;transition:all .15s}
+.arb:hover{border-color:var(--navy);color:var(--navy)}
+.gift-arb{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;margin:2px 3px 2px 0;border:1px solid #C5E0CE;border-radius:99px;background:#fff;color:var(--ok);font-size:12px;font-family:var(--f);font-weight:500;cursor:pointer;transition:all .15s}
+.gift-arb:hover{background:var(--ok-bg)}
+
+/* Footer */
+.ftr td{background:#F6F6F2;border-top:1px solid var(--bdr);padding:8px 10px 8px 16px;font-size:13px;color:var(--mut)}
+.ftr td:first-child{border-right:1px solid var(--bdr)}
+.fp{border-right:1px solid var(--bdr-l);text-align:right;padding-right:12px!important;font-weight:600;color:var(--txt)!important;font-variant-numeric:tabular-nums}
+.fp:last-child{border-right:none}
+.ftr.vt .fp{color:var(--fnt)!important;font-weight:400;font-size:12px}
+.gtr-sum td{padding:11px 10px 11px 16px;border-top:1px solid var(--bdr);background:var(--sur)}
+.gtr-sum td:first-child{font-size:13px;font-weight:600;color:var(--mut);border-right:1px solid var(--bdr)}
+.gp{border-right:1px solid var(--bdr-l);text-align:right;padding-right:12px!important}
+.gp:last-child{border-right:none}
+.ga{font-size:17px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* Actions */
+.acts-wrap{margin-bottom:.875rem}
+.acts-row1{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.ab{height:34px;padding:0 14px;border:1px solid var(--bdr);border-radius:var(--r-sm);background:var(--sur);color:var(--txt);font-size:13px;font-family:var(--f);font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.ab:hover{background:#F0F0EA;border-color:#B4B4AC}
+.ab-reset{height:34px;padding:0 14px;border:1px solid #E0D0C0;border-radius:var(--r-sm);background:#FDF6EC;color:#A07030;font-size:13px;font-family:var(--f);font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.ab-reset:hover{background:#F5E8D0;border-color:#C8972B}
+.ab-export{width:100%;height:44px;border:none;border-radius:var(--r-sm);background:var(--navy);color:#fff;font-size:14px;font-family:var(--f);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;letter-spacing:.02em}
+.ab-export:hover{background:#2d2d50}
+.add-pkg-btn{width:100%;height:36px;border:1px dashed var(--bdr);border-radius:var(--r);background:transparent;color:var(--fnt);font-size:13px;font-family:var(--f);font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:.875rem;transition:all .15s}
+.add-pkg-btn:hover{border-color:var(--navy);color:var(--navy);background:rgba(26,26,46,.02);border-style:solid}
+.export-ok{display:none;margin-top:10px;padding:12px 16px;background:#EBF4EE;border:1.5px solid #C5E0CE;border-radius:var(--r)}
+.export-ok.show{display:block}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:8px 20px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="hdr">
+    <div class="brand">
+      <div class="bsq"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/></svg></div>
+      <div><div class="bnm">Can Đăng Studio</div><div class="bsb">candangstudio.vn · 090 432 9595</div></div>
+    </div>
+    <div class="htag">Bộ tính báo giá dịch vụ quay phim TVC</div>
+  </div>
+
+  <div class="info">
+    <div class="info-grid">
+      <div><div class="fl">Khách hàng / Thương hiệu</div><input type="text" id="ic" placeholder="Khách hàng"></div>
+      <div><div class="fl">Tháng thực hiện</div><input type="text" id="im" placeholder=""></div>
+      <div>
+        <div class="fl">Loại sản phẩm quay</div>
+        <div class="pills" id="tpills">
+          <button class="pb on" data-t="product" onclick="setType(this)">📦 Sản phẩm</button>
+          <button class="pb" data-t="food" onclick="setType(this)">🍽 Món ăn</button>
+          <button class="pb" data-t="drink" onclick="setType(this)">🧋 Đồ uống</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <div style="font-size:11px;color:var(--fnt);line-height:1.6">3 gói: Standard · PRO · Premium<br>Chỉnh giá tổng mục tiêu ↓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="specs-bar">
+    <div class="spec-item"><span class="spec-lbl">Số video</span>
+      <div class="spec-ctrl">
+        <button class="spec-btn" onclick="adjSpec('videos',-1)">−</button>
+        <span class="spec-val" id="sp-videos">1</span>
+        <button class="spec-btn" onclick="adjSpec('videos',1)">+</button>
+      </div><span class="spec-unit">video</span></div>
+    <div class="spec-sep"></div>
+    <div class="spec-item"><span class="spec-lbl">Thời lượng</span>
+      <div class="spec-ctrl"><input class="spec-text-in" type="text" id="sp-dur" value="30" oninput="SPECS.duration=this.value"></div>
+      <span class="spec-unit">giây</span></div>
+    <div class="spec-sep"></div>
+    <div style="font-size:12px;color:var(--fnt);font-style:italic">Số ngày quay → chỉnh trong header từng gói ↓</div>
+  </div>
+
+  <!-- Target price with per-row checkboxes -->
+  <div class="target-bar">
+    <div class="target-top">
+      <div class="target-head">
+        <div class="target-lbl">🎯 Phân bổ giá theo mục tiêu</div>
+        <div class="target-hint">Nhập tổng mục tiêu → tick hạng mục muốn phân bổ → bấm Phân bổ<br>Hệ thống chia theo tỷ lệ hợp lý, làm tròn 500.000đ. Người dùng tự điều chỉnh thêm bên dưới.</div>
+      </div>
+    </div>
+    <div id="target-pkgs" class="target-pkgs"></div>
+  </div>
+
+  <div class="tc"><table id="tbl"></table></div>
+  <button class="add-pkg-btn" onclick="addPkg()">＋ Thêm gói mới</button>
+
+  <div class="acts-wrap">
+    <div class="acts-row1" id="acts-row1"></div>
+    <button class="ab-export" onclick="copyAll()">📋 Copy tất cả gói — xuất Word trên Claude</button>
+    <div class="export-ok" id="export-ok">
+      <div style="font-size:12px;font-weight:600;color:#1E6B3C;margin-bottom:4px">✓ Đã copy! Mở Claude → Paste → Claude tự xuất Word .docx</div>
+      <div style="font-size:12px;color:#555;line-height:1.55">Không cần giải thích thêm — Claude xuất file Word đúng layout Can Đăng Studio ngay lập tức.</div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var COLORS=['#1A1A2E','#C8972B','#1E6B3C','#7C3070','#1A5276'];
+var TYPE='product';
+var SPECS={videos:1,duration:'30'};
+
+var TYPE_LABEL={product:'Sản phẩm',food:'Món ăn',drink:'Đồ uống'};
+
+// hints[0]=standard, hints[1]=pro, hints[2]=premium
+var SCHEMA=[
+  {id:'preprod', sep:'Chuẩn bị',  label:'Pre-production: Kịch bản & Moodboard', unit:'Dự án', hints:['Kịch bản, moodboard, brief, shot list','Kịch bản, moodboard, brief, shot list','Kịch bản sáng tạo, storyboard, moodboard, brief chi tiết, shot list đầy đủ']},
+  {id:'stylist', sep:null,         label:'Food / Prop Stylist on-set',            unit:'Ngày',  hints:['Dàn dựng và trang trí sản phẩm theo từng cảnh quay','Dàn dựng và trang trí sản phẩm theo từng cảnh quay','Food stylist + prop stylist chuyên nghiệp — dàn dựng từng cảnh theo storyboard']},
+  {id:'cam',     sep:'Sản xuất',   label:'Thiết bị quay phim',                   unit:'Ngày',  hints:['Máy quay Sony, ống kính cinema, gimbal, slider, monitor · FULL HD','Máy quay Sony cinema grade, ống kính prime · Slow Motion · gimbal, slider, monitor · 4K','Máy quay cinema 4K/6K, ống kính cinema set · Slow Motion · gimbal DJI RS3 Pro, slider motorized · 4K/6K']},
+  {id:'light',   sep:null,         label:'Hệ thống ánh sáng',                    unit:'Ngày',  hints:['Đèn studio Aputure, diffuser, LED panel, fog machine','Đèn studio Aputure 600D, diffuser, LED panel, fog machine','Hệ thống đèn Profoto + Aputure đầy đủ, diffuser cao cấp, LED panel, fog machine']},
+  {id:'studio',  sep:null,         label:'Studio & Bối cảnh / Set Design',       unit:'Ngày',  hints:['Không gian quay, backdrop, đạo cụ dàn dựng','Không gian quay nâng cấp, backdrop premium, set design phong cách','Set design hoàn chỉnh theo storyboard — backdrop cao cấp, đạo cụ chuyên biệt']},
+  {id:'director',sep:null,         label:'Đạo diễn & Đội quay',                  unit:'Ngày',  hints:['Đạo diễn, cameraman, assistant, script supervisor','Đạo diễn, cameraman, assistant, script supervisor','Đạo diễn sáng tạo, 2 cameraman, assistant, gaffer, script supervisor']},
+  {id:'edit',    sep:'Hậu kỳ',     label:'Dựng phim & Hậu kỳ',                  unit:'Dự án', hints:['Biên tập, color grading, sound design, mix âm thanh · FULL HD','Biên tập nâng cao, color grading chuyên sâu, mix âm thanh · FULL HD','Biên tập chuyên nghiệp, color grading broadcast, sound design & mix chuẩn · 4K']},
+  {id:'motion',  sep:null,         label:'Motion Graphics & Đồ họa',             unit:'Dự án', hints:['Chữ động, hiệu ứng chuyển cảnh, product animation','Chữ động, hiệu ứng chuyển cảnh, product animation','Motion graphics cao cấp, hiệu ứng visual effects']},
+];
+// Dùng để lấy hint đúng theo gói
+var DEF_KEY_IDX={standard:0,pro:1,premium:2};
+function getHint(def,defKey){var idx=DEF_KEY_IDX[defKey]!=null?DEF_KEY_IDX[defKey]:0;return(def.hints&&def.hints[idx])||def.hints[0]||'';}
+
+// Preset weights for proportional distribution (relative)
+var WEIGHTS={preprod:2,stylist:3,cam:5,light:2,studio:3,director:5,edit:3,motion:3};
+
+var DEF={
+  standard:{ preprod:{on:true,q:null,r:2000000}, stylist:{on:true,q:1,r:3500000}, cam:{on:true,q:1,r:3000000}, light:{on:true,q:1,r:1500000}, studio:{on:true,q:1,r:2000000}, director:{on:true,q:1,r:5000000}, edit:{on:true,q:null,r:3000000}, motion:{on:false,q:null,r:0} },
+  pro:{      preprod:{on:true,q:null,r:2000000}, stylist:{on:true,q:1,r:3500000}, cam:{on:true,q:1,r:5000000}, light:{on:true,q:1,r:3000000}, studio:{on:true,q:1,r:3000000}, director:{on:true,q:1,r:6000000}, edit:{on:true,q:null,r:4000000}, motion:{on:true,q:null,r:1500000} },
+  premium:{  preprod:{on:true,q:null,r:4000000}, stylist:{on:true,q:1,r:6000000}, cam:{on:true,q:1,r:20000000},light:{on:true,q:1,r:5000000}, studio:{on:true,q:1,r:5000000}, director:{on:true,q:1,r:10000000},edit:{on:true,q:null,r:5000000}, motion:{on:true,q:null,r:8000000} },
+};
+
+var ADDON_PRESETS=[
+  {id:'voice', label:'Voice-off chuyên nghiệp', unit:'Dự án', r:3000000},
+  {id:'model', label:'Thuê người mẫu',           unit:'Ngày',  r:3000000},
+  {id:'food',  label:'Chi phí thực phẩm',        unit:'Dự án', r:0},
+  {id:'makeup',label:'Make-up artist',           unit:'Ngày',  r:1500000},
+  {id:'extra', label:'Chi phí phát sinh',        unit:'Dự án', r:0},
+  {id:'custom',label:'Hạng mục khác',            unit:'Dự án', r:0},
+];
+var GIFT_PRESETS=[
+  {id:'g1',label:'Chụp ảnh sản phẩm nền trắng'},
+  {id:'g2',label:'Chụp ảnh concept sản phẩm'},
+  {id:'g3',label:'Đăng video lên kênh Can Đăng Studio'},
+  {id:'g4',label:'Cắt Reels / Shorts từ TVC chính'},
+];
+
+var PKG=[];
+var extraRows=[];
+var giftRows=[];
+// Per-pkg: which schema row IDs are selected for distribution
+var distSel=[];
+
+function makeRows(defKey){
+  return SCHEMA.map(function(s){
+    var d=(DEF[defKey]||DEF.standard)[s.id]||{on:false,q:null,r:0};
+    return{id:s.id,on:d.on,q:d.q,r:d.r};
+  });
+}
+
+function initPkgs(){
+  PKG=[
+    {name:'TVC Standard',ci:0,days:1,rows:makeRows('standard'),defKey:'standard'},
+    {name:'TVC PRO',     ci:1,days:1,rows:makeRows('pro'),     defKey:'pro'},
+    {name:'TVC Premium', ci:2,days:1,rows:makeRows('premium'), defKey:'premium'},
+  ];
+  // Voice-off: Standard=on (3tr, theo PDF Gói 1), PRO=on (3tr, PDF Gói 2), Premium=on (3tr, PDF Gói 3)
+  extraRows=[
+    [{id:'voice',label:'Voice-off chuyên nghiệp',unit:'Dự án',q:null,r:3000000,on:true}],
+    [{id:'voice',label:'Voice-off chuyên nghiệp',unit:'Dự án',q:null,r:3000000,on:true}],
+    [{id:'voice',label:'Voice-off chuyên nghiệp',unit:'Dự án',q:null,r:3000000,on:true}],
+  ];
+  // Tặng kèm: Standard=không có, PRO=2 món, Premium=2 món (theo PDF)
+  giftRows=[
+    [],
+    [{label:'Đăng video lên kênh Can Đăng Studio',r:0,on:true},{label:'Cắt Reels / Shorts từ TVC chính',r:0,on:true}],
+    [{label:'Đăng video lên kênh Can Đăng Studio',r:0,on:true},{label:'Cắt Reels / Shorts từ TVC chính',r:0,on:true}],
+  ];
+  distSel=PKG.map(function(p){
+    return p.rows.filter(function(r){return r.on;}).map(function(r){return r.id;});
+  });
+}
+
+// ── Format ────────────────────────────────────────────────────────
+function fmtFull(n){if(!n&&n!==0)return'—';return n.toLocaleString('vi-VN');}
+function fmtRate(raw){var s=String(raw).replace(/\D/g,'');if(!s)return'';return parseInt(s,10).toLocaleString('vi-VN');}
+function parseNum(s){return parseInt(String(s).replace(/[^\d]/g,''),10)||0;}
+function round500(n){return Math.round(n/500000)*500000;}
+function rowAmt(r){if(!r.on)return 0;return r.q!=null?Math.round(r.q*r.r):Math.round(r.r);}
+function pkgTot(pi){
+  var p=PKG[pi];
+  var base=p.rows.reduce(function(s,r){return s+rowAmt(r);},0);
+  var ex=(extraRows[pi]||[]).reduce(function(s,r){return s+rowAmt(r);},0);
+  return base+ex;
+}
+
+// ── Target price distribution ─────────────────────────────────────
+function buildTargetUI(){
+  var h='';
+  PKG.forEach(function(p,pi){
+    var c=COLORS[p.ci%COLORS.length];
+    var sel=distSel[pi]||[];
+    h+='<div class="tpkg-card" style="border-color:'+c+'40">';
+    h+='<div class="tpkg-name" style="color:'+c+'">'+esc(p.name)+'</div>';
+    h+='<div class="tpkg-input-row">';
+    h+='<input class="tpkg-input" id="tgt-'+pi+'" type="text" placeholder="Giá mục tiêu..." oninput="onTgtIn(this)" onkeydown="if(event.key===\'Enter\')doApply('+pi+')">';
+    h+='<span class="tpkg-curr">đ</span>';
+    h+='</div>';
+    // Checkboxes for rows
+    h+='<div class="tpkg-rows">';
+    p.rows.forEach(function(pr,ri){
+      if(!pr.on)return;
+      var def=SCHEMA[ri];
+      var checked=sel.indexOf(def.id)>=0;
+      var shortLabel=def.label.split(':')[0].replace('Food / Prop ','');
+      h+='<label class="tpkg-row-cb'+(checked?' sel':'')+'" id="tcb-'+pi+'-'+ri+'">';
+      h+='<input type="checkbox"'+(checked?' checked':'')+' data-pi="'+pi+'" data-ri="'+ri+'" data-id="'+def.id+'" onchange="onDistCb(this)">';
+      h+='<span>'+shortLabel+'</span></label>';
+    });
+    h+='</div>';
+    h+='<button class="tpkg-apply" onclick="doApply('+pi+')" style="background:'+c+'22;color:'+c+';border-color:'+c+'50">Phân bổ vào mục đã chọn ↑</button>';
+    h+='<div class="tpkg-hint">Làm tròn 500.000đ · Sửa tay bên dưới để tinh chỉnh thêm</div>';
+    h+='</div>';
+  });
+  document.getElementById('target-pkgs').innerHTML=h;
+}
+
+function onTgtIn(inp){
+  var raw=inp.value.replace(/[^\d]/g,'');
+  var fmt=raw?parseInt(raw).toLocaleString('vi-VN'):'';
+  var p=inp.selectionStart,ol=inp.value.length;
+  inp.value=fmt;
+  try{inp.selectionStart=inp.selectionEnd=p+(fmt.length-ol);}catch(e){}
+}
+
+function onDistCb(cb){
+  var pi=+cb.dataset.pi,id=cb.dataset.id;
+  if(!distSel[pi])distSel[pi]=[];
+  if(cb.checked){
+    if(distSel[pi].indexOf(id)<0)distSel[pi].push(id);
+  }else{
+    distSel[pi]=distSel[pi].filter(function(x){return x!==id;});
+  }
+  // update label styling
+  var lbl=document.getElementById('tcb-'+pi+'-'+cb.dataset.ri);
+  if(lbl)lbl.className='tpkg-row-cb'+(cb.checked?' sel':'');
+}
+
+function doApply(pi){
+  var inp=document.getElementById('tgt-'+pi);
+  if(!inp)return;
+  var target=parseNum(inp.value);
+  if(!target){showToast('Nhập giá mục tiêu trước');return;}
+
+  var sel=distSel[pi]||[];
+  if(sel.length===0){showToast('Chọn ít nhất 1 hạng mục để phân bổ');return;}
+
+  var p=PKG[pi];
+  // Get selected active rows
+  var selRows=p.rows.filter(function(r){return sel.indexOf(r.id)>=0&&r.on;});
+  if(selRows.length===0){showToast('Hạng mục đã chọn chưa được bật');return;}
+
+  // Calculate total weight of selected rows
+  var totalW=selRows.reduce(function(s,r){return s+(WEIGHTS[r.id]||2);},0);
+
+  // Distribute by weight, round 500k
+  selRows.forEach(function(r){
+    var w=WEIGHTS[r.id]||2;
+    var raw=(target*w/totalW);
+    if(r.q!=null&&r.q>1){
+      r.r=round500(raw/r.q);
+    }else{
+      r.r=round500(raw);
+    }
+    if(r.r<500000)r.r=500000;
+  });
+
+  showToast('✓ Đã phân bổ '+p.name);
+  inp.value='';
+  render();
+}
+
+// ── Render ────────────────────────────────────────────────────────
+function render(){
+  var n=PKG.length;
+  var lW=186;
+  var pW=Math.max(220,Math.floor((1340-lW)/n));
+  var cg='<colgroup><col style="width:'+lW+'px">';
+  PKG.forEach(function(){cg+='<col style="width:'+pW+'px">';});
+  cg+='</colgroup>';
+
+  var th='<thead><tr class="thrt">';
+  th+='<th class="th-lc"><span class="th-lt">Hạng mục</span></th>';
+  PKG.forEach(function(p,pi){
+    var c=COLORS[p.ci%COLORS.length];
+    var grand=pkgTot(pi)+Math.round(pkgTot(pi)*.08);
+    th+='<th class="th-pc" style="background:'+c+'">';
+    th+='<div class="phw"><div class="pht">';
+    th+='<div style="flex:1"><div class="phey">Gói '+(pi+1)+'</div>';
+    th+='<input class="phni" value="'+esc(p.name)+'" data-pi="'+pi+'" onchange="PKG[+this.dataset.pi].name=this.value;renderActs();buildTargetUI()">';
+    th+='</div>';
+    if(PKG.length>1)th+='<button class="delp" onclick="delPkg('+pi+')" title="Xoá">✕</button>';
+    th+='</div>';
+    // Days
+    th+='<div style="display:flex;align-items:center;gap:6px;padding:5px 12px 5px;border-top:1px solid rgba(255,255,255,.1)">';
+    th+='<span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:600;letter-spacing:.04em;white-space:nowrap">NGÀY QUAY:</span>';
+    th+='<div style="display:flex;align-items:center;background:rgba(255,255,255,.12);border-radius:6px;overflow:hidden">';
+    th+='<button style="width:24px;height:24px;border:none;background:transparent;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="adjDays('+pi+',-1)">−</button>';
+    th+='<span style="font-size:13px;font-weight:700;color:#fff;min-width:24px;text-align:center;line-height:24px" id="dv'+pi+'">'+p.days+'</span>';
+    th+='<button style="width:24px;height:24px;border:none;background:transparent;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="adjDays('+pi+',1)">+</button>';
+    th+='</div></div>';
+    th+='<div class="phpill" id="pill'+pi+'">'+fmtFull(grand)+'đ</div>';
+    th+='<div class="phsc"><span>Bật</span><span style="text-align:right;padding-right:6px">SL</span><span style="text-align:right;padding-right:6px">Đơn giá</span><span style="text-align:right;padding-right:10px">Thành tiền</span></div>';
+    th+='</div></th>';
+  });
+  th+='</tr></thead>';
+
+  var tb='<tbody>';
+  var lastSep='';
+  SCHEMA.forEach(function(def,ri){
+    if(def.sep&&def.sep!==lastSep){
+      lastSep=def.sep;
+      tb+='<tr class="septr"><td>'+def.sep+'</td>';
+      PKG.forEach(function(p,pi){tb+='<td class="psep" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'">'+def.sep+'</td>';});
+      tb+='</tr>';
+    }
+    var alt=ri%2===0?'':' z';
+    tb+='<tr class="dr'+alt+'"><td class="tdl">';
+    tb+='<div class="rn">'+def.label+'</div>';
+    var hintKey=PKG[0]?PKG[0].defKey:'standard';
+    var rowHint=getHint(def,hintKey);
+    if(rowHint)tb+='<div class="rh">'+rowHint+'</div>';
+    tb+='</td>';
+    PKG.forEach(function(p,pi){
+      var pr=p.rows[ri];
+      if(!pr){tb+='<td class="tdp" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'"></td>';return;}
+      var amt=rowAmt(pr);
+      var c=COLORS[p.ci%COLORS.length];
+      var isDA=pr.q==null;
+      tb+='<td class="tdp" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'"><div class="cg">';
+      tb+='<div><label class="tog"><input type="checkbox"'+(pr.on?' checked':'')+' data-pi="'+pi+'" data-ri="'+ri+'" onchange="onTog(this)"><span class="tsl" style="'+(pr.on?'background:'+c:'')+'"></span></label></div>';
+      if(!isDA){
+        tb+='<div><input class="ei" type="text" inputmode="numeric" value="'+pr.q+'" '+(pr.on?'':'disabled')+' data-pi="'+pi+'" data-ri="'+ri+'" data-f="q" oninput="onQtyIn(this)" onblur="onQtyBlur(this)" onkeydown="onEnter(this,event)"></div>';
+      }else{
+        tb+='<div><span class="da-cell">Dự án</span></div>';
+      }
+      tb+='<div><input class="ei" type="text" inputmode="numeric" value="'+fmtRate(pr.r)+'" '+(pr.on?'':'disabled')+' data-pi="'+pi+'" data-ri="'+ri+'" data-f="r" oninput="onRateIn(this)" onblur="onRateBlur(this)" onkeydown="onEnter(this,event)"></div>';
+      tb+='<div><span class="amt'+(pr.on?'':' off')+'" id="a-'+pi+'-'+ri+'">'+(pr.on?fmtFull(amt):'—')+'</span></div>';
+      tb+='</div></td>';
+    });
+    tb+='</tr>';
+  });
+
+  // Extra
+  tb+='<tr class="septr"><td>Cộng thêm</td>';
+  PKG.forEach(function(p,pi){tb+='<td class="psep" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'">Cộng thêm</td>';});
+  tb+='</tr>';
+  var maxEx=extraRows.reduce(function(m,ea){return Math.max(m,(ea||[]).length);},0);
+  for(var ei=0;ei<maxEx;ei++){
+    var fx=extraRows[0]&&extraRows[0][ei];
+    tb+='<tr class="extr"><td style="border-right:1px solid var(--bdr);padding:0 5px 0 16px">';
+    if(fx){tb+='<input class="extr-name" value="'+esc(fx.label||'')+'" placeholder="Tên hạng mục..." data-ei="'+ei+'" onchange="onExLabel(this)">';tb+='<button class="delr" onclick="delEx('+ei+')" title="Xoá">✕</button>';}
+    tb+='</td>';
+    PKG.forEach(function(p,pi){
+      var ex=extraRows[pi]&&extraRows[pi][ei];
+      var c=COLORS[p.ci%COLORS.length];
+      tb+='<td class="tdp-ex" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'"><div class="cg">';
+      if(ex){
+        var amt=rowAmt(ex);var isDaEx=ex.unit==='Dự án';
+        tb+='<div><label class="tog"><input type="checkbox"'+(ex.on?' checked':'')+' data-pi="'+pi+'" data-ei="'+ei+'" onchange="onExTog(this)"><span class="tsl" style="'+(ex.on?'background:'+c:'')+'"></span></label></div>';
+        if(!isDaEx){tb+='<div><input class="ei" type="text" inputmode="numeric" value="'+(ex.q||1)+'" '+(ex.on?'':'disabled')+' data-pi="'+pi+'" data-ei="'+ei+'" data-f="q" oninput="onExQtyIn(this)" onkeydown="onEnter(this,event)"></div>';}
+        else{tb+='<div><span class="da-cell">Dự án</span></div>';}
+        tb+='<div><input class="ei" type="text" inputmode="numeric" value="'+fmtRate(ex.r)+'" '+(ex.on?'':'disabled')+' data-pi="'+pi+'" data-ei="'+ei+'" data-f="r" oninput="onExRateIn(this)" onblur="onExRateBlur(this)" onkeydown="onEnter(this,event)"></div>';
+        tb+='<div><span class="amt'+(ex.on?'':' off')+'">'+(ex.on?fmtFull(amt):'—')+'</span></div>';
+      }else{tb+='<div></div><div></div><div></div><div></div>';}
+      tb+='</div></td>';
+    });
+    tb+='</tr>';
+  }
+  tb+='<tr class="atr"><td colspan="'+(n+1)+'" style="padding:8px 14px;border-top:1px solid var(--bdr-l)">';
+  ADDON_PRESETS.forEach(function(ap){tb+='<button class="arb" onclick="addEx(\''+ap.id+'\',\''+esc(ap.label)+'\',\''+ap.unit+'\','+ap.r+')">+ '+ap.label+'</button>';});
+  tb+='</td></tr>';
+
+  // Gifts
+  tb+='<tr class="gift-sec"><td><span class="gift-sec-lbl">Tặng kèm</span></td>';
+  PKG.forEach(function(p,pi){tb+='<td style="border-right:'+(pi<n-1?'1px solid #C5E0CE':'none')+'"></td>';});
+  tb+='</tr>';
+  var maxG=giftRows.reduce(function(m,ga){return Math.max(m,(ga||[]).length);},0);
+  for(var gi=0;gi<maxG;gi++){
+    // Lấy label từ gói bất kỳ có gift tại vị trí gi (tránh trống khi gói 0 không có)
+    var fg=null;
+    for(var _pi=0;_pi<PKG.length;_pi++){if(giftRows[_pi]&&giftRows[_pi][gi]){fg=giftRows[_pi][gi];break;}}
+    tb+='<tr class="gift-row"><td style="border-right:1px solid var(--bdr);padding:0 10px 0 16px">';
+    if(fg){tb+='<span class="gift-name-row">'+esc(fg.label)+'</span> <button class="delr" onclick="delGift('+gi+')" title="Xoá">✕</button>';}
+    tb+='</td>';
+    PKG.forEach(function(p,pi){
+      var g=giftRows[pi]&&giftRows[pi][gi];
+      var c=COLORS[p.ci%COLORS.length];
+      tb+='<td style="border-right:'+(pi<n-1?'1px solid rgba(197,224,206,.6)':'none');tb+='"><div class="gi">';
+      if(g!=null){
+        tb+='<div><label class="tog"><input type="checkbox"'+(g.on?' checked':'')+' data-pi="'+pi+'" data-gi="'+gi+'" onchange="onGiftTog(this)"><span class="tsl" style="'+(g.on?'background:'+c:'')+'"></span></label></div>';
+        tb+='<div><span style="font-size:11px;color:var(--fnt)">—</span></div>';
+        tb+='<div><input class="ei" type="text" inputmode="numeric" style="font-size:12px;color:var(--fnt)" value="'+(g.r?fmtRate(g.r):'')+'" placeholder="Giá trị..." '+(g.on?'':'disabled')+' data-pi="'+pi+'" data-gi="'+gi+'" oninput="onGiftRate(this)" onkeydown="onEnter(this,event)"></div>';
+        tb+='<div>'+(g.on?'<span class="gtag" style="background:'+c+'22;color:'+c+'">TẶNG</span>':'<span style="font-size:11px;color:var(--fnt)">—</span>')+'</div>';
+      }else{tb+='<div></div><div></div><div></div><div></div>';}
+      tb+='</div></td>';
+    });
+    tb+='</tr>';
+  }
+  tb+='<tr class="add-gift-tr"><td colspan="'+(n+1)+'" style="padding:8px 14px;border-top:1px solid rgba(197,224,206,.4)">';
+  GIFT_PRESETS.forEach(function(gp){tb+='<button class="gift-arb" onclick="addGift(\''+esc(gp.label)+'\')">+ '+gp.label+'</button>';});
+  tb+='<button class="gift-arb" onclick="addGift(\'\')">+ Khác...</button>';
+  tb+='</td></tr>';
+
+  // Footer totals
+  tb+='<tr class="ftr"><td>Phí dịch vụ</td>';
+  PKG.forEach(function(p,pi){tb+='<td class="fp" id="fp-'+pi+'" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'">'+fmtFull(pkgTot(pi))+'đ</td>';});
+  tb+='</tr>';
+  tb+='<tr class="ftr vt"><td>VAT 8%</td>';
+  PKG.forEach(function(p,pi){tb+='<td class="fp" id="fv-'+pi+'" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'">'+fmtFull(Math.round(pkgTot(pi)*.08))+'đ</td>';});
+  tb+='</tr>';
+  tb+='<tr class="gtr-sum"><td>Tổng thanh toán</td>';
+  PKG.forEach(function(p,pi){
+    var c=COLORS[p.ci%COLORS.length];
+    var g=pkgTot(pi)+Math.round(pkgTot(pi)*.08);
+    tb+='<td class="gp" id="fg-'+pi+'" style="border-right:'+(pi<n-1?'1px solid var(--bdr-l)':'none')+'"><span class="ga" style="color:'+c+'">'+fmtFull(g)+'đ</span></td>';
+  });
+  tb+='</tr></tbody>';
+
+  document.getElementById('tbl').innerHTML=cg+th+tb;
+  renderActs();
+  buildTargetUI();
+}
+
+// ── Live update totals (no full re-render) ────────────────────────
+function liveUpdate(){
+  PKG.forEach(function(p,pi){
+    var tot=pkgTot(pi);
+    var grand=tot+Math.round(tot*.08);
+    var pill=document.getElementById('pill'+pi);
+    if(pill)pill.textContent=fmtFull(grand)+'đ';
+    var fp=document.getElementById('fp-'+pi);
+    if(fp)fp.textContent=fmtFull(tot)+'đ';
+    var fv=document.getElementById('fv-'+pi);
+    if(fv)fv.textContent=fmtFull(Math.round(tot*.08))+'đ';
+    var fg=document.getElementById('fg-'+pi);
+    if(fg)fg.querySelector('.ga').textContent=fmtFull(grand)+'đ';
+  });
+}
+
+function renderActs(){
+  var h='';
+  PKG.forEach(function(p,pi){
+    var c=COLORS[p.ci%COLORS.length];
+    h+='<button class="ab" style="border-color:'+c+'50;color:'+c+'" onclick="copyNg('+pi+')">⎘ Copy nhanh '+p.name+'</button>';
+  });
+  h+='<button class="ab-reset" onclick="doReset()">↺ Reset tất cả</button>';
+  document.getElementById('acts-row1').innerHTML=h;
+}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ── Event handlers ────────────────────────────────────────────────
+function onTog(cb){
+  var pi=+cb.dataset.pi,ri=+cb.dataset.ri;
+  PKG[pi].rows[ri].on=cb.checked;
+  // Update row amount cell
+  var amtEl=document.getElementById('a-'+pi+'-'+ri);
+  if(amtEl){
+    var pr=PKG[pi].rows[ri];
+    amtEl.className='amt'+(pr.on?'':' off');
+    amtEl.textContent=pr.on?fmtFull(rowAmt(pr)):'—';
+  }
+  // Update toggle color
+  var tsl=cb.nextElementSibling;
+  if(tsl){tsl.style.background=cb.checked?COLORS[PKG[pi].ci%COLORS.length]:'';}
+  // Rebuild target UI (checkboxes may change)
+  liveUpdate();
+  buildTargetUI();
+}
+
+function onEnter(inp,e){if(e.key==='Enter'){inp.blur();}}
+
+function onQtyIn(inp){
+  var raw=inp.value.replace(/[^\d]/g,'');inp.value=raw;
+  var pi=+inp.dataset.pi,ri=+inp.dataset.ri;
+  PKG[pi].rows[ri].q=parseInt(raw)||0;
+  var amtEl=document.getElementById('a-'+pi+'-'+ri);
+  if(amtEl){var pr=PKG[pi].rows[ri];amtEl.textContent=pr.on?fmtFull(rowAmt(pr)):'—';}
+  liveUpdate();
+}
+function onQtyBlur(inp){var raw=inp.value.replace(/[^\d]/g,'');inp.value=raw||'0';}
+
+function onRateIn(inp){
+  var raw=inp.value.replace(/[^\d]/g,'');
+  var fmt=raw?parseInt(raw).toLocaleString('vi-VN'):'';
+  var p=inp.selectionStart,ol=inp.value.length;
+  inp.value=fmt;
+  try{inp.selectionStart=inp.selectionEnd=p+(fmt.length-ol);}catch(e){}
+  var pi=+inp.dataset.pi,ri=+inp.dataset.ri;
+  PKG[pi].rows[ri].r=parseInt(raw)||0;
+  var amtEl=document.getElementById('a-'+pi+'-'+ri);
+  if(amtEl){var pr=PKG[pi].rows[ri];amtEl.textContent=pr.on?fmtFull(rowAmt(pr)):'—';}
+  liveUpdate();
+}
+function onRateBlur(inp){
+  var raw=inp.value.replace(/[^\d]/g,'');
+  inp.value=raw?parseInt(raw).toLocaleString('vi-VN'):'';
+}
+
+function onExTog(cb){if(extraRows[+cb.dataset.pi]&&extraRows[+cb.dataset.pi][+cb.dataset.ei]){extraRows[+cb.dataset.pi][+cb.dataset.ei].on=cb.checked;}render();}
+function onExLabel(inp){var ei=+inp.dataset.ei;extraRows.forEach(function(ea){if(ea&&ea[ei])ea[ei].label=inp.value;});}
+function onExQtyIn(inp){var pi=+inp.dataset.pi,ei=+inp.dataset.ei;var raw=inp.value.replace(/[^\d]/g,'');inp.value=raw;if(extraRows[pi]&&extraRows[pi][ei]){extraRows[pi][ei].q=parseInt(raw)||0;}liveUpdate();}
+function onExRateIn(inp){
+  var raw=inp.value.replace(/[^\d]/g,'');
+  var fmt=raw?parseInt(raw).toLocaleString('vi-VN'):'';
+  var p=inp.selectionStart,ol=inp.value.length;
+  inp.value=fmt;try{inp.selectionStart=inp.selectionEnd=p+(fmt.length-ol);}catch(e){}
+  var pi=+inp.dataset.pi,ei=+inp.dataset.ei;
+  if(extraRows[pi]&&extraRows[pi][ei])extraRows[pi][ei].r=parseInt(raw)||0;
+  liveUpdate();
+}
+function onExRateBlur(inp){var raw=inp.value.replace(/[^\d]/g,'');inp.value=raw?parseInt(raw).toLocaleString('vi-VN'):'';}
+
+function onGiftTog(cb){if(giftRows[+cb.dataset.pi]&&giftRows[+cb.dataset.pi][+cb.dataset.gi])giftRows[+cb.dataset.pi][+cb.dataset.gi].on=cb.checked;render();}
+function onGiftRate(inp){
+  var raw=inp.value.replace(/[^\d]/g,'');
+  var fmt=raw?parseInt(raw).toLocaleString('vi-VN'):'';
+  var p=inp.selectionStart,ol=inp.value.length;
+  inp.value=fmt;try{inp.selectionStart=inp.selectionEnd=p+(fmt.length-ol);}catch(e){}
+  var pi=+inp.dataset.pi,gi=+inp.dataset.gi;
+  if(giftRows[pi]&&giftRows[pi][gi])giftRows[pi][gi].r=parseInt(raw)||0;
+}
+
+// ── Days / Spec ────────────────────────────────────────────────────
+function adjDays(pi,d){
+  PKG[pi].days=Math.max(1,PKG[pi].days+d);
+  var el=document.getElementById('dv'+pi);
+  if(el)el.textContent=PKG[pi].days;
+  SCHEMA.forEach(function(def,ri){
+    if(def.unit==='Ngày'&&PKG[pi].rows[ri]&&PKG[pi].rows[ri].q!=null)
+      PKG[pi].rows[ri].q=PKG[pi].days;
+  });
+  render();
+}
+function adjSpec(k,d){
+  if(k==='videos')SPECS.videos=Math.max(1,SPECS.videos+d);
+  var el=document.getElementById('sp-'+k);if(el)el.textContent=SPECS[k];
+}
+
+// ── Type ──────────────────────────────────────────────────────────
+function setType(el){
+  document.querySelectorAll('.pb').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');TYPE=el.dataset.t;
+}
+
+// ── Add / Del ─────────────────────────────────────────────────────
+function addEx(id,label,unit,r){
+  PKG.forEach(function(p,pi){if(!extraRows[pi])extraRows[pi]=[];extraRows[pi].push({id:id,label:label,unit:unit,q:1,r:r,on:true});});
+  render();
+}
+function delEx(ei){extraRows.forEach(function(ea){if(ea)ea.splice(ei,1);});render();}
+function addGift(label){
+  var name=label||prompt('Tên mục tặng kèm:','');if(!name)return;
+  PKG.forEach(function(p,pi){if(!giftRows[pi])giftRows[pi]=[];giftRows[pi].push({label:name,r:0,on:true});});
+  render();
+}
+function delGift(gi){giftRows.forEach(function(ga){if(ga)ga.splice(gi,1);});render();}
+function addPkg(){
+  var ci=PKG.length%COLORS.length;
+  var dkArr=['standard','pro','premium'];
+  var dk=dkArr[PKG.length]||'standard';
+  PKG.push({name:'Gói '+(PKG.length+1),ci:ci,days:1,rows:makeRows(dk),defKey:dk});
+  extraRows.push([]);giftRows.push([]);
+  distSel.push(PKG[PKG.length-1].rows.filter(function(r){return r.on;}).map(function(r){return r.id;}));
+  render();
+}
+function delPkg(pi){if(PKG.length<=1)return;PKG.splice(pi,1);extraRows.splice(pi,1);giftRows.splice(pi,1);distSel.splice(pi,1);render();}
+
+// ── Reset ─────────────────────────────────────────────────────────
+function doReset(){
+  if(!confirm('Reset tất cả về giá mặc định?'))return;
+  document.getElementById('ic').value='';
+  document.getElementById('im').value='';
+  SPECS={videos:1,duration:'30'};
+  document.getElementById('sp-videos').textContent='1';
+  document.getElementById('sp-dur').value='30';
+  initPkgs();
+  render();
+  showToast('✓ Đã reset về mặc định');
+}
+
+// ── Copy ──────────────────────────────────────────────────────────
+function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
+
+function copyNg(pi){
+  var p=PKG[pi];
+  var client=document.getElementById('ic').value||'Khách hàng';
+  var month=document.getElementById('im').value||document.getElementById('im').placeholder||'';
+  var lines=[p.name.toUpperCase()+' — CAN ĐĂNG STUDIO'];
+  if(client)lines.push('Khách: '+client);
+  if(month)lines.push('Tháng: '+month);
+  lines.push(p.days+' ngày quay · '+SPECS.videos+' video · '+SPECS.duration+'s');
+  lines.push('');
+  var tot=0;
+  p.rows.forEach(function(pr,ri){
+    if(!pr.on)return;
+    var def=SCHEMA[ri];var amt=rowAmt(pr);tot+=amt;
+    var d=pr.q!=null?(fmtFull(pr.r)+'đ × '+pr.q+' '+def.unit):'Dự án — Trọn gói';
+    lines.push('• '+def.label+': '+d+' = '+fmtFull(amt)+'đ');
+  });
+  (extraRows[pi]||[]).forEach(function(ex){
+    if(!ex.on)return;var amt=rowAmt(ex);tot+=amt;
+    var d=ex.q!=null?(fmtFull(ex.r)+'đ × '+ex.q+' '+ex.unit):'Dự án — Trọn gói';
+    lines.push('• '+ex.label+': '+d+' = '+fmtFull(amt)+'đ');
+  });
+  var gifts=(giftRows[pi]||[]).filter(function(g){return g.on;});
+  if(gifts.length){lines.push('');lines.push('TẶNG KÈM:');gifts.forEach(function(g){lines.push('• [TẶNG] '+g.label+(g.r?' (trị giá '+fmtFull(g.r)+'đ)':''));});}
+  var vat=Math.round(tot*.08);
+  lines.push('');lines.push('Phí dịch vụ: '+fmtFull(tot)+'đ');
+  lines.push('VAT 8%: '+fmtFull(vat)+'đ');
+  lines.push('TỔNG: '+fmtFull(tot+vat)+'đ');
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){showToast('✓ Đã copy '+p.name);});
+}
+
+function copyAll(){
+  var client=document.getElementById('ic').value||'Khách hàng';
+  var month=document.getElementById('im').value||(document.getElementById('im').placeholder||'');
+  var typeStr=TYPE_LABEL[TYPE]||'Sản phẩm';
+  var lines=['XUẤT FILE WORD BÁO GIÁ TVC — CAN ĐĂNG STUDIO'];
+  lines.push('Khách hàng: '+client);
+  lines.push('Tháng: '+month);
+  lines.push('Loại: '+typeStr+' | Số video: '+SPECS.videos+' | Thời lượng: '+SPECS.duration+' giây');
+  lines.push('Số gói: '+PKG.length);
+  lines.push('');
+  PKG.forEach(function(p,pi){
+    var tot=0;
+    lines.push('=== GÓI '+(pi+1)+': '+p.name.toUpperCase()+' — '+p.days+' NGÀY QUAY ===');
+    lines.push('HẠNG MỤC:');
+    var stt=1;
+    p.rows.forEach(function(pr,ri){
+      if(!pr.on)return;
+      var def=SCHEMA[ri];var amt=rowAmt(pr);tot+=amt;
+      var desc=getHint(def,p.defKey||'standard');
+      var detail=pr.q!=null?(fmtFull(pr.r)+'đ × '+pr.q+' '+def.unit):'Dự án — Trọn gói';
+      lines.push(stt+'. '+def.label+(desc?' — '+desc:'')+' | '+detail+' = '+fmtFull(amt)+'đ');
+      stt++;
+    });
+    (extraRows[pi]||[]).forEach(function(ex){
+      if(!ex.on)return;var amt=rowAmt(ex);tot+=amt;
+      var detail=ex.q!=null?(fmtFull(ex.r)+'đ × '+ex.q+' '+ex.unit):'Dự án — Trọn gói';
+      lines.push(stt+'. '+ex.label+' | '+detail+' = '+fmtFull(amt)+'đ');stt++;
+    });
+    var gifts=(giftRows[pi]||[]).filter(function(g){return g.on;});
+    if(gifts.length){lines.push('TẶNG KÈM:');gifts.forEach(function(g){lines.push('• [TẶNG] '+g.label+(g.r?' (trị giá '+fmtFull(g.r)+'đ)':''));});}
+    var vat=Math.round(tot*.08);
+    lines.push('Phí dịch vụ: '+fmtFull(tot)+'đ');
+    lines.push('VAT 8%: '+fmtFull(vat)+'đ');
+    lines.push('TỔNG: '+fmtFull(tot+vat)+'đ');
+    lines.push('');
+  });
+  lines.push('YÊU CẦU: Xuất file Word .docx chuẩn layout TVC Can Đăng Studio. Màu navy #1A1A2E, gold #C8972B. Font Arial Unicode. Mỗi gói 1 trang riêng. Scope box vàng. Bảng 6 cột phân tách hạng mục. Mỗi hàng 2 dòng: tên bold + mô tả italic nhỏ màu xám. Dòng tặng kèm màu xanh lá MIỄN PHÍ. Tổng cộng màu xanh đậm. Box tham chiếu thị trường quốc tế TVC Singapore/Thái Lan 5.000–10.000 USD. Điều khoản thanh toán ACB 3638 6868 8888. Header/footer Can Đăng Studio.');
+  navigator.clipboard.writeText(lines.join('\n')).then(function(){
+    document.getElementById('export-ok').classList.add('show');
+    showToast('✓ Đã copy — paste vào Claude!');
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+(function(){
+  var now=new Date();
+  document.getElementById('im').placeholder='Tháng '+(now.getMonth()+1)+' / '+now.getFullYear();
+})();
+initPkgs();
+render();
+</script>
+</body>
+</html>
