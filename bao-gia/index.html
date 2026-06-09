@@ -8,322 +8,82 @@
 <script>if(typeof docx==='undefined'){document.write('<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"><\/script>')}</script>
 <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 <style>
-/* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-/* ===== BODY ===== */
-body {
-  font-family: 'Times New Roman', Times, serif;
-  font-size: 13pt;
-  line-height: 1.2;
-  background: #e8e8e8;
-  color: #000;
-}
-
-/* ===== MOBILE TAB BAR (hidden on desktop) ===== */
-.mobile-tabs {
-  display: none;
-}
-
-/* ===== APP LAYOUT ===== */
-.app-wrap {
-  display: flex;
-  gap: 0;
-  min-height: 100vh;
-}
-
-/* ===== FORM PANEL ===== */
-.form-panel {
-  width: 310px;
-  flex-shrink: 0;
-  background: #1e2a3a;
-  color: #eee;
-  padding: 20px 16px 30px;
-  overflow-y: auto;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-}
-
-.form-panel h2 {
-  font-family: Arial, sans-serif;
-  font-size: 13pt;
-  font-weight: bold;
-  color: #fff;
-  margin-bottom: 18px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #4a7fc1;
-  letter-spacing: 0.5px;
-}
-
+body { font-family: 'Times New Roman', Times, serif; font-size: 13pt; line-height: 1.2; background: #e8e8e8; color: #000; }
+.mobile-tabs { display: none; }
+.app-wrap { display: flex; gap: 0; min-height: 100vh; }
+.form-panel { width: 320px; flex-shrink: 0; background: #1e2a3a; color: #eee; padding: 20px 16px 30px; overflow-y: auto; position: sticky; top: 0; height: 100vh; }
+.form-panel h2 { font-family: Arial, sans-serif; font-size: 13pt; font-weight: bold; color: #fff; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 2px solid #4a7fc1; letter-spacing: 0.5px; }
 .form-section { margin-bottom: 18px; }
-
-.form-section-title {
-  font-family: Arial, sans-serif;
-  font-size: 9pt;
-  font-weight: bold;
-  color: #7ab3e0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 10px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #2e3e54;
-}
-
-.form-panel label {
-  display: block;
-  font-family: Arial, sans-serif;
-  font-size: 9pt;
-  color: #bbb;
-  margin-bottom: 3px;
-  margin-top: 8px;
-}
+.form-section-title { font-family: Arial, sans-serif; font-size: 9pt; font-weight: bold; color: #7ab3e0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-bottom: 4px; border-bottom: 1px solid #2e3e54; }
+.form-panel label { display: block; font-family: Arial, sans-serif; font-size: 9pt; color: #bbb; margin-bottom: 3px; margin-top: 8px; }
 .form-panel label:first-of-type { margin-top: 0; }
-
-.form-panel input[type="text"],
-.form-panel input[type="number"],
-.form-panel select {
-  width: 100%;
-  padding: 6px 8px;
-  background: #253447;
-  border: 1px solid #3a5070;
-  border-radius: 4px;
-  color: #fff;
-  font-family: 'Times New Roman', serif;
-  font-size: 11pt;
-  line-height: 1.3;
-}
-
-.form-panel input:focus,
-.form-panel select:focus {
-  outline: none;
-  border-color: #4a7fc1;
-  background: #2c3f56;
-}
-
+.form-panel input[type="text"], .form-panel input[type="number"], .form-panel select { width: 100%; padding: 6px 8px; background: #253447; border: 1px solid #3a5070; border-radius: 4px; color: #fff; font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.3; }
+.form-panel input:focus, .form-panel select:focus { outline: none; border-color: #4a7fc1; background: #2c3f56; }
 .form-panel select option { background: #253447; }
-
-.pkg-check-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  cursor: pointer;
-}
-
-.pkg-check-row input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
-  cursor: pointer;
-  accent-color: #4a7fc1;
-  flex-shrink: 0;
-}
-
-.pkg-check-row span {
-  font-family: Arial, sans-serif;
-  font-size: 10pt;
-  color: #ddd;
-}
-
-.pkg-fields {
-  background: #253447;
-  border: 1px solid #3a5070;
-  border-radius: 4px;
-  padding: 10px 10px 4px;
-  margin-bottom: 10px;
-}
-
+.pkg-check-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; cursor: pointer; }
+.pkg-check-row input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; accent-color: #4a7fc1; flex-shrink: 0; }
+.pkg-check-row span { font-family: Arial, sans-serif; font-size: 10pt; color: #ddd; }
+.pkg-fields { background: #253447; border: 1px solid #3a5070; border-radius: 4px; padding: 10px 10px 4px; margin-bottom: 10px; }
 .pkg-fields label { margin-top: 6px; }
 .pkg-fields label:first-of-type { margin-top: 0; }
-
-.vat-note {
-  font-family: Arial, sans-serif;
-  font-size: 8.5pt;
-  color: #7ab3e0;
-  margin-top: 6px;
-  font-style: italic;
-}
-
-.btn-export {
-  width: 100%;
-  padding: 12px 10px;
-  background: #2a6fc9;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-family: Arial, sans-serif;
-  font-size: 12pt;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 6px;
-  transition: background 0.2s;
-}
+.vat-note { font-family: Arial, sans-serif; font-size: 8.5pt; color: #7ab3e0; margin-top: 6px; font-style: italic; }
+.btn-export { width: 100%; padding: 12px 10px; background: #2a6fc9; color: #fff; border: none; border-radius: 6px; font-family: Arial, sans-serif; font-size: 12pt; font-weight: bold; cursor: pointer; margin-top: 6px; transition: background 0.2s; }
 .btn-export:hover { background: #3a82e0; }
+.pkg-divider { border-top: 1px solid #2e3e54; margin: 14px 0 10px; }
 
-/* ===== PREVIEW AREA ===== */
-.preview-area {
-  flex: 1;
-  padding: 24px 24px 40px;
-  overflow-y: auto;
-}
+/* ===== EXTRA COSTS ===== */
+.extra-costs-wrap { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #3a5070; }
+.extra-costs-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.extra-costs-hdr span { font-family: Arial, sans-serif; font-size: 8.5pt; color: #7ab3e0; font-style: italic; }
+.btn-add-extra { padding: 3px 8px; background: #1e4f8f; color: #dce9f8; border: 1px solid #3a6db0; border-radius: 3px; font-family: Arial, sans-serif; font-size: 8pt; cursor: pointer; }
+.btn-add-extra:hover { background: #2a6fc9; }
+.extra-row { display: flex; gap: 4px; align-items: center; margin-bottom: 5px; }
+.extra-row input[type="text"] { flex: 2; min-width: 0; }
+.extra-row input[type="number"] { flex: 1.2; min-width: 0; }
+.btn-rm-extra { flex-shrink: 0; width: 24px; height: 26px; background: #7b1e1e; color: #ffcdd2; border: none; border-radius: 3px; cursor: pointer; font-size: 14pt; line-height: 1; display: flex; align-items: center; justify-content: center; padding: 0; }
+.btn-rm-extra:hover { background: #c0392b; }
 
-.preview-label {
-  text-align: center;
-  font-family: Arial, sans-serif;
-  font-size: 9pt;
-  color: #777;
-  margin-bottom: 12px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-/* ===== DOCUMENT ===== */
-.doc {
-  background: #fff;
-  width: 210mm;
-  min-height: 297mm;
-  margin: 0 auto;
-  padding: 20mm 22mm 22mm;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-  font-family: 'Times New Roman', Times, serif;
-  font-size: 13pt;
-  line-height: 1.2;
-  color: #000;
-}
-
-.doc-title {
-  text-align: center;
-  font-size: 15pt;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-  line-height: 1.3;
-}
-
-.doc-header-info {
-  margin-bottom: 14px;
-  text-align: right;
-}
-.doc-header-info p {
-  margin-bottom: 3px;
-  line-height: 1.4;
-}
-
+/* ===== PREVIEW ===== */
+.preview-area { flex: 1; padding: 24px 24px 40px; overflow-y: auto; }
+.preview-label { text-align: center; font-family: Arial, sans-serif; font-size: 9pt; color: #777; margin-bottom: 12px; letter-spacing: 0.5px; text-transform: uppercase; }
+.doc { background: #fff; width: 210mm; min-height: 297mm; margin: 0 auto; padding: 20mm 22mm 22mm; box-shadow: 0 4px 24px rgba(0,0,0,0.18); font-family: 'Times New Roman', Times, serif; font-size: 13pt; line-height: 1.2; color: #000; }
+.doc-title { text-align: center; font-size: 15pt; font-weight: bold; text-transform: uppercase; margin-bottom: 14px; line-height: 1.3; }
+.doc-header-info { margin-bottom: 14px; text-align: right; }
+.doc-header-info p { margin-bottom: 3px; line-height: 1.4; }
 .doc p { margin-bottom: 6px; line-height: 1.4; }
-
 .doc ul { margin-left: 22px; margin-bottom: 8px; }
 .doc ul li { margin-bottom: 3px; line-height: 1.4; }
-
-/* Inner lists (table cells) — hanging indent chuẩn */
-.cell-list {
-  margin: 5px 0 2px 0;
-  padding-left: 1.3em;
-  list-style-type: disc;
-}
-.cell-list li {
-  margin-bottom: 4px;
-  line-height: 1.4;
-  font-size: 12pt;
-}
-
+.cell-list { margin: 5px 0 2px 0; padding-left: 1.3em; list-style-type: disc; }
+.cell-list li { margin-bottom: 4px; line-height: 1.4; font-size: 12pt; }
 .doc-spacer { height: 10px; }
 
 /* ===== TABLES ===== */
-.baogia-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 18px;
-  font-family: 'Times New Roman', Times, serif;
-  font-size: 12pt;
-  line-height: 1.3;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.10);
-}
-
-.baogia-table th,
-.baogia-table td {
-  border: 1px solid #b8cce4;
-  padding: 7px 9px;
-  vertical-align: top;
-  text-align: left;
-}
-
-.baogia-table thead th {
-  text-align: center;
-  font-weight: bold;
-  background: linear-gradient(135deg, #1e3a5f 0%, #2a5298 100%);
-  color: #fff;
-  vertical-align: middle;
-  font-size: 12pt;
-  border-color: #1a3060;
-  letter-spacing: 0.2px;
-  padding: 9px;
-}
-
-.baogia-table .col-stt { width: 5%;  text-align: center; }
+.baogia-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.3; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.10); }
+.baogia-table th, .baogia-table td { border: 1px solid #b8cce4; padding: 7px 9px; vertical-align: top; text-align: left; }
+.baogia-table thead th { text-align: center; font-weight: bold; background: linear-gradient(135deg, #1e3a5f 0%, #2a5298 100%); color: #fff; vertical-align: middle; font-size: 12pt; border-color: #1a3060; letter-spacing: 0.2px; padding: 9px; }
+.baogia-table .col-stt { width: 5%; text-align: center; }
 .baogia-table .col-nd  { width: 44%; }
 .baogia-table .col-dvt { width: 10%; text-align: center; }
 .baogia-table .col-dg  { width: 13%; text-align: right; }
 .baogia-table .col-tg  { width: 11%; text-align: center; }
 .baogia-table .col-tt  { width: 13%; text-align: right; }
+.baogia-table tbody tr:first-child td:nth-child(2) { border-left: 3px solid #2a5298; }
+.baogia-table .row-summary td { font-weight: bold; background-color: #eaf1fb; color: #1e3a5f; }
+.baogia-table .row-vat td { font-weight: bold; background-color: #fdf6e3; color: #5a3e00; }
+.baogia-table .row-total td { font-weight: bold; font-size: 13pt; background: linear-gradient(90deg, #1e3a5f 0%, #2a5298 100%); color: #fff; border-color: #1a3060; }
+.baogia-table .row-vip td { background-color: #fffbf0; border-left: 3px solid #e6a817; }
+.baogia-table .row-extra td { background-color: #f5f8ff; color: #333; font-size: 12pt; }
 
-.baogia-table tbody tr:first-child td:nth-child(2) {
-  border-left: 3px solid #2a5298;
-}
-
-.baogia-table .row-summary td {
-  font-weight: bold;
-  background-color: #eaf1fb;
-  color: #1e3a5f;
-}
-
-.baogia-table .row-vat td {
-  font-weight: bold;
-  background-color: #fdf6e3;
-  color: #5a3e00;
-}
-
-.baogia-table .row-total td {
-  font-weight: bold;
-  font-size: 13pt;
-  background: linear-gradient(90deg, #1e3a5f 0%, #2a5298 100%);
-  color: #fff;
-  border-color: #1a3060;
-}
-
-.baogia-table .row-vip td {
-  background-color: #fffbf0;
-  border-left: 3px solid #e6a817;
-}
-
-.pkg-heading {
-  font-size: 13pt;
-  font-weight: bold;
-  margin: 14px 0 4px 0;
-  line-height: 1.3;
-}
-.pkg-subheading {
-  font-size: 12pt;
-  font-weight: bold;
-  margin: 0 0 6px 0;
-  font-style: italic;
-  line-height: 1.35;
-}
-
+.pkg-heading { font-size: 13pt; font-weight: bold; margin: 14px 0 4px 0; line-height: 1.3; }
+.pkg-subheading { font-size: 12pt; font-weight: bold; margin: 0 0 6px 0; font-style: italic; line-height: 1.35; }
 .portfolio-link { margin: 12px 0 6px; }
 .portfolio-link a { color: #1155cc; text-decoration: underline; font-weight: bold; }
-
 .payment-section { margin-top: 10px; }
-
 .bank-block { margin: 6px 0 6px 20px; line-height: 1.5; }
-
 .closing { margin-top: 18px; font-weight: bold; font-size: 13pt; text-align: center; }
-
-/* ===== MOBILE EXPORT BUTTON (fixed bottom) ===== */
 .mobile-export { display: none; }
 
-/* ===== PRINT ===== */
 @media print {
   body { background: #fff; }
   .form-panel, .preview-label, .mobile-tabs, .mobile-export { display: none !important; }
@@ -332,146 +92,48 @@ body {
   .doc { box-shadow: none; margin: 0; padding: 15mm 20mm; width: 100%; }
 }
 
-/* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
-
-  /* Tab bar */
-  .mobile-tabs {
-    display: flex;
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 200;
-    background: #1e2a3a;
-    border-bottom: 2px solid #4a7fc1;
-    height: 50px;
-  }
-  .tab-btn {
-    flex: 1;
-    padding: 0 10px;
-    background: transparent;
-    color: #8ba8c8;
-    border: none;
-    border-bottom: 3px solid transparent;
-    font-family: Arial, sans-serif;
-    font-size: 11pt;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
-  }
-  .tab-btn.active {
-    color: #fff;
-    border-bottom-color: #4a7fc1;
-  }
-
-  /* Layout stacks vertically */
-  .app-wrap {
-    display: block;
-    padding-top: 50px;
-    padding-bottom: 64px;
-  }
-
-  /* Form panel: full width, not sticky */
-  .form-panel {
-    width: 100%;
-    height: auto;
-    position: relative;
-    overflow-y: visible;
-    display: none; /* controlled by tab */
-  }
+  .mobile-tabs { display: flex; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #1e2a3a; border-bottom: 2px solid #4a7fc1; height: 50px; }
+  .tab-btn { flex: 1; padding: 0 10px; background: transparent; color: #8ba8c8; border: none; border-bottom: 3px solid transparent; font-family: Arial, sans-serif; font-size: 11pt; font-weight: bold; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
+  .tab-btn.active { color: #fff; border-bottom-color: #4a7fc1; }
+  .app-wrap { display: block; padding-top: 50px; padding-bottom: 64px; }
+  .form-panel { width: 100%; height: auto; position: relative; overflow-y: visible; display: none; }
   .form-panel.tab-active { display: block; }
-
-  /* Bigger inputs for touch */
-  .form-panel input[type="text"],
-  .form-panel input[type="number"],
-  .form-panel select {
-    padding: 10px 10px;
-    font-size: 13pt;
-    min-height: 44px;
-  }
+  .form-panel input[type="text"], .form-panel input[type="number"], .form-panel select { padding: 10px 10px; font-size: 13pt; min-height: 44px; }
   .pkg-check-row input[type="checkbox"] { width: 20px; height: 20px; }
   .pkg-check-row span { font-size: 12pt; }
-
-  /* Hide desktop export button inside form */
   .form-panel .btn-export { display: none; }
-
-  /* Preview area */
-  .preview-area {
-    padding: 10px 8px 10px;
-    overflow-x: hidden;
-    display: none; /* controlled by tab */
-  }
+  .preview-area { padding: 10px 8px 10px; overflow-x: hidden; display: none; }
   .preview-area.tab-active { display: block; }
-
-  /* Document scales to fit screen */
-  .doc {
-    transform-origin: top left;
-    /* scale set by JS */
-  }
-
-  /* Fixed export button at bottom */
-  .mobile-export {
-    display: block;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    padding: 10px 16px;
-    background: #1e2a3a;
-    border-top: 1px solid #3a5070;
-    z-index: 200;
-  }
-  .mobile-export button {
-    width: 100%;
-    padding: 13px;
-    background: #2a6fc9;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-family: Arial, sans-serif;
-    font-size: 13pt;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
+  .doc { transform-origin: top left; }
+  .mobile-export { display: block; position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 16px; background: #1e2a3a; border-top: 1px solid #3a5070; z-index: 200; }
+  .mobile-export button { width: 100%; padding: 13px; background: #2a6fc9; color: #fff; border: none; border-radius: 6px; font-family: Arial, sans-serif; font-size: 13pt; font-weight: bold; cursor: pointer; }
   .preview-label { font-size: 8pt; margin-bottom: 8px; }
 }
 
-/* ===== TOAST ===== */
-#cd-toast {
-  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-  background: #111; color: #fff; padding: 10px 20px; border-radius: 8px;
-  font-size: 14px; font-family: Arial, sans-serif; font-weight: 600;
-  z-index: 999; display: none; white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25); pointer-events: none;
-  transition: opacity 0.3s;
-}
+#cd-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #111; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-family: Arial, sans-serif; font-weight: 600; z-index: 999; display: none; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.25); pointer-events: none; transition: opacity 0.3s; }
 </style>
 </head>
 <body>
 <div id="cd-toast"></div>
 
-<!-- ===== MOBILE TAB BAR ===== -->
 <div class="mobile-tabs">
   <button class="tab-btn active" id="tabForm" onclick="showTab('form')">📝 Nhập liệu</button>
   <button class="tab-btn" id="tabPreview" onclick="showTab('preview')">👁 Xem trước</button>
 </div>
 
 <div class="app-wrap">
-
-  <!-- ===== FORM PANEL ===== -->
   <div class="form-panel tab-active" id="formPanel">
     <h2>⚙ Nhập thông tin báo giá</h2>
 
     <div class="form-section">
       <div class="form-section-title">Thông tin chung</div>
-
       <label>Tên khách hàng</label>
       <input type="text" id="tenKH" placeholder="VD: Nhà hàng ABC..." oninput="render()">
-
       <label>Tháng thực hiện</label>
       <input type="text" id="thang" placeholder="VD: 05" oninput="render()">
-
       <label>Năm thực hiện</label>
       <input type="text" id="nam" placeholder="VD: 2026" oninput="render()">
-
       <label>Loại sản phẩm</label>
       <select id="loai" onchange="render()">
         <option value="món ăn">Món ăn</option>
@@ -480,13 +142,11 @@ body {
         <option value="món ăn / đồ uống">Món ăn / Đồ uống</option>
         <option value="sản phẩm / món ăn / đồ uống">Sản phẩm / Món ăn / Đồ uống</option>
       </select>
-
       <label>Địa điểm chụp</label>
       <select id="diaDiem" onchange="render()">
         <option value="Studio">Studio</option>
         <option value="địa điểm khách hàng">Địa điểm khách hàng</option>
       </select>
-
       <label id="labelSlMonYC">Số lượng món (yêu cầu)</label>
       <input type="text" id="slMonYC" placeholder="VD: 15" oninput="render()">
     </div>
@@ -506,6 +166,13 @@ body {
         <input type="number" id="sl1" value="12" min="1" oninput="render()">
         <label>Số ảnh chỉnh sửa</label>
         <input type="number" id="anh1" value="24" min="1" oninput="render()">
+        <div class="extra-costs-wrap">
+          <div class="extra-costs-hdr">
+            <span>Chi phí bổ sung</span>
+            <button type="button" class="btn-add-extra" onclick="addExtra(1)">+ Thêm</button>
+          </div>
+          <div id="extRows1"></div>
+        </div>
       </div>
 
       <!-- Gói 2 -->
@@ -520,6 +187,13 @@ body {
         <input type="number" id="sl2" value="20" min="1" oninput="render()">
         <label>Số ảnh chỉnh sửa</label>
         <input type="number" id="anh2" value="40" min="1" oninput="render()">
+        <div class="extra-costs-wrap">
+          <div class="extra-costs-hdr">
+            <span>Chi phí bổ sung</span>
+            <button type="button" class="btn-add-extra" onclick="addExtra(2)">+ Thêm</button>
+          </div>
+          <div id="extRows2"></div>
+        </div>
       </div>
 
       <!-- Gói 3 -->
@@ -534,44 +208,113 @@ body {
         <input type="number" id="sl3" value="25" min="1" oninput="render()">
         <label>Số ảnh chỉnh sửa</label>
         <input type="number" id="anh3" value="50" min="1" oninput="render()">
+        <div class="extra-costs-wrap">
+          <div class="extra-costs-hdr">
+            <span>Chi phí bổ sung</span>
+            <button type="button" class="btn-add-extra" onclick="addExtra(3)">+ Thêm</button>
+          </div>
+          <div id="extRows3"></div>
+        </div>
       </div>
 
       <div class="vat-note">VAT mặc định 8% — tự động tính cho từng gói.</div>
+
+      <!-- Divider -->
+      <div class="pkg-divider"></div>
+      <div class="form-section-title" style="margin-bottom:8px;">Gói tách biệt</div>
+
+      <!-- Gói Nền Trắng -->
+      <label class="pkg-check-row">
+        <input type="checkbox" id="chkNT" onchange="togglePkg('NT'); render();">
+        <span id="labelChkNT">Gói chụp ảnh nền trắng</span>
+      </label>
+      <div class="pkg-fields" id="fieldsNT" style="display:none;">
+        <label>Đơn giá / sản phẩm (vnđ)</label>
+        <input type="number" id="dgNT" value="80000" min="0" oninput="render()">
+        <label id="labelSlNT">Số lượng sản phẩm</label>
+        <input type="number" id="slNT" value="10" min="1" oninput="render()">
+        <label>Số ảnh chỉnh sửa / sản phẩm</label>
+        <input type="number" id="anhNT" value="2" min="1" oninput="render()">
+        <div class="extra-costs-wrap">
+          <div class="extra-costs-hdr">
+            <span>Chi phí bổ sung</span>
+            <button type="button" class="btn-add-extra" onclick="addExtra('NT')">+ Thêm</button>
+          </div>
+          <div id="extRowsNT"></div>
+        </div>
+      </div>
     </div>
 
     <button class="btn-export" onclick="exportWord()">📥 Xuất file Word (.docx)</button>
   </div>
 
-  <!-- ===== PREVIEW AREA ===== -->
   <div class="preview-area" id="previewArea">
     <div class="preview-label">▸ Preview — cập nhật theo thời gian thực</div>
     <div class="doc" id="doc"></div>
   </div>
-
 </div>
 
-<!-- ===== MOBILE EXPORT BUTTON ===== -->
 <div class="mobile-export">
   <button onclick="exportWord()">📥 Xuất file Word (.docx)</button>
 </div>
 
-<!-- ===== SCRIPT ===== -->
 <script>
 const VAT = 0.08;
+
+// ── Extra costs state: keyed by pkg number (1,2,3) or 'NT'
+const extras = {1:[], 2:[], 3:[], NT:[]};
 
 function v(id)   { return document.getElementById(id).value.trim(); }
 function chk(id) { return document.getElementById(id).checked; }
 function num(id) { return parseFloat(document.getElementById(id).value) || 0; }
-
-function fmt(n) { return n.toLocaleString('vi-VN'); }
-
+function fmt(n)  { return (n||0).toLocaleString('vi-VN'); }
 function isSP(loai) { return loai.includes('sản phẩm'); }
 
-function calcPkg(cp) {
-  const chiPhi = Math.round(cp);
+function calcPkg(cp, extraTotal) {
+  extraTotal = extraTotal || 0;
+  const chiPhi = Math.round(cp) + Math.round(extraTotal);
   const vat    = Math.round(chiPhi * VAT);
   const total  = chiPhi + vat;
   return { chiPhi, vat, total };
+}
+
+function getExtraTotal(key) {
+  return (extras[key]||[]).reduce(function(s,e){ return s + (parseFloat(e.amt)||0); }, 0);
+}
+
+function addExtra(key) {
+  extras[key].push({name:'', amt:0});
+  renderExtrasForm(key);
+  render();
+}
+
+function removeExtra(key, idx) {
+  extras[key].splice(idx, 1);
+  renderExtrasForm(key);
+  render();
+}
+
+function updateExtra(key, idx, field, val) {
+  if (!extras[key] || !extras[key][idx]) return;
+  if (field === 'name') extras[key][idx].name = val;
+  else extras[key][idx].amt = parseFloat(val) || 0;
+  render();
+}
+
+function renderExtrasForm(key) {
+  var container = document.getElementById('extRows' + key);
+  if (!container) return;
+  var k = (key === 'NT') ? '"NT"' : key;
+  container.innerHTML = extras[key].map(function(e, i) {
+    var safeName = (e.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    return '<div class="extra-row">'
+      + '<input type="text" value="' + safeName + '" placeholder="Tên chi phí..." '
+      + 'oninput="updateExtra(' + k + ',' + i + ',\'name\',this.value)">'
+      + '<input type="number" value="' + (e.amt||'') + '" placeholder="Số tiền" min="0" '
+      + 'oninput="updateExtra(' + k + ',' + i + ',\'amt\',this.value)">'
+      + '<button type="button" class="btn-rm-extra" onclick="removeExtra(' + k + ',' + i + ')">×</button>'
+      + '</div>';
+  }).join('');
 }
 
 function togglePkg(n) {
@@ -580,231 +323,289 @@ function togglePkg(n) {
 }
 
 // ──────────────────────────────────────────────
-// BUILD TABLE — nội dung động theo loại
+// BUILD HTML PREVIEW TABLE cho gói 1/2/3
 // ──────────────────────────────────────────────
 function buildPkgTable(pkgNum, chiPhi, slMon, slAnh, loai) {
-  const { chiPhi: cp, vat, total } = calcPkg(chiPhi);
-  const sp = isSP(loai);
+  var extTotal = getExtraTotal(pkgNum);
+  var calc = calcPkg(chiPhi, extTotal);
+  var cp = calc.chiPhi, vat = calc.vat, total = calc.total;
+  var sp = isSP(loai);
+  var donVi    = sp ? 'sản phẩm' : 'món/set';
+  var phatSinh = sp ? 'Phát sinh sản phẩm + 200.000vnđ/1 ảnh'
+                    : 'Phát sinh món ăn + 300.000vnđ/1 món';
 
-  // Thuật ngữ động
-  const donVi    = sp ? 'sản phẩm'                         : 'món/set';
-  const phatSinh = sp ? `Phát sinh sản phẩm + 200.000vnđ/1 ảnh`
-                      : `Phát sinh món ăn + 300.000vnđ/1 món`;
+  var heading = '', subheading = '', col1Content = '', thoiGian = '', extraRows = '';
 
-  let heading = '', subheading = '', col1Content = '', thoiGian = '', extraRows = '';
-
-  // ── GÓI 1 ──
   if (pkgNum === 1) {
-    heading   = 'Gói 1: Gói chụp ảnh quảng cáo cơ bản';
-    thoiGian  = '9h – 15h';
-    col1Content = `
-      <strong>Gói chụp ảnh quảng cáo cơ bản</strong>
-      <ul class="cell-list">
-        <li>Số lượng: ${slMon} ${donVi}</li>
-        <li>Bối cảnh, đạo cụ cơ bản</li>
-        <li>Chỉnh sửa ${slAnh} ảnh hoàn thiện</li>
-        <li>${phatSinh}</li>
-      </ul>`;
+    heading  = 'Gói 1: Gói chụp ảnh quảng cáo cơ bản';
+    thoiGian = '9h – 15h';
+    col1Content = '<strong>Gói chụp ảnh quảng cáo cơ bản</strong>'
+      + '<ul class="cell-list">'
+      + '<li>Số lượng: ' + slMon + ' ' + donVi + '</li>'
+      + '<li>Bối cảnh, đạo cụ cơ bản</li>'
+      + '<li>Chỉnh sửa ' + slAnh + ' ảnh hoàn thiện</li>'
+      + '<li>' + phatSinh + '</li>'
+      + '</ul>';
   }
 
-  // ── GÓI 2 ──
   if (pkgNum === 2) {
     heading  = 'Gói 2: Gói chụp ảnh quảng cáo Stylist';
     thoiGian = '9h – 17h';
-    const dieuChinhThu = sp ? 'điều chỉnh sản phẩm phù hợp với chụp ảnh'
-                            : 'điều chỉnh món ăn phù hợp với chụp ảnh';
-    col1Content = `
-      <strong>Gói chụp ảnh concept có Foodstylist</strong>
-      <ul class="cell-list">
-        <li>Số lượng: ${slMon} ${donVi}</li>
-        <li>Đạo cụ, bối cảnh phù hợp với concept chụp</li>
-        <li>Foodstylist trang trí, ${dieuChinhThu}</li>
-        <li>Chỉnh sửa ${slAnh} ảnh hoàn thiện</li>
-        <li>${phatSinh}</li>
-      </ul>`;
+    var dc = sp ? 'điều chỉnh sản phẩm phù hợp với chụp ảnh'
+                : 'điều chỉnh món ăn phù hợp với chụp ảnh';
+    col1Content = '<strong>Gói chụp ảnh concept có Foodstylist</strong>'
+      + '<ul class="cell-list">'
+      + '<li>Số lượng: ' + slMon + ' ' + donVi + '</li>'
+      + '<li>Đạo cụ, bối cảnh phù hợp với concept chụp</li>'
+      + '<li>Foodstylist trang trí, ' + dc + '</li>'
+      + '<li>Chỉnh sửa ' + slAnh + ' ảnh hoàn thiện</li>'
+      + '<li>' + phatSinh + '</li>'
+      + '</ul>';
   }
 
-  // ── GÓI 3 ──
   if (pkgNum === 3) {
-    const loaiLabel = sp ? 'sản phẩm' : 'món ăn';
-    heading    = `Gói 3: Gói chụp ảnh concept ${loaiLabel} cao cấp`;
+    var loaiLabel = sp ? 'sản phẩm' : 'món ăn';
+    heading    = 'Gói 3: Gói chụp ảnh concept ' + loaiLabel + ' cao cấp';
     subheading = 'Foodstylist lên ý tưởng sáng tạo, đề xuất concept chụp, chuẩn bị đạo cụ bối cảnh cho dự án chụp hình';
     thoiGian   = '1 ngày';
-    const phatSinh3 = sp
-      ? `Phát sinh ngoài ${slMon} sản phẩm + 200.000vnđ/1 ảnh`
-      : `Phát sinh ngoài ${slMon} món ăn + 300.000vnđ/1 món (set)`;
-    col1Content = `
-      <strong>Gói chụp ảnh quảng cáo cao cấp</strong>
-      <ul class="cell-list">
-        <li>Máy ảnh in ấn khổ lớn</li>
-        <li>Số lượng: dưới ${slMon} ${donVi}</li>
-        <li>Foodstylist chuẩn bị đạo cụ, bối cảnh, trang trí trên set chụp hình</li>
-        <li><strong>Nhiều concept thực hiện và đạo cụ hơn cho bộ ảnh</strong></li>
-        <li>Chỉnh sửa ${slAnh} ảnh hoàn thiện</li>
-        <li>${phatSinh3}</li>
-      </ul>`;
-    extraRows = `
-      <tr class="row-vip">
-        <td class="col-stt"></td>
-        <td colspan="5">
-          <strong>Quyền lợi VIP</strong>
-          <ul class="cell-list">
-            <li>Can Đăng trực tiếp chụp bộ ảnh</li>
-            <li>Tặng chụp ảnh nền trắng sản phẩm: tách phông 25 ảnh hoàn thiện</li>
-            <li>Tặng 5 ảnh kết hợp AI từ công nghệ hình ảnh độc quyền</li>
-          </ul>
-        </td>
-      </tr>`;
+    var ps3 = sp
+      ? 'Phát sinh ngoài ' + slMon + ' sản phẩm + 200.000vnđ/1 ảnh'
+      : 'Phát sinh ngoài ' + slMon + ' món ăn + 300.000vnđ/1 món (set)';
+    col1Content = '<strong>Gói chụp ảnh quảng cáo cao cấp</strong>'
+      + '<ul class="cell-list">'
+      + '<li>Máy ảnh in ấn khổ lớn</li>'
+      + '<li>Số lượng: dưới ' + slMon + ' ' + donVi + '</li>'
+      + '<li>Foodstylist chuẩn bị đạo cụ, bối cảnh, trang trí trên set chụp hình</li>'
+      + '<li><strong>Nhiều concept thực hiện và đạo cụ hơn cho bộ ảnh</strong></li>'
+      + '<li>Chỉnh sửa ' + slAnh + ' ảnh hoàn thiện</li>'
+      + '<li>' + ps3 + '</li>'
+      + '</ul>';
+    extraRows = '<tr class="row-vip">'
+      + '<td class="col-stt"></td>'
+      + '<td colspan="5"><strong>Quyền lợi VIP</strong>'
+      + '<ul class="cell-list">'
+      + '<li>Can Đăng trực tiếp chụp bộ ảnh</li>'
+      + '<li>Tặng chụp ảnh nền trắng sản phẩm: tách phông 25 ảnh hoàn thiện</li>'
+      + '<li>Tặng 5 ảnh kết hợp AI từ công nghệ hình ảnh độc quyền</li>'
+      + '</ul></td>'
+      + '</tr>';
   }
 
-  return `
-    <p class="pkg-heading">${heading}</p>
-    ${subheading ? `<p class="pkg-subheading">${subheading}</p>` : ''}
-    <table class="baogia-table">
-      <thead>
-        <tr>
-          <th class="col-stt">STT</th>
-          <th class="col-nd">Nội dung</th>
-          <th class="col-dvt">ĐVT</th>
-          <th class="col-dg">Đơn giá<br><em>(vnđ)</em></th>
-          <th class="col-tg">Thời gian<br>thực hiện</th>
-          <th class="col-tt">Thành tiền<br>(vnđ)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="col-stt"><strong>1</strong></td>
-          <td class="col-nd">${col1Content}</td>
-          <td class="col-dvt">Trọn gói</td>
-          <td class="col-dg">${fmt(cp)}</td>
-          <td class="col-tg">${thoiGian}</td>
-          <td class="col-tt">${fmt(cp)}</td>
-        </tr>
-        ${extraRows}
-        <tr class="row-summary">
-          <td class="col-stt"><strong>2</strong></td>
-          <td class="col-nd"><strong>Chi phí dịch vụ</strong></td>
-          <td colspan="3" style="text-align:center;"><strong>${fmt(cp)}</strong></td>
-          <td class="col-tt"></td>
-        </tr>
-        <tr class="row-vat">
-          <td class="col-stt"><strong>3</strong></td>
-          <td colspan="4"><strong>Thuế giá trị gia tăng 08% VAT</strong></td>
-          <td class="col-tt"><strong>${fmt(vat)}</strong></td>
-        </tr>
-        <tr class="row-total">
-          <td class="col-stt"><strong>4</strong></td>
-          <td colspan="4"><strong>Tổng cộng</strong></td>
-          <td class="col-tt"><strong>${fmt(total)}</strong></td>
-        </tr>
-      </tbody>
-    </table>`;
+  // Extra cost rows
+  var extraCostRows = '';
+  extras[pkgNum].forEach(function(ext) {
+    extraCostRows += '<tr class="row-extra">'
+      + '<td class="col-stt" style="text-align:center;">—</td>'
+      + '<td class="col-nd"><strong>' + (ext.name || '[Tên chi phí]') + '</strong></td>'
+      + '<td class="col-dvt" style="text-align:center;">—</td>'
+      + '<td class="col-dg" style="text-align:right;">' + fmt(ext.amt || 0) + '</td>'
+      + '<td class="col-tg" style="text-align:center;">—</td>'
+      + '<td class="col-tt" style="text-align:right;">' + fmt(ext.amt || 0) + '</td>'
+      + '</tr>';
+  });
+
+  // Chi phí cơ bản (trước khi cộng extra) để hiển thị trong row 1
+  var baseCp = Math.round(chiPhi);
+
+  return '<p class="pkg-heading">' + heading + '</p>'
+    + (subheading ? '<p class="pkg-subheading">' + subheading + '</p>' : '')
+    + '<table class="baogia-table">'
+    + '<thead><tr>'
+    + '<th class="col-stt">STT</th>'
+    + '<th class="col-nd">Nội dung</th>'
+    + '<th class="col-dvt">ĐVT</th>'
+    + '<th class="col-dg">Đơn giá<br><em>(vnđ)</em></th>'
+    + '<th class="col-tg">Thời gian<br>thực hiện</th>'
+    + '<th class="col-tt">Thành tiền<br>(vnđ)</th>'
+    + '</tr></thead>'
+    + '<tbody>'
+    + '<tr>'
+    + '<td class="col-stt"><strong>1</strong></td>'
+    + '<td class="col-nd">' + col1Content + '</td>'
+    + '<td class="col-dvt">Trọn gói</td>'
+    + '<td class="col-dg">' + fmt(baseCp) + '</td>'
+    + '<td class="col-tg">' + thoiGian + '</td>'
+    + '<td class="col-tt">' + fmt(baseCp) + '</td>'
+    + '</tr>'
+    + extraRows
+    + extraCostRows
+    + '<tr class="row-summary">'
+    + '<td class="col-stt"><strong>2</strong></td>'
+    + '<td class="col-nd"><strong>Chi phí dịch vụ</strong></td>'
+    + '<td colspan="3" style="text-align:center;"><strong>' + fmt(cp) + '</strong></td>'
+    + '<td class="col-tt"></td>'
+    + '</tr>'
+    + '<tr class="row-vat">'
+    + '<td class="col-stt"><strong>3</strong></td>'
+    + '<td colspan="4"><strong>Thuế giá trị gia tăng 08% VAT</strong></td>'
+    + '<td class="col-tt"><strong>' + fmt(vat) + '</strong></td>'
+    + '</tr>'
+    + '<tr class="row-total">'
+    + '<td class="col-stt"><strong>4</strong></td>'
+    + '<td colspan="4"><strong>Tổng cộng</strong></td>'
+    + '<td class="col-tt"><strong>' + fmt(total) + '</strong></td>'
+    + '</tr>'
+    + '</tbody></table>';
+}
+
+// ──────────────────────────────────────────────
+// BUILD HTML PREVIEW TABLE cho gói Nền Trắng
+// ──────────────────────────────────────────────
+function buildNTTable(loai) {
+  var dgNT    = num('dgNT');
+  var slNT    = parseInt(v('slNT'))  || 0;
+  var anhNT   = parseInt(v('anhNT')) || 0;
+  var baseCost = dgNT * slNT;
+  var extTotal = getExtraTotal('NT');
+  var calc = calcPkg(baseCost, extTotal);
+  var chiPhi = calc.chiPhi, vat = calc.vat, total = calc.total;
+  var sp = isSP(loai);
+  var donVi = sp ? 'sản phẩm' : (loai.includes('đồ uống') ? 'đồ uống' : 'món');
+  var tongAnh = slNT * anhNT;
+
+  var extraCostRows = '';
+  extras['NT'].forEach(function(ext) {
+    extraCostRows += '<tr class="row-extra">'
+      + '<td class="col-stt" style="text-align:center;">—</td>'
+      + '<td class="col-nd"><strong>' + (ext.name || '[Tên chi phí]') + '</strong></td>'
+      + '<td class="col-dvt" style="text-align:center;">—</td>'
+      + '<td class="col-dg" style="text-align:right;">' + fmt(ext.amt || 0) + '</td>'
+      + '<td class="col-tg" style="text-align:center;">—</td>'
+      + '<td class="col-tt" style="text-align:right;">' + fmt(ext.amt || 0) + '</td>'
+      + '</tr>';
+  });
+
+  return '<p class="pkg-heading">Gói chụp ảnh nền trắng ' + loai + '</p>'
+    + '<table class="baogia-table">'
+    + '<thead><tr>'
+    + '<th class="col-stt">STT</th>'
+    + '<th class="col-nd">Nội dung</th>'
+    + '<th class="col-dvt">ĐVT</th>'
+    + '<th class="col-dg">Đơn giá<br><em>(vnđ)</em></th>'
+    + '<th class="col-tg">Thời gian<br>thực hiện</th>'
+    + '<th class="col-tt">Thành tiền<br>(vnđ)</th>'
+    + '</tr></thead>'
+    + '<tbody>'
+    + '<tr>'
+    + '<td class="col-stt"><strong>1</strong></td>'
+    + '<td class="col-nd">'
+    + '<strong>Chụp ảnh nền trắng ' + loai + '</strong>'
+    + '<ul class="cell-list">'
+    + '<li>Số lượng: ' + slNT + ' ' + donVi + '</li>'
+    + '<li>Thiết bị chụp ảnh và dải ống kính Canon</li>'
+    + '<li>Thiết bị chiếu sáng</li>'
+    + '<li>Macbook check hình ảnh</li>'
+    + '<li>Chỉnh sửa: ' + anhNT + ' ảnh/' + donVi + ' (tổng ' + tongAnh + ' ảnh hoàn thiện)</li>'
+    + '</ul></td>'
+    + '<td class="col-dvt" style="text-align:center;">/' + donVi + '</td>'
+    + '<td class="col-dg" style="text-align:right;">' + fmt(dgNT) + '</td>'
+    + '<td class="col-tg" style="text-align:center;">—</td>'
+    + '<td class="col-tt" style="text-align:right;">' + fmt(baseCost) + '</td>'
+    + '</tr>'
+    + extraCostRows
+    + '<tr class="row-summary">'
+    + '<td class="col-stt"><strong>2</strong></td>'
+    + '<td class="col-nd"><strong>Chi phí dịch vụ</strong></td>'
+    + '<td colspan="3" style="text-align:center;"><strong>' + fmt(chiPhi) + '</strong></td>'
+    + '<td class="col-tt"></td>'
+    + '</tr>'
+    + '<tr class="row-vat">'
+    + '<td class="col-stt"><strong>3</strong></td>'
+    + '<td colspan="4"><strong>Thuế giá trị gia tăng 08% VAT</strong></td>'
+    + '<td class="col-tt"><strong>' + fmt(vat) + '</strong></td>'
+    + '</tr>'
+    + '<tr class="row-total">'
+    + '<td class="col-stt"><strong>4</strong></td>'
+    + '<td colspan="4"><strong>Tổng cộng</strong></td>'
+    + '<td class="col-tt"><strong>' + fmt(total) + '</strong></td>'
+    + '</tr>'
+    + '</tbody></table>';
 }
 
 // ──────────────────────────────────────────────
 // MAIN RENDER
 // ──────────────────────────────────────────────
 function render() {
-  const tenKH   = v('tenKH')   || '[Tên_khách_hàng]';
-  const thang   = v('thang')   || '....';
-  const nam     = v('nam')     || '....';
-  const loai    = v('loai');
-  const diaDiem = v('diaDiem');
-  const slMonYC = v('slMonYC') || '.....';
-  const sp      = isSP(loai);
+  var tenKH   = v('tenKH')   || '[Tên_khách_hàng]';
+  var thang   = v('thang')   || '....';
+  var nam     = v('nam')     || '....';
+  var loai    = v('loai');
+  var diaDiem = v('diaDiem');
+  var slMonYC = v('slMonYC') || '.....';
+  var sp      = isSP(loai);
+  var donViLabel = sp ? 'sản phẩm' : 'món';
 
-  // Cập nhật label form theo loại
-  const donViLabel = sp ? 'sản phẩm' : 'món';
-  document.getElementById('labelSlMonYC').textContent =
-    sp ? 'Số lượng sản phẩm (yêu cầu)' : 'Số lượng món (yêu cầu)';
-  document.getElementById('labelSl1').textContent =
-    sp ? 'Số lượng sản phẩm' : 'Số lượng món';
-  document.getElementById('labelSl2').textContent =
-    sp ? 'Số lượng sản phẩm' : 'Số lượng món';
-  document.getElementById('labelSl3').textContent =
-    sp ? 'Số lượng sản phẩm' : 'Số lượng món';
+  document.getElementById('labelSlMonYC').textContent = sp ? 'Số lượng sản phẩm (yêu cầu)' : 'Số lượng món (yêu cầu)';
+  document.getElementById('labelSl1').textContent = sp ? 'Số lượng sản phẩm' : 'Số lượng món';
+  document.getElementById('labelSl2').textContent = sp ? 'Số lượng sản phẩm' : 'Số lượng món';
+  document.getElementById('labelSl3').textContent = sp ? 'Số lượng sản phẩm' : 'Số lượng món';
+  document.getElementById('labelSlNT').textContent = sp ? 'Số lượng sản phẩm' : 'Số lượng ' + donViLabel;
 
-  const show1 = chk('chk1');
-  const show2 = chk('chk2');
-  const show3 = chk('chk3');
+  var show1  = chk('chk1');
+  var show2  = chk('chk2');
+  var show3  = chk('chk3');
+  var showNT = chk('chkNT');
 
-  let pkgsHTML = '';
-  if (show1) pkgsHTML += buildPkgTable(1, num('cp1'), v('sl1'), v('anh1'), loai);
-  if (show2) pkgsHTML += buildPkgTable(2, num('cp2'), v('sl2'), v('anh2'), loai);
-  if (show3) pkgsHTML += buildPkgTable(3, num('cp3'), v('sl3'), v('anh3'), loai);
+  var pkgsHTML = '';
+  if (show1)  pkgsHTML += buildPkgTable(1, num('cp1'), v('sl1'), v('anh1'), loai);
+  if (show2)  pkgsHTML += buildPkgTable(2, num('cp2'), v('sl2'), v('anh2'), loai);
+  if (show3)  pkgsHTML += buildPkgTable(3, num('cp3'), v('sl3'), v('anh3'), loai);
+  if (showNT) pkgsHTML += buildNTTable(loai);
 
-  if (!show1 && !show2 && !show3) {
+  if (!show1 && !show2 && !show3 && !showNT) {
     pkgsHTML = '<p style="color:#aaa;text-align:center;padding:20px;">[Chưa chọn gói dịch vụ]</p>';
   }
 
-  const slMonYCText = sp ? `${slMonYC} sản phẩm` : `${slMonYC} món/set`;
+  var slMonYCText = sp ? (slMonYC + ' sản phẩm') : (slMonYC + ' món/set');
 
-  document.getElementById('doc').innerHTML = `
-    <p class="doc-title">Báo giá chi phí chụp ảnh quảng cáo ${loai.toUpperCase()}</p>
-
-    <div class="doc-header-info">
-      <p><strong>Can Đăng Studio</strong></p>
-      <p><strong>Công ty TNHH Can Creative</strong></p>
-      <p>Điện thoại: 090 432 9595</p>
-      <p>Thời gian thực hiện: tháng ${thang} năm ${nam}</p>
-      <p>Email: Candangphoto@gmail.com</p>
-    </div>
-
-    <p><strong>Gửi ${tenKH}</strong></p>
-    <div class="doc-spacer"></div>
-
-    <p><strong>Yêu cầu:</strong></p>
-    <ul>
-      <li>Chụp ảnh ${loai}</li>
-      <li>Số lượng: ${slMonYCText}</li>
-    </ul>
-    <div class="doc-spacer"></div>
-
-    <p><strong>Chúng tôi xác nhận thông tin và gửi báo giá chụp ảnh quảng cáo</strong></p>
-    <div class="doc-spacer"></div>
-
-    <p><strong>Trong gói dịch vụ:</strong></p>
-    <ul>
-      <li>Chụp ảnh tại ${diaDiem}</li>
-      <li>Thiết bị chiếu sáng</li>
-      <li>Thiết bị chụp ảnh và dải ống kính Canon</li>
-      <li>Macbook check file hình ảnh</li>
-      <li>File chỉnh sửa hoàn thiện trên những hình ảnh khách hàng đã phê duyệt (khách hàng được sửa tối đa 3 lần)</li>
-      <li>Chèn Logo tùy theo yêu cầu của khách hàng</li>
-    </ul>
-    <div class="doc-spacer"></div>
-
-    ${pkgsHTML}
-
-    <div class="portfolio-link">
-      <p><strong>Portfolio</strong></p>
-      <p><a href="https://candangstudio.vn/" target="_blank">https://candangstudio.vn/</a></p>
-    </div>
-    <div class="doc-spacer"></div>
-
-    <div class="payment-section">
-      <p><strong>Thanh toán:</strong></p>
-      <ul>
-        <li>Khách hàng thanh toán trước 50% khi chốt thực hiện dự án</li>
-        <li>Thanh toán 50% còn lại sau khi kết thúc chỉnh sửa</li>
-        <li>Bàn giao hình ảnh sau khi nhận thanh toán đầy đủ từ khách hàng</li>
-      </ul>
-    </div>
-
-    <div class="bank-block">
-      <p><strong>Thông tin tài khoản ngân hàng</strong><br>
-      Tên tài khoản: Công ty TNHH Can Creative<br>
-      Số tài khoản: 3638 6868 8888<br>
-      Ngân hàng TMCP Á Châu ACB – Chi nhánh Hoàng Cầu</p>
-    </div>
-    <div class="doc-spacer"></div>
-
-    <p class="closing">Trân trọng !</p>
-  `;
+  document.getElementById('doc').innerHTML =
+    '<p class="doc-title">Báo giá chi phí chụp ảnh quảng cáo ' + loai.toUpperCase() + '</p>'
+    + '<div class="doc-header-info">'
+    + '<p><strong>Can Đăng Studio</strong></p>'
+    + '<p><strong>Công ty TNHH Can Creative</strong></p>'
+    + '<p>Điện thoại: 090 432 9595</p>'
+    + '<p>Thời gian thực hiện: tháng ' + thang + ' năm ' + nam + '</p>'
+    + '<p>Email: Candangphoto@gmail.com</p>'
+    + '</div>'
+    + '<p><strong>Gửi ' + tenKH + '</strong></p>'
+    + '<div class="doc-spacer"></div>'
+    + '<p><strong>Yêu cầu:</strong></p>'
+    + '<ul><li>Chụp ảnh ' + loai + '</li><li>Số lượng: ' + slMonYCText + '</li></ul>'
+    + '<div class="doc-spacer"></div>'
+    + '<p><strong>Chúng tôi xác nhận thông tin và gửi báo giá chụp ảnh quảng cáo</strong></p>'
+    + '<div class="doc-spacer"></div>'
+    + '<p><strong>Trong gói dịch vụ:</strong></p>'
+    + '<ul>'
+    + '<li>Chụp ảnh tại ' + diaDiem + '</li>'
+    + '<li>Thiết bị chiếu sáng</li>'
+    + '<li>Thiết bị chụp ảnh và dải ống kính Canon</li>'
+    + '<li>Macbook check file hình ảnh</li>'
+    + '<li>File chỉnh sửa hoàn thiện trên những hình ảnh khách hàng đã phê duyệt (khách hàng được sửa tối đa 3 lần)</li>'
+    + '<li>Chèn Logo tùy theo yêu cầu của khách hàng</li>'
+    + '</ul>'
+    + '<div class="doc-spacer"></div>'
+    + pkgsHTML
+    + '<div class="portfolio-link"><p><strong>Portfolio</strong></p>'
+    + '<p><a href="https://candangstudio.vn/" target="_blank">https://candangstudio.vn/</a></p></div>'
+    + '<div class="doc-spacer"></div>'
+    + '<div class="payment-section"><p><strong>Thanh toán:</strong></p>'
+    + '<ul>'
+    + '<li>Khách hàng thanh toán trước 50% khi chốt thực hiện dự án</li>'
+    + '<li>Thanh toán 50% còn lại sau khi kết thúc chỉnh sửa</li>'
+    + '<li>Bàn giao hình ảnh sau khi nhận thanh toán đầy đủ từ khách hàng</li>'
+    + '</ul></div>'
+    + '<div class="bank-block">'
+    + '<p><strong>Thông tin tài khoản ngân hàng</strong><br>'
+    + 'Tên tài khoản: Công ty TNHH Can Creative<br>'
+    + 'Số tài khoản: 3638 6868 8888<br>'
+    + 'Ngân hàng TMCP Á Châu ACB – Chi nhánh Hoàng Cầu</p>'
+    + '</div>'
+    + '<div class="doc-spacer"></div>'
+    + '<p class="closing">Trân trọng !</p>';
 }
 
 // ──────────────────────────────────────────────
-// DOWNLOAD HELPER – Web Share API mobile → FileSaver → blob URL
+// DOWNLOAD HELPER
 // ──────────────────────────────────────────────
 async function _dlBlob(blob, name) {
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -862,9 +663,24 @@ async function exportWord() {
 
   // Column widths DXA: STT, Nội dung, ĐVT, Đơn giá, Thời gian, Thành tiền
   const W=[470,4100,940,1210,1030,1210];
+  const tW=W.reduce((a,b)=>a+b,0);
+
+  // Build extra cost rows for docx
+  function mkExtraCostRows(key) {
+    return (extras[key]||[]).map(ext => new TableRow({children:[
+      mkC([P('—',{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[0],va:VerticalAlign.CENTER}),
+      mkC([P(ext.name||'[Tên chi phí]',{bold:true,sz:12,after:0})],{w:W[1]}),
+      mkC([P('—',{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[2],va:VerticalAlign.CENTER}),
+      mkC([P(fmt(ext.amt||0),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[3],va:VerticalAlign.CENTER}),
+      mkC([P('—',{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[4],va:VerticalAlign.CENTER}),
+      mkC([P(fmt(ext.amt||0),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[5],va:VerticalAlign.CENTER}),
+    ]}));
+  }
 
   function buildPkg(pkgNum){
-    const {chiPhi:cp,vat,total}=calcPkg(num('cp'+pkgNum));
+    const extTotal=getExtraTotal(pkgNum);
+    const {chiPhi:cp,vat,total}=calcPkg(num('cp'+pkgNum),extTotal);
+    const baseCp=Math.round(num('cp'+pkgNum));
     const slMon=v('sl'+pkgNum), slAnh=v('anh'+pkgNum);
     const donVi=sp?'sản phẩm':'món';
     const ps=sp?'Phát sinh sản phẩm + 200.000vnđ/1 ảnh':'Phát sinh món ăn + 300.000vnđ/1 món';
@@ -887,17 +703,59 @@ async function exportWord() {
       extraRows=[new TableRow({children:[mkC([SP(0)],{w:W[0],bg:VB}),mkC([P('Quyền lợi VIP',{bold:true,sz:12,after:40}),CBUL('Can Đăng trực tiếp chụp bộ ảnh'),CBUL('Tặng chụp ảnh nền trắng sản phẩm: tách phông 25 ảnh hoàn thiện'),CBUL('Tặng 5 ảnh kết hợp AI từ công nghệ hình ảnh độc quyền')],{w:W[1]+W[2]+W[3]+W[4]+W[5],bg:VB,cs:5})]})];
     }
 
-    const tW=W.reduce((a,b)=>a+b,0);
+    const extCostRows=mkExtraCostRows(pkgNum);
+
     const rows=[
       new TableRow({tableHeader:true,children:[mkH('STT',W[0]),mkH('Nội dung',W[1]),mkH('ĐVT',W[2]),mkH('Đơn giá\n(vnđ)',W[3]),mkH('Thời gian\nthực hiện',W[4]),mkH('Thành tiền\n(vnđ)',W[5])]}),
-      new TableRow({children:[mkC([P('1',{bold:true,sz:12,align:AlignmentType.CENTER,after:0})],{w:W[0],va:VerticalAlign.CENTER}),mkC(col1,{w:W[1],boldL:true}),mkC([P('Trọn gói',{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[2],va:VerticalAlign.CENTER}),mkC([P(fmt(cp),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[3],va:VerticalAlign.CENTER}),mkC([P(thoiGian,{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[4],va:VerticalAlign.CENTER}),mkC([P(fmt(cp),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[5],va:VerticalAlign.CENTER})]}),
+      new TableRow({children:[mkC([P('1',{bold:true,sz:12,align:AlignmentType.CENTER,after:0})],{w:W[0],va:VerticalAlign.CENTER}),mkC(col1,{w:W[1],boldL:true}),mkC([P('Trọn gói',{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[2],va:VerticalAlign.CENTER}),mkC([P(fmt(baseCp),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[3],va:VerticalAlign.CENTER}),mkC([P(thoiGian,{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[4],va:VerticalAlign.CENTER}),mkC([P(fmt(baseCp),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[5],va:VerticalAlign.CENTER})]}),
       ...extraRows,
+      ...extCostRows,
       new TableRow({children:[mkC([P('2',{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:LB,va:VerticalAlign.CENTER}),mkC([P('Chi phí dịch vụ',{bold:true,sz:12,col:DB,after:0})],{w:W[1],bg:LB,va:VerticalAlign.CENTER}),mkC([P(fmt(cp),{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[2]+W[3]+W[4],bg:LB,va:VerticalAlign.CENTER,cs:3}),mkC([SP(0)],{w:W[5],bg:LB})]}),
       new TableRow({children:[mkC([P('3',{bold:true,sz:12,col:GT,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:GB,va:VerticalAlign.CENTER}),mkC([P('Thuế giá trị gia tăng 08% VAT',{bold:true,sz:12,col:GT,after:0})],{w:W[1]+W[2]+W[3]+W[4],bg:GB,va:VerticalAlign.CENTER,cs:4}),mkC([P(fmt(vat),{bold:true,sz:12,col:GT,align:AlignmentType.RIGHT,after:0})],{w:W[5],bg:GB,va:VerticalAlign.CENTER})]}),
       new TableRow({children:[mkDk([P('4',{bold:true,sz:12,col:WH,align:AlignmentType.CENTER,after:0})],{w:W[0]}),mkDk([P('Tổng cộng',{bold:true,sz:12,col:WH,after:0})],{w:W[1]+W[2]+W[3]+W[4],cs:4}),mkDk([P(fmt(total),{bold:true,sz:13,col:WH,align:AlignmentType.RIGHT,after:0})],{w:W[5]})]})
     ];
     const out=[P(heading,{bold:true,before:200,after:80})];
     if(subheading) out.push(P(subheading,{italic:true,bold:true,after:80}));
+    out.push(new Table({width:{size:tW,type:WidthType.DXA},rows}));
+    return out;
+  }
+
+  function buildNTPkg(){
+    const dgNT=num('dgNT'), slNT=parseInt(v('slNT'))||0, anhNT=parseInt(v('anhNT'))||0;
+    const baseCost=dgNT*slNT;
+    const extTotal=getExtraTotal('NT');
+    const {chiPhi,vat,total}=calcPkg(baseCost,extTotal);
+    const donVi=sp?'sản phẩm':(loai.includes('đồ uống')?'đồ uống':'món');
+    const tongAnh=slNT*anhNT;
+
+    const col1=[
+      P('Chụp ảnh nền trắng '+loai,{bold:true,sz:12,after:40}),
+      CBUL('Số lượng: '+slNT+' '+donVi),
+      CBUL('Thiết bị chụp ảnh và dải ống kính Canon'),
+      CBUL('Thiết bị chiếu sáng'),
+      CBUL('Macbook check hình ảnh'),
+      CBUL('Chỉnh sửa: '+anhNT+' ảnh/'+donVi+' (tổng '+tongAnh+' ảnh hoàn thiện)'),
+    ];
+
+    const extCostRows=mkExtraCostRows('NT');
+
+    const rows=[
+      new TableRow({tableHeader:true,children:[mkH('STT',W[0]),mkH('Nội dung',W[1]),mkH('ĐVT',W[2]),mkH('Đơn giá\n(vnđ)',W[3]),mkH('Thời gian\nthực hiện',W[4]),mkH('Thành tiền\n(vnđ)',W[5])]}),
+      new TableRow({children:[
+        mkC([P('1',{bold:true,sz:12,align:AlignmentType.CENTER,after:0})],{w:W[0],va:VerticalAlign.CENTER}),
+        mkC(col1,{w:W[1],boldL:true}),
+        mkC([P('/'+donVi,{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[2],va:VerticalAlign.CENTER}),
+        mkC([P(fmt(dgNT),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[3],va:VerticalAlign.CENTER}),
+        mkC([P('—',{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[4],va:VerticalAlign.CENTER}),
+        mkC([P(fmt(baseCost),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[5],va:VerticalAlign.CENTER}),
+      ]}),
+      ...extCostRows,
+      new TableRow({children:[mkC([P('2',{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:LB,va:VerticalAlign.CENTER}),mkC([P('Chi phí dịch vụ',{bold:true,sz:12,col:DB,after:0})],{w:W[1],bg:LB,va:VerticalAlign.CENTER}),mkC([P(fmt(chiPhi),{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[2]+W[3]+W[4],bg:LB,va:VerticalAlign.CENTER,cs:3}),mkC([SP(0)],{w:W[5],bg:LB})]}),
+      new TableRow({children:[mkC([P('3',{bold:true,sz:12,col:GT,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:GB,va:VerticalAlign.CENTER}),mkC([P('Thuế giá trị gia tăng 08% VAT',{bold:true,sz:12,col:GT,after:0})],{w:W[1]+W[2]+W[3]+W[4],bg:GB,va:VerticalAlign.CENTER,cs:4}),mkC([P(fmt(vat),{bold:true,sz:12,col:GT,align:AlignmentType.RIGHT,after:0})],{w:W[5],bg:GB,va:VerticalAlign.CENTER})]}),
+      new TableRow({children:[mkDk([P('4',{bold:true,sz:12,col:WH,align:AlignmentType.CENTER,after:0})],{w:W[0]}),mkDk([P('Tổng cộng',{bold:true,sz:12,col:WH,after:0})],{w:W[1]+W[2]+W[3]+W[4],cs:4}),mkDk([P(fmt(total),{bold:true,sz:13,col:WH,align:AlignmentType.RIGHT,after:0})],{w:W[5]})]})
+    ];
+
+    const out=[P('Gói chụp ảnh nền trắng '+loai,{bold:true,before:200,after:80})];
     out.push(new Table({width:{size:tW,type:WidthType.DXA},rows}));
     return out;
   }
@@ -920,6 +778,7 @@ async function exportWord() {
   if(chk('chk1')) buildPkg(1).forEach(e=>ch.push(e));
   if(chk('chk2')) buildPkg(2).forEach(e=>ch.push(e));
   if(chk('chk3')) buildPkg(3).forEach(e=>ch.push(e));
+  if(chk('chkNT')) buildNTPkg().forEach(e=>ch.push(e));
   ch.push(SP());
   ch.push(P('Portfolio',{bold:true,after:40}));
   ch.push(new Paragraph({spacing:{after:80},children:[new TextRun({text:'https://candangstudio.vn/',bold:true,color:'1155CC',font:FN,size:26})]}));
@@ -946,11 +805,8 @@ async function exportWord() {
   }
 }
 
-// ── placeholder để không break nếu còn ref cũ ──
 function convertListsForWord(html){return html;}
-// ──────────────────────────────────────────────
-// TOAST
-// ──────────────────────────────────────────────
+
 function showToast(msg, dur) {
   dur = dur || 2800;
   const t = document.getElementById('cd-toast');
@@ -964,20 +820,11 @@ function showToast(msg, dur) {
   }, dur);
 }
 
-// ──────────────────────────────────────────────
-// MOBILE: TAB SWITCHING + DOCUMENT SCALE
-// ──────────────────────────────────────────────
-// (old HTML-based export removed)
-
-// ──────────────────────────────────────────────
-// MOBILE: TAB SWITCHING + DOCUMENT SCALE
-// ──────────────────────────────────────────────
 function showTab(tab) {
   const formPanel   = document.getElementById('formPanel');
   const previewArea = document.getElementById('previewArea');
   const btnForm     = document.getElementById('tabForm');
   const btnPreview  = document.getElementById('tabPreview');
-
   if (tab === 'form') {
     formPanel.classList.add('tab-active');
     previewArea.classList.remove('tab-active');
@@ -994,49 +841,39 @@ function showTab(tab) {
 
 function scaleDoc() {
   if (window.innerWidth > 768) return;
-  const area  = document.getElementById('previewArea');
-  const doc   = document.getElementById('doc');
+  const area = document.getElementById('previewArea');
+  const doc  = document.getElementById('doc');
   if (!area || !doc) return;
-  const avail = area.clientWidth - 16; // 8px padding mỗi bên
-  const docW  = 794; // 210mm ≈ 794px at 96dpi
+  const avail = area.clientWidth - 16;
+  const docW  = 794;
   const scale = Math.min(1, avail / docW);
   doc.style.width = docW + 'px';
   doc.style.transform = 'scale(' + scale + ')';
   doc.style.transformOrigin = 'top left';
-  // Xoá khoảng trắng thừa do transform:scale để scroll chính xác
   const docH = doc.offsetHeight;
   doc.style.marginBottom = '-' + Math.round(docH * (1 - scale)) + 'px';
 }
 
 window.addEventListener('resize', function () {
-  if (window.innerWidth <= 768) {
-    scaleDoc();
-  } else {
+  if (window.innerWidth <= 768) { scaleDoc(); }
+  else {
     const doc = document.getElementById('doc');
     doc.style.transform = doc.style.transformOrigin = doc.style.marginBottom = '';
   }
 });
 
-// ──────────────────────────────────────────────
-// INIT
-// ──────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', function () {
   const now = new Date();
   document.getElementById('thang').value = String(now.getMonth() + 1).padStart(2, '0');
   document.getElementById('nam').value   = now.getFullYear();
-
-  // Mobile: bắt đầu ở tab Form
   if (window.innerWidth <= 768) {
     showTab('form');
   } else {
-    // Desktop: cả hai panel luôn hiển thị
     document.getElementById('formPanel').classList.add('tab-active');
     document.getElementById('previewArea').classList.add('tab-active');
   }
-
   render();
 });
 </script>
-
 </body>
 </html>
