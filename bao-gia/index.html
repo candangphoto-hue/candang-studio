@@ -60,18 +60,18 @@ body { font-family: 'Times New Roman', Times, serif; font-size: 13pt; line-heigh
 
 /* ===== TABLES ===== */
 .baogia-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.3; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.10); }
-.baogia-table th, .baogia-table td { border: 1px solid #b8cce4; padding: 7px 9px; vertical-align: top; text-align: left; }
-.baogia-table thead th { text-align: center; font-weight: bold; background: linear-gradient(135deg, #1e3a5f 0%, #2a5298 100%); color: #fff; vertical-align: middle; font-size: 12pt; border-color: #1a3060; letter-spacing: 0.2px; padding: 9px; }
+.baogia-table th, .baogia-table td { border: 1px solid #c8d8ee; padding: 7px 9px; vertical-align: top; text-align: left; }
+.baogia-table thead th { text-align: center; font-weight: bold; background: #2d5090; color: #fff; vertical-align: middle; font-size: 12pt; border-color: #4a6aaa; letter-spacing: 0.2px; padding: 9px; }
 .baogia-table .col-stt { width: 5%; text-align: center; }
 .baogia-table .col-nd  { width: 44%; }
 .baogia-table .col-dvt { width: 10%; text-align: center; }
 .baogia-table .col-dg  { width: 13%; text-align: right; }
 .baogia-table .col-tg  { width: 11%; text-align: center; }
 .baogia-table .col-tt  { width: 13%; text-align: right; }
-.baogia-table tbody tr:first-child td:nth-child(2) { border-left: 3px solid #2a5298; }
-.baogia-table .row-summary td { font-weight: bold; background-color: #eaf1fb; color: #1e3a5f; }
+.baogia-table tbody tr:first-child td:nth-child(2) { border-left: 3px solid #2d5090; }
+.baogia-table .row-summary td { font-weight: bold; background-color: #eaf1fb; color: #2d5090; }
 .baogia-table .row-vat td { font-weight: bold; background-color: #fdf6e3; color: #5a3e00; }
-.baogia-table .row-total td { font-weight: bold; font-size: 13pt; background: linear-gradient(90deg, #1e3a5f 0%, #2a5298 100%); color: #fff; border-color: #1a3060; }
+.baogia-table .row-total td { font-weight: bold; font-size: 13pt; background: #2d5090; color: #fff; border-color: #4a6aaa; }
 .baogia-table .row-vip td { background-color: #fffbf0; border-left: 3px solid #e6a817; }
 .baogia-table .row-extra td { background-color: #f5f8ff; color: #333; font-size: 12pt; }
 
@@ -431,9 +431,8 @@ function buildPkgTable(pkgNum, chiPhi, slMon, slAnh, loai) {
     + extraCostRows
     + '<tr class="row-summary">'
     + '<td class="col-stt"><strong>2</strong></td>'
-    + '<td class="col-nd"><strong>Chi phí dịch vụ</strong></td>'
-    + '<td colspan="3" style="text-align:center;"><strong>' + fmt(cp) + '</strong></td>'
-    + '<td class="col-tt"></td>'
+    + '<td colspan="4"><strong>Chi phí dịch vụ</strong></td>'
+    + '<td class="col-tt" style="text-align:right;"><strong>' + fmt(cp) + '</strong></td>'
     + '</tr>'
     + '<tr class="row-vat">'
     + '<td class="col-stt"><strong>3</strong></td>'
@@ -505,9 +504,8 @@ function buildNTTable(loai) {
     + extraCostRows
     + '<tr class="row-summary">'
     + '<td class="col-stt"><strong>2</strong></td>'
-    + '<td class="col-nd"><strong>Chi phí dịch vụ</strong></td>'
-    + '<td colspan="3" style="text-align:center;"><strong>' + fmt(chiPhi) + '</strong></td>'
-    + '<td class="col-tt"></td>'
+    + '<td colspan="4"><strong>Chi phí dịch vụ</strong></td>'
+    + '<td class="col-tt" style="text-align:right;"><strong>' + fmt(chiPhi) + '</strong></td>'
     + '</tr>'
     + '<tr class="row-vat">'
     + '<td class="col-stt"><strong>3</strong></td>'
@@ -639,7 +637,7 @@ async function exportWord() {
   const done=()=>[btnD,btnM].forEach(b=>{if(b){b.innerHTML='✅ Xong!';b.disabled=false;setTimeout(()=>b.innerHTML=b._orig,3000);}});
 
   const FN='Times New Roman';
-  const DB='1E3A5F',LB='EAF1FB',GB='FDF6E3',GT='5A3E00',VB='FFFBF0',WH='FFFFFF';
+  const DB='2D5090',LB='EAF1FB',GB='FDF6E3',GT='5A3E00',VB='FFFBF0',WH='FFFFFF';
 
   function T(text,o={}){return new TextRun({text,bold:o.bold||false,italic:o.italic||false,size:(o.sz||13)*2,font:FN,color:o.col||'000000'});}
   function P(text,o={}){
@@ -650,9 +648,9 @@ async function exportWord() {
   function CBUL(text,o={}){return P('• '+text,{...o,indent:160,after:40,sz:12});}
   function SP(n=80){return new Paragraph({spacing:{after:n},children:[T('')]});}
 
-  const BG={style:BorderStyle.SINGLE,size:4,color:'B8CCE4'};
-  const BD={style:BorderStyle.SINGLE,size:4,color:'1A3060'};
-  const BL={style:BorderStyle.SINGLE,size:18,color:'2A5298'};
+  const BG={style:BorderStyle.SINGLE,size:4,color:'C8D8EE'};
+  const BD={style:BorderStyle.SINGLE,size:6,color:'4A6AAA'};
+  const BL={style:BorderStyle.SINGLE,size:18,color:'2D5090'};
   const sh=fill=>({fill,type:ShadingType.CLEAR,color:'auto'});
 
   const CM={top:100,bottom:100,left:150,right:120};
@@ -710,7 +708,7 @@ async function exportWord() {
       new TableRow({children:[mkC([P('1',{bold:true,sz:12,align:AlignmentType.CENTER,after:0})],{w:W[0],va:VerticalAlign.CENTER}),mkC(col1,{w:W[1],boldL:true}),mkC([P('Trọn gói',{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[2],va:VerticalAlign.CENTER}),mkC([P(fmt(baseCp),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[3],va:VerticalAlign.CENTER}),mkC([P(thoiGian,{sz:12,align:AlignmentType.CENTER,after:0})],{w:W[4],va:VerticalAlign.CENTER}),mkC([P(fmt(baseCp),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[5],va:VerticalAlign.CENTER})]}),
       ...extraRows,
       ...extCostRows,
-      new TableRow({children:[mkC([P('2',{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:LB,va:VerticalAlign.CENTER}),mkC([P('Chi phí dịch vụ',{bold:true,sz:12,col:DB,after:0})],{w:W[1],bg:LB,va:VerticalAlign.CENTER}),mkC([P(fmt(cp),{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[2]+W[3]+W[4],bg:LB,va:VerticalAlign.CENTER,cs:3}),mkC([SP(0)],{w:W[5],bg:LB})]}),
+      new TableRow({children:[mkC([P('2',{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:LB,va:VerticalAlign.CENTER}),mkC([P('Chi phí dịch vụ',{bold:true,sz:12,col:DB,after:0})],{w:W[1]+W[2]+W[3]+W[4],bg:LB,va:VerticalAlign.CENTER,cs:4}),mkC([P(fmt(cp),{bold:true,sz:12,col:DB,align:AlignmentType.RIGHT,after:0})],{w:W[5],bg:LB,va:VerticalAlign.CENTER})]}),
       new TableRow({children:[mkC([P('3',{bold:true,sz:12,col:GT,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:GB,va:VerticalAlign.CENTER}),mkC([P('Thuế giá trị gia tăng 08% VAT',{bold:true,sz:12,col:GT,after:0})],{w:W[1]+W[2]+W[3]+W[4],bg:GB,va:VerticalAlign.CENTER,cs:4}),mkC([P(fmt(vat),{bold:true,sz:12,col:GT,align:AlignmentType.RIGHT,after:0})],{w:W[5],bg:GB,va:VerticalAlign.CENTER})]}),
       new TableRow({children:[mkDk([P('4',{bold:true,sz:12,col:WH,align:AlignmentType.CENTER,after:0})],{w:W[0]}),mkDk([P('Tổng cộng',{bold:true,sz:12,col:WH,after:0})],{w:W[1]+W[2]+W[3]+W[4],cs:4}),mkDk([P(fmt(total),{bold:true,sz:13,col:WH,align:AlignmentType.RIGHT,after:0})],{w:W[5]})]})
     ];
@@ -750,7 +748,7 @@ async function exportWord() {
         mkC([P(fmt(baseCost),{sz:12,align:AlignmentType.RIGHT,after:0})],{w:W[5],va:VerticalAlign.CENTER}),
       ]}),
       ...extCostRows,
-      new TableRow({children:[mkC([P('2',{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:LB,va:VerticalAlign.CENTER}),mkC([P('Chi phí dịch vụ',{bold:true,sz:12,col:DB,after:0})],{w:W[1],bg:LB,va:VerticalAlign.CENTER}),mkC([P(fmt(chiPhi),{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[2]+W[3]+W[4],bg:LB,va:VerticalAlign.CENTER,cs:3}),mkC([SP(0)],{w:W[5],bg:LB})]}),
+      new TableRow({children:[mkC([P('2',{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:LB,va:VerticalAlign.CENTER}),mkC([P('Chi phí dịch vụ',{bold:true,sz:12,col:DB,after:0})],{w:W[1]+W[2]+W[3]+W[4],bg:LB,va:VerticalAlign.CENTER,cs:4}),mkC([P(fmt(chiPhi),{bold:true,sz:12,col:DB,align:AlignmentType.RIGHT,after:0})],{w:W[5],bg:LB,va:VerticalAlign.CENTER})]}),
       new TableRow({children:[mkC([P('3',{bold:true,sz:12,col:GT,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:GB,va:VerticalAlign.CENTER}),mkC([P('Thuế giá trị gia tăng 08% VAT',{bold:true,sz:12,col:GT,after:0})],{w:W[1]+W[2]+W[3]+W[4],bg:GB,va:VerticalAlign.CENTER,cs:4}),mkC([P(fmt(vat),{bold:true,sz:12,col:GT,align:AlignmentType.RIGHT,after:0})],{w:W[5],bg:GB,va:VerticalAlign.CENTER})]}),
       new TableRow({children:[mkDk([P('4',{bold:true,sz:12,col:WH,align:AlignmentType.CENTER,after:0})],{w:W[0]}),mkDk([P('Tổng cộng',{bold:true,sz:12,col:WH,after:0})],{w:W[1]+W[2]+W[3]+W[4],cs:4}),mkDk([P(fmt(total),{bold:true,sz:13,col:WH,align:AlignmentType.RIGHT,after:0})],{w:W[5]})]})
     ];
