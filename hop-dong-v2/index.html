@@ -605,6 +605,7 @@ function buildContract(d) {
   c.push(P([T('Người đại diện: '),T(d.clientRep,{bold:true,italics:true}),T(`          Chức vụ: ${d.clientPosition}`)]));
   c.push(P([T(`MST: ${d.clientTax}`)]));
   c.push(P([T(`Địa chỉ: ${d.clientAddress}`)]));
+  if(d.clientPhone) c.push(P([T(`Điện thoại: ${d.clientPhone}`)]));
   if(d.clientEmail) c.push(P([T(`Email: ${d.clientEmail}`)]));
   if(d.clientBankAccount) c.push(P([T(`Số TK: ${d.clientBankAccount}          Ngân hàng: ${d.clientBankName}`)]));
 
@@ -636,7 +637,9 @@ function buildPaymentRequest(d) {
   c.push(P([T('Người đại diện: '),T(d.clientRep,{bold:true,italics:true}),T(`          Chức vụ: ${d.clientPosition}`)]));
   c.push(P([T(`MST: ${d.clientTax}`)]));
   c.push(P([T(`Địa chỉ: ${d.clientAddress}`)]));
+  if(d.clientPhone) c.push(P([T(`Điện thoại: ${d.clientPhone}`)]));
   if(d.clientEmail) c.push(P([T(`Email: ${d.clientEmail}`)]));
+  if(d.clientBankAccount) c.push(P([T(`Số TK: ${d.clientBankAccount}          Ngân hàng: ${d.clientBankName}`)]));
   c.push(P([T('Căn cứ theo khối lượng và giá trị dịch vụ đã được 2 bên thống nhất theo hợp đồng '),T(`Số: ${d.contractNumber}`,{italics:true}),T(` ngày ${d.signD.d} tháng ${d.signD.m} năm ${d.signD.y}, Công ty TNHH Can Creative đề nghị thanh toán 50% chi phí dịch vụ Chụp ảnh quảng cáo, số tiền là `),T(`${d.fD} VNĐ `,{bold:true}),T(`(Bằng chữ: ${d.depWords})./.`,{bold:true,italics:true})],{before:120}));
   c.push(P([T('Số tiền trên gửi vào tài khoản của Công ty TNHH Can Creative theo thông tin:')],{before:120}));
   ['Tên tài khoản: Công ty TNHH Can Creative','Số tài khoản: 3638 6868 8888','Ngân hàng TMCP Á Châu ACB – Chi nhánh Hoàng Cầu'].forEach(x => c.push(P([T(x)],{indent:{left:720}})));
@@ -665,6 +668,7 @@ function buildSettlement(d) {
   c.push(P([T('Người đại diện: '),T(d.clientRep,{bold:true,italics:true}),T(`          Chức vụ: ${d.clientPosition}`)]));
   c.push(P([T(`Địa chỉ: ${d.clientAddress}`)]));
   c.push(P([T(`MST: ${d.clientTax}`)]));
+  if(d.clientPhone) c.push(P([T(`Điện thoại: ${d.clientPhone}`)]));
   if(d.clientBankAccount) c.push(P([T(`Số TK: ${d.clientBankAccount}          Ngân hàng: ${d.clientBankName}`)]));
 
   // BÊN GIAO
