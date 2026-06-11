@@ -705,8 +705,8 @@ function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
         ${extraRows}
         <tr class="row-summary">
           <td class="col-stt" style="text-align:center;vertical-align:middle;"><strong>${summaryN}</strong></td>
-          <td colspan="4" style="text-align:center;vertical-align:middle;"><strong>Chi phí dịch vụ &nbsp;&mdash;&nbsp; ${fmt(cp)}</strong></td>
-          <td style="vertical-align:middle;"></td>
+          <td colspan="4" style="vertical-align:middle;"><strong>Chi phí dịch vụ</strong></td>
+          <td style="text-align:right;vertical-align:middle;"><strong>${fmt(cp)}</strong></td>
         </tr>
         <tr class="row-vat">
           <td class="col-stt" style="text-align:center;vertical-align:middle;"><strong>${vatN}</strong></td>
@@ -940,8 +940,8 @@ async function exportWord() {
       ...extraRows,
       new TableRow({children:[
         mkC([P(String(sumN),{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:LB,va:VerticalAlign.CENTER}),
-        mkC([P('Chi phí dịch vụ  —  '+fmt(cp),{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[1]+W[2]+W[3]+W[4],bg:LB,va:VerticalAlign.CENTER,cs:4}),
-        mkC([SP(0)],{w:W[5],bg:LB}),
+        mkC([P('Chi phí dịch vụ',{bold:true,sz:12,col:DB,after:0})],{w:W[1]+W[2]+W[3]+W[4],bg:LB,va:VerticalAlign.CENTER,cs:4}),
+        mkC([P(fmt(cp),{bold:true,sz:12,col:DB,align:AlignmentType.RIGHT,after:0})],{w:W[5],bg:LB,va:VerticalAlign.CENTER}),
       ]}),
       new TableRow({children:[
         mkC([P(String(vatN),{bold:true,sz:12,col:GT,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:GB,va:VerticalAlign.CENTER}),
