@@ -235,7 +235,7 @@ body {
 
 .baogia-table th,
 .baogia-table td {
-  border: 1px solid #b8cce4;
+  border: 1px solid #c8d8ee;
   padding: 7px 9px;
   vertical-align: top;
   text-align: left;
@@ -244,11 +244,11 @@ body {
 .baogia-table thead th {
   text-align: center;
   font-weight: bold;
-  background: linear-gradient(135deg, #1e3a5f 0%, #2a5298 100%);
+  background: #2d5090;
   color: #fff;
   vertical-align: middle;
   font-size: 12pt;
-  border-color: #1a3060;
+  border-color: #4a6aaa;
   letter-spacing: 0.2px;
   padding: 9px;
 }
@@ -261,13 +261,13 @@ body {
 .baogia-table .col-tt  { width: 14%; text-align: right; }
 
 .baogia-table tbody tr:first-child td:nth-child(2) {
-  border-left: 3px solid #2a5298;
+  border-left: 3px solid #2d5090;
 }
 
 .baogia-table .row-summary td {
   font-weight: bold;
   background-color: #eaf1fb;
-  color: #1e3a5f;
+  color: #2d5090;
 }
 
 .baogia-table .row-vat td {
@@ -279,9 +279,9 @@ body {
 .baogia-table .row-total td {
   font-weight: bold;
   font-size: 13pt;
-  background: linear-gradient(90deg, #1e3a5f 0%, #2a5298 100%);
+  background: #2d5090;
   color: #fff;
-  border-color: #1a3060;
+  border-color: #4a6aaa;
 }
 
 .baogia-table .row-gift td {
@@ -314,7 +314,7 @@ body {
   margin: 0 0 6px 0;
   font-style: italic;
   line-height: 1.35;
-  color: #2a5298;
+  color: #2d5090;
 }
 
 .portfolio-link { margin: 12px 0 6px; }
@@ -581,7 +581,7 @@ function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
         <li>Màn hình check hình ảnh</li>
         <li>Đạo cụ, bối cảnh phù hợp với concept</li>
       </ul>
-      <strong>Dạng phim quảng cáo</strong>
+      <strong>Dựng phim quảng cáo</strong>
       <ul class="cell-list">
         <li>Số lượng: ${soLuong}</li>
         <li>Thời lượng: ${thoiLuong}</li>
@@ -606,7 +606,7 @@ function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
         <li>Bối cảnh, kỹ thuật máy thực hiện cầu kỳ hơn</li>
         <li>Đạo cụ, bối cảnh phù hợp với concept</li>
       </ul>
-      <strong>Dạng phim quảng cáo</strong>
+      <strong>Dựng phim quảng cáo</strong>
       <ul class="cell-list">
         <li>Số lượng: ${soLuong}</li>
         <li>Thời lượng: ${thoiLuong}</li>
@@ -631,7 +631,7 @@ function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
         <li>Màn hình check cảnh quay</li>
         <li>Đạo cụ, bối cảnh phù hợp với concept</li>
       </ul>
-      <strong>Dạng phim quảng cáo</strong>
+      <strong>Dựng phim quảng cáo</strong>
       <ul class="cell-list">
         <li>Số lượng: ${soLuong}</li>
         <li>Thời lượng: ${thoiLuong}</li>
@@ -705,9 +705,8 @@ function buildPkgTable(pkgNum, chiPhi, thoiLuong, soLuong, loai) {
         ${extraRows}
         <tr class="row-summary">
           <td class="col-stt" style="text-align:center;vertical-align:middle;"><strong>${summaryN}</strong></td>
-          <td class="col-nd" style="vertical-align:middle;"><strong>Chi phí dịch vụ</strong></td>
-          <td colspan="3" style="text-align:center;vertical-align:middle;"><strong>${fmt(cp)}</strong></td>
-          <td style="text-align:right;vertical-align:middle;"></td>
+          <td colspan="4" style="text-align:center;vertical-align:middle;"><strong>Chi phí dịch vụ &nbsp;&mdash;&nbsp; ${fmt(cp)}</strong></td>
+          <td style="vertical-align:middle;"></td>
         </tr>
         <tr class="row-vat">
           <td class="col-stt" style="text-align:center;vertical-align:middle;"><strong>${vatN}</strong></td>
@@ -841,7 +840,7 @@ async function exportWord() {
   const done=()=>[btnD,btnM].forEach(b=>{if(b){b.innerHTML='✅ Xong!';b.disabled=false;setTimeout(()=>b.innerHTML=b._orig,3000);}});
 
   const FN='Times New Roman';
-  const DB='1E3A5F',LB='EAF1FB',GB='FDF6E3',GT='5A3E00',GFB='F0F7FF',GFC='1E6A9E',WH='FFFFFF';
+  const DB='2D5090',LB='EAF1FB',GB='FDF6E3',GT='5A3E00',GFB='F0F7FF',GFC='1E6A9E',WH='FFFFFF';
 
   function T(text,o={}){return new TextRun({text,bold:o.bold||false,italic:o.italic||false,size:(o.sz||13)*2,font:FN,color:o.col||'000000'});}
   function P(text,o={}){
@@ -852,8 +851,8 @@ async function exportWord() {
   function CBUL(text,o={}){return P('• '+text,{...o,indent:160,after:40,sz:12});}
   function SP(n=80){return new Paragraph({spacing:{after:n},children:[T('')]});}
 
-  const BG={style:BorderStyle.SINGLE,size:4,color:'B8CCE4'};
-  const BD={style:BorderStyle.SINGLE,size:4,color:'1A3060'};
+  const BG={style:BorderStyle.SINGLE,size:4,color:'C8D8EE'};
+  const BD={style:BorderStyle.SINGLE,size:6,color:'4A6AAA'};
   const BGB={style:BorderStyle.SINGLE,size:12,color:'4A9AD4'};
   const sh=fill=>({fill,type:ShadingType.CLEAR,color:'auto'});
 
@@ -890,7 +889,7 @@ async function exportWord() {
         CBUL('Quay phim tại studio'),CBUL('Tư vấn về bối cảnh, concept, hiệu ứng phù hợp với video'),
         CBUL('Thiết bị quay phim và dải ống kính Sony – Full HD'),CBUL('Thiết bị chiếu sáng'),
         CBUL('Bối cảnh theo kịch bản'),CBUL('Màn hình check hình ảnh'),CBUL('Đạo cụ, bối cảnh phù hợp với concept'),
-        P('Dạng phim quảng cáo',{bold:true,sz:12,before:60,after:40}),
+        P('Dựng phim quảng cáo',{bold:true,sz:12,before:60,after:40}),
         CBUL('Số lượng: '+sl),CBUL('Thời lượng: '+tl),CBUL('Kích thước video: Full HD'),CBUL('Chèn thông tin và hiệu ứng đồ họa phù hợp'),
       ];
     } else if(pkgNum===2){
@@ -902,7 +901,7 @@ async function exportWord() {
         CBUL('Thiết bị quay phim và dải ống kính Sony – Full HD 400 fps (chuyển động chậm)'),
         CBUL('Thiết bị chiếu sáng công suất lớn'),CBUL('Màn hình check cảnh quay'),
         CBUL('Bối cảnh, kỹ thuật máy thực hiện cầu kỳ hơn'),CBUL('Đạo cụ, bối cảnh phù hợp với concept'),
-        P('Dạng phim quảng cáo',{bold:true,sz:12,before:60,after:40}),
+        P('Dựng phim quảng cáo',{bold:true,sz:12,before:60,after:40}),
         CBUL('Số lượng: '+sl),CBUL('Thời lượng: '+tl),CBUL('Kích thước video: Full HD'),
         CBUL('Chèn thông tin và hiệu ứng đồ họa phù hợp với ngân sách'),
       ];
@@ -916,7 +915,7 @@ async function exportWord() {
         CBUL('Kịch bản video hoàn thiện'),
         CBUL('Thiết bị quay phim và dải ống kính Sony – 4K 400 fps (chuyển động rất chậm – TVC chuyên nghiệp)',{bold:false}),
         CBUL('Thiết bị chiếu sáng công suất lớn'),CBUL('Màn hình check cảnh quay'),CBUL('Đạo cụ, bối cảnh phù hợp với concept'),
-        P('Dạng phim quảng cáo',{bold:true,sz:12,before:60,after:40}),
+        P('Dựng phim quảng cáo',{bold:true,sz:12,before:60,after:40}),
         CBUL('Số lượng: '+sl),CBUL('Thời lượng: '+tl),CBUL('Kích thước video: 4K',{bold:true}),
         CBUL('Thiết kế chữ phù hợp với nội dung video'),CBUL('Voice off hoàn thiện cho video'),CBUL('Chèn thông tin và hiệu ứng đồ họa phù hợp'),
       ];
@@ -941,8 +940,7 @@ async function exportWord() {
       ...extraRows,
       new TableRow({children:[
         mkC([P(String(sumN),{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[0],bg:LB,va:VerticalAlign.CENTER}),
-        mkC([P('Chi phí dịch vụ',{bold:true,sz:12,col:DB,after:0})],{w:W[1],bg:LB,va:VerticalAlign.CENTER}),
-        mkC([P(fmt(cp),{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[2]+W[3]+W[4],bg:LB,va:VerticalAlign.CENTER,cs:3}),
+        mkC([P('Chi phí dịch vụ  —  '+fmt(cp),{bold:true,sz:12,col:DB,align:AlignmentType.CENTER,after:0})],{w:W[1]+W[2]+W[3]+W[4],bg:LB,va:VerticalAlign.CENTER,cs:4}),
         mkC([SP(0)],{w:W[5],bg:LB}),
       ]}),
       new TableRow({children:[
@@ -957,7 +955,7 @@ async function exportWord() {
       ]}),
     ];
     const out=[P(heading,{bold:true,before:200,after:80})];
-    if(subheading) out.push(P(subheading,{italic:true,bold:true,col:'2A5298',after:80}));
+    if(subheading) out.push(P(subheading,{italic:true,bold:true,col:'2D5090',after:80}));
     out.push(new Table({width:{size:tW,type:WidthType.DXA},rows}));
     return out;
   }
