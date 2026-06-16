@@ -343,12 +343,19 @@ const DEFAULT_APPS = [
 // LOAD & MIGRATE DATA
 // ════════════════════════════════════════════════════════
 let APPS = JSON.parse(localStorage.getItem('cd_apps') || JSON.stringify(DEFAULT_APPS));
+// IDs của default apps bị user xóa chủ động — không tự thêm lại khi reload
+let DEL_DEFAULTS = new Set(JSON.parse(localStorage.getItem('cd_del_defaults') || '[]'));
 
 // Migrate stale default names
 const _nameMap = { 'app-contract-v2':'Hợp đồng chụp ảnh', 'app-quote':'Báo giá chụp ảnh quảng cáo' };
 let _migrated = false;
 APPS.forEach(a => { if(_nameMap[a.id] && a.name !== _nameMap[a.id]){ a.name = _nameMap[a.id]; _migrated = true; } });
-DEFAULT_APPS.forEach(da => { if(!APPS.find(a => a.id === da.id)){ APPS.push(da); _migrated = true; } });
+// Chỉ thêm lại default apps nếu user chưa xóa chúng
+DEFAULT_APPS.forEach(da => {
+  if(!APPS.find(a => a.id === da.id) && !DEL_DEFAULTS.has(da.id)){
+    APPS.push(da); _migrated = true;
+  }
+});
 if(_migrated) localStorage.setItem('cd_apps', JSON.stringify(APPS));
 
 let ROWS = JSON.parse(localStorage.getItem('cd_rows') || 'null');
@@ -734,6 +741,11 @@ function openManage(){
 function _deleteApp(id){
   APPS = APPS.filter(a => a.id !== id);
   ROWS.forEach(r => { r.appIds = r.appIds.filter(aid => aid !== id); });
+  // Ghi nhớ nếu là default app, tránh tự thêm lại sau reload
+  if(DEFAULT_APPS.find(da => da.id === id)){
+    DEL_DEFAULTS.add(id);
+    localStorage.setItem('cd_del_defaults', JSON.stringify([...DEL_DEFAULTS]));
+  }
   saveApps();
   saveRows();
   renderRows();
@@ -853,6 +865,19 @@ function _runTests(){
     rows[rows.length-1].appIds.push(...orphans);
     rows[0].appIds.includes('x3') ? pass('_syncOrphans: orphan added') : fail('FAIL _syncOrphans');
     orphans.length === 1 ? pass('_syncOrphans: correct count') : fail('FAIL _syncOrphans count');
+  }
+
+  // ── Test DEL_DEFAULTS: app bị xóa không tự thêm lại ──
+  {
+    const fakeDefaults = [{id:'d1'},{id:'d2'}];
+    const savedApps    = [{id:'d1'}];
+    const delSet       = new Set(['d2']);
+    const result2      = [...savedApps];
+    fakeDefaults.forEach(da => {
+      if(!result2.find(a=>a.id===da.id) && !delSet.has(da.id)) result2.push(da);
+    });
+    result2.find(a=>a.id==='d2') ? fail('FAIL DEL_DEFAULTS: deleted re-added') : pass('DEL_DEFAULTS: deleted stays gone');
+    !result2.find(a=>a.id==='d2') && result2.length===1 ? pass('DEL_DEFAULTS: array length correct') : fail('FAIL DEL_DEFAULTS length');
   }
 
   // ── Test _esc XSS ──
