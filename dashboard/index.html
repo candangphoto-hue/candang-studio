@@ -448,6 +448,7 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
         <option value="2027">2027</option>
       </select>
       <button class="btn btn-g btn-s" onclick="syncSheets()" title="Kéo dữ liệu từ Sheets về">↻ Kéo về</button>
+      <button class="btn btn-g btn-s" onclick="forcePullSheets()" title="Kéo về và ghi đè toàn bộ — dùng khi MacBook bị lệch dữ liệu" style="color:var(--or)">↻↻ Ghi đè</button>
       <button class="btn btn-g btn-s" onclick="pushAllToSheets()" title="Đẩy toàn bộ lên Sheets">↑ Đẩy lên</button>
       <button class="btn btn-p" onclick="openModal('addP')">+ Thêm dự án</button>
     </div>
@@ -1851,7 +1852,7 @@ function saveStaffEdit(i,gross){
   const base=days*wage;
   list[i]={...list[i],name,role:$(`se-role-${i}`).value,days,wage,commType,commVal:commRaw,commission:comm,base,total:base+comm};
   CUR_P.staffCost=list.reduce((s,x)=>s+x.total,0);
-  saveLocal(); renderDP1(CUR_P); renderDP3(CUR_P); renderAll();
+  _bump(CUR_P); saveLocal(); _pushProject(CUR_P); renderDP1(CUR_P); renderDP3(CUR_P); renderAll();
   toast('✅ Đã lưu nhân sự: '+name);
 }
 
@@ -1897,7 +1898,7 @@ function saveAddStaff(){
   if(!CUR_P.staffList)CUR_P.staffList=[];
   CUR_P.staffList.push({name,role,days,wage,commType,commVal:commRaw,commission:comm,base,total:base+comm});
   CUR_P.staffCost=(CUR_P.staffList).reduce((s,x)=>s+x.total,0);
-  saveLocal(); renderDPAll(CUR_P); renderAll();
+  _bump(CUR_P); saveLocal(); _pushProject(CUR_P); renderDPAll(CUR_P); renderAll();
   toast('✅ Đã thêm: '+name);
 }
 
@@ -1905,7 +1906,7 @@ function delStaff(i){
   if(!CUR_P.staffList)return;
   CUR_P.staffList.splice(i,1);
   CUR_P.staffCost=CUR_P.staffList.reduce((s,x)=>s+x.total,0);
-  saveLocal(); renderDPAll(CUR_P); renderAll();
+  _bump(CUR_P); saveLocal(); _pushProject(CUR_P); renderDPAll(CUR_P); renderAll();
   toast('🗑️ Đã xóa nhân sự');
 }
 
@@ -1979,7 +1980,7 @@ function savePropsEdit(i){
   const up=pM($(`pe-up-${i}`).value);
   list[i]={...list[i],desc,qty,unitPrice:up,total:qty*up,date:$(`pe-date-${i}`).value};
   CUR_P.propsCost=list.reduce((s,x)=>s+(x.total||0),0);
-  saveLocal(); renderDP2(CUR_P); renderDP3(CUR_P); renderAll();
+  _bump(CUR_P); saveLocal(); _pushProject(CUR_P); renderDP2(CUR_P); renderDP3(CUR_P); renderAll();
   toast('✅ Đã lưu: '+desc);
 }
 
@@ -2009,7 +2010,7 @@ function saveAddProps(){
   if(!CUR_P.propsList)CUR_P.propsList=[];
   CUR_P.propsList.push({desc,qty,unitPrice:up,total:qty*up,date});
   CUR_P.propsCost=CUR_P.propsList.reduce((s,x)=>s+(x.total||0),0);
-  saveLocal(); renderDPAll(CUR_P); renderAll();
+  _bump(CUR_P); saveLocal(); _pushProject(CUR_P); renderDPAll(CUR_P); renderAll();
   toast('✅ Đã thêm: '+desc);
 }
 
@@ -2017,7 +2018,7 @@ function delProps(i){
   if(!CUR_P.propsList)return;
   CUR_P.propsList.splice(i,1);
   CUR_P.propsCost=CUR_P.propsList.reduce((s,x)=>s+(x.total||0),0);
-  saveLocal(); renderDPAll(CUR_P); renderAll();
+  _bump(CUR_P); saveLocal(); _pushProject(CUR_P); renderDPAll(CUR_P); renderAll();
   toast('🗑️ Đã xóa item');
 }
 
@@ -2091,14 +2092,14 @@ function saveOtherEdit(i){
   list[i]={desc:$(`oe-desc-${i}`).value.trim()||'Chi phí khác',amount:pM($(`oe-amt-${i}`).value)};
   CUR_P.otherList=list;
   CUR_P.otherCost=list.reduce((s,x)=>s+(x.amount||0),0);
-  saveLocal(); renderDP3(CUR_P); renderAll();
+  _bump(CUR_P); saveLocal(); _pushProject(CUR_P); renderDP3(CUR_P); renderAll();
   toast('✅ Đã lưu khoản chi phí');
 }
 function delOther(i){
   if(!CUR_P.otherList)return;
   CUR_P.otherList.splice(i,1);
   CUR_P.otherCost=CUR_P.otherList.reduce((s,x)=>s+(x.amount||0),0);
-  saveLocal(); renderDP3(CUR_P); renderAll();
+  _bump(CUR_P); saveLocal(); _pushProject(CUR_P); renderDP3(CUR_P); renderAll();
   toast('🗑️ Đã xóa khoản chi');
 }
 function openAddOther(){
@@ -2120,7 +2121,7 @@ function saveAddOther(){
   if(!CUR_P.otherList)CUR_P.otherList=[];
   CUR_P.otherList.push({desc,amount:amt});
   CUR_P.otherCost=CUR_P.otherList.reduce((s,x)=>s+(x.amount||0),0);
-  saveLocal(); renderDP3(CUR_P); renderAll();
+  _bump(CUR_P); saveLocal(); _pushProject(CUR_P); renderDP3(CUR_P); renderAll();
   toast('✅ Đã thêm: '+desc);
 }
 
@@ -2918,6 +2919,9 @@ async function pushSheets(data){
     });
   }catch(e){console.warn('Sheets push:',e);}
 }
+
+function _bump(p){p.updatedAt=new Date().toISOString();return p;}
+function _pushProject(p){if(SHEETS_URL)pushSheets({action:'updateProject',...p});}
 
 async function pushAllToSheets(){
   if(!SHEETS_URL){toast('⚠️ Chưa nhập URL Sheets');return;}
@@ -3894,19 +3898,53 @@ function _sanitizeProject(p){
   else console.log('[OK] _sanitizeProject');
 })();
 
+// Payment union: gộp payments của 2 bên, không mất khoản nào
+// Key = date|amount (sau _sanitizeProject đã chuẩn hoá)
+function _mergePayments(a,b){
+  const merged=[...(a||[])];
+  const keys=new Set(merged.map(p=>`${p.date}|${p.amount}`));
+  (b||[]).forEach(p=>{const k=`${p.date}|${p.amount}`;if(!keys.has(k)){merged.push(p);keys.add(k);}});
+  return merged;
+}
+
+// Smart merge 1 project: winner=bên có timestamp mới hơn,
+// nhưng payments luôn được union (không mất khoản của bên thua)
+function _mergeOneProject(local,remote){
+  const lt=new Date(local.updatedAt||local.createdAt||0).getTime();
+  const rt=new Date(remote.updatedAt||remote.createdAt||0).getTime();
+  const winner=rt>=lt?{...remote}:{...local};
+  const loser=rt>=lt?local:remote;
+  winner.payments=_mergePayments(winner.payments,loser.payments);
+  return winner;
+}
+
+// Unit test _mergeOneProject
+(function _testMergeOne(){
+  const base={id:'x',createdAt:'2026-01-01T00:00:00Z',payments:[{date:'2026-06-10',amount:1000000}]};
+  // Trường hợp 1: remote không có updatedAt (như Sheets trả về) → tie → remote thắng, nhưng payment local không mất
+  const remote={...base,client:'PC',payments:[{date:'2026-06-15',amount:2000000}]};
+  const local={...base,client:'Mac',updatedAt:'2026-01-01T00:00:00Z',payments:[{date:'2026-06-10',amount:1000000}]};
+  const r1=_mergeOneProject(local,remote);
+  const ok1=r1.client==='PC'&&r1.payments.length===2;
+  // Trường hợp 2: local có updatedAt mới hơn → local thắng, payment remote không mất
+  const local2={...base,client:'Mac-Edit',updatedAt:'2026-06-17T10:00:00Z',payments:[{date:'2026-06-10',amount:1000000}]};
+  const remote2={...base,client:'PC-Old',payments:[{date:'2026-06-17',amount:500000}]};
+  const r2=_mergeOneProject(local2,remote2);
+  const ok2=r2.client==='Mac-Edit'&&r2.payments.length===2;
+  if(!ok1||!ok2)console.error('[FAIL] _mergeOneProject',{r1,r2,ok1,ok2});
+  else console.log('[OK] _mergeOneProject (2 cases)');
+})();
+
 function _mergeProjects(remote){
   let changed=false;
   remote.forEach(rp=>{
     if(DELETED_IDS.has(rp.id))return;
-    rp=_sanitizeProject(rp); // chuẩn hóa date/number/bool trước khi merge
+    rp=_sanitizeProject(rp);
     const li=PROJECTS.findIndex(p=>p.id===rp.id);
     if(li===-1){PROJECTS.unshift(rp);changed=true;}
     else{
-      const lt=new Date(PROJECTS[li].updatedAt||PROJECTS[li].createdAt||0).getTime();
-      const rt=new Date(rp.updatedAt||rp.createdAt||0).getTime();
-      // rt >= lt (không chỉ >) để khi tie (Sheets không trả updatedAt),
-      // remote đã qua _sanitizeProject thắng — sửa được ngày sai trong localStorage cũ
-      if(rt>=lt){PROJECTS[li]=rp;changed=true;}
+      const merged=_mergeOneProject(PROJECTS[li],rp);
+      if(JSON.stringify(merged)!==JSON.stringify(PROJECTS[li])){PROJECTS[li]=merged;changed=true;}
     }
   });
   return changed;
@@ -3941,6 +3979,28 @@ async function autoSync2Way(){
         body:JSON.stringify({action:'batchSync',projects:PROJECTS,clients:CLIENTS})});
     }
   }catch(e){console.warn('[AutoSync]',e);}
+}
+
+// Force-pull: kéo về và ghi đè TOÀN BỘ bằng data từ Sheets
+// Dùng khi MacBook lệch dữ liệu, cần reset về trạng thái Sheets đúng
+async function forcePullSheets(){
+  if(!SHEETS_URL){toast('⚠️ Chưa nhập URL Sheets');return;}
+  if(!confirm('Kéo về và GHI ĐÈ toàn bộ?\nToàn bộ dữ liệu local sẽ bị thay thế bằng dữ liệu trên Sheets.\n(Nên dùng khi MacBook bị lệch dữ liệu)'))return;
+  setSync('sync','Đang kéo về (ghi đè)...');
+  try{
+    const r=await fetch(SHEETS_URL+'?action=getAll&t='+Date.now());
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    if(d.projects&&d.projects.length>0)PROJECTS=d.projects.map(p=>_sanitizeProject(p));
+    if(d.clients&&d.clients.length>0)CLIENTS=d.clients;
+    saveLocal();renderAll();
+    setSync('ok','Ghi đè '+new Date().toLocaleTimeString('vi-VN'));
+    toast('✅ Đã ghi đè — '+PROJECTS.length+' dự án từ Sheets');
+  }catch(e){
+    setSync('','Lỗi');
+    toast('❌ Không kết nối được Sheets');
+    console.error('[ForcePull]',e);
+  }
 }
 
 // Khởi động auto-sync nếu đã có URL
