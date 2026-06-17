@@ -293,9 +293,13 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
 .tax-note{color:var(--or);font-size:11px}
 
 /* REVENUE filter tabs */
-.rv-filter{display:flex;gap:6px;margin-bottom:12px}
+.rv-filter{display:flex;gap:6px}
 .rv-ftab{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--t2);font-family:inherit;transition:all .15s}
 .rv-ftab.on{background:var(--al);color:var(--ad);border-color:#e8d9b8}
+.rv-metric-lbl{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;user-select:none}
+.rv-metric-dot{width:11px;height:11px;border-radius:3px;display:inline-block;flex-shrink:0}
+.rv-month-hdr{padding:11px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:var(--bg);border-bottom:1px solid var(--bl);transition:background .15s}
+.rv-month-hdr:hover{background:var(--al)}
 
 /* PAYMENT */
 .pay-item{background:var(--bg);border:1px solid var(--bl);border-radius:var(--rs);padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
@@ -563,18 +567,38 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
     <div id="v-revenue" class="view">
       <div class="kpi-g" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px" id="rvKpi"></div>
       <div class="sh">
-        <div class="st">Chi tiết theo tháng</div>
-        <div class="rv-filter">
-          <button class="rv-ftab on" onclick="setRvFilter('all',this)">Tất cả</button>
-          <button class="rv-ftab" onclick="setRvFilter('vat',this)">Có VAT</button>
-          <button class="rv-ftab" onclick="setRvFilter('novat',this)">Không VAT</button>
+        <div><div class="st" id="rvTitle">Chi tiết theo tháng</div></div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="rv-filter">
+            <button class="rv-ftab rv-vattab on" onclick="setRvFilter('all',this)">Tất cả</button>
+            <button class="rv-ftab rv-vattab" onclick="setRvFilter('vat',this)">Có VAT</button>
+            <button class="rv-ftab rv-vattab" onclick="setRvFilter('novat',this)">Không VAT</button>
+          </div>
+          <div style="display:flex;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:3px;gap:2px">
+            <button id="rvBtnTable" class="btn btn-a" style="font-size:12px;padding:5px 14px" onclick="setRvView('table')">📋 Bảng</button>
+            <button id="rvBtnChart" class="btn btn-g" style="font-size:12px;padding:5px 14px;border:none" onclick="setRvView('chart')">📊 Biểu đồ</button>
+          </div>
         </div>
       </div>
-      <div class="card">
+      <div id="rvTableOpts" style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:12px;color:var(--t3)">Xem theo:</span>
+        <button id="rvBtnMonth" class="rv-ftab on" onclick="setRvTableMode('month',this)">📋 Theo tháng</button>
+        <button id="rvBtnProject" class="rv-ftab" onclick="setRvTableMode('project',this)">📁 Theo dự án</button>
+      </div>
+      <div id="rvChartOpts" style="display:none;align-items:center;gap:14px;margin-bottom:12px;padding:8px 14px;background:var(--white);border:1px solid var(--border);border-radius:var(--rs)">
+        <span style="font-size:12px;color:var(--t3);font-weight:500">Hiển thị:</span>
+        <label class="rv-metric-lbl"><input type="checkbox" id="rvMetricRevenue" checked onchange="renderRvChart()"><span class="rv-metric-dot" style="background:#2563eb"></span>Doanh thu</label>
+        <label class="rv-metric-lbl"><input type="checkbox" id="rvMetricProfit" checked onchange="renderRvChart()"><span class="rv-metric-dot" style="background:#e07b39"></span>Lợi nhuận</label>
+      </div>
+      <div id="rvTableView" class="card">
         <div class="tw"><table>
           <thead><tr><th>Tháng</th><th>Dự án</th><th>Doanh thu (net)</th><th>VAT</th><th>Tổng thu KH</th><th>CP Nhân sự</th><th>CP Props</th><th>CP Khác</th><th>CP Vận hành</th><th>Tổng chi</th><th>LN (sau VAT)</th><th>Biên LN</th></tr></thead>
           <tbody id="rvT"></tbody>
         </table></div>
+      </div>
+      <div id="rvProjectView" style="display:none"></div>
+      <div id="rvChartView" class="card" style="display:none;padding:20px 18px 14px">
+        <canvas id="rvCanvas"></canvas>
       </div>
     </div>
 
@@ -3223,11 +3247,214 @@ function markSalPaid(name,m,y){
 
 // ═══ REVENUE FILTER ═══
 let rvFilter='all';
+let rvView='table';
+let rvTableMode='month';
+
 function setRvFilter(f,el){
   rvFilter=f;
-  document.querySelectorAll('.rv-ftab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.rv-vattab').forEach(b=>b.classList.remove('on'));
   el.classList.add('on');
   renderRevenue();
+  if(rvView==='chart') renderRvChart();
+  if(rvView==='table'&&rvTableMode==='project') renderRvByProject();
+}
+
+function setRvView(v){
+  rvView=v;
+  const isT=v==='table';
+  $('rvBtnTable').className='btn '+(isT?'btn-a':'btn-g');
+  $('rvBtnChart').className='btn '+(!isT?'btn-a':'btn-g');
+  $('rvBtnTable').style.border=isT?'none':'1px solid var(--border)';
+  $('rvBtnChart').style.border=!isT?'none':'1px solid var(--border)';
+  $('rvTableOpts').style.display=isT?'flex':'none';
+  $('rvChartOpts').style.display=isT?'none':'flex';
+  $('rvTableView').style.display=(isT&&rvTableMode==='month')?'':'none';
+  $('rvProjectView').style.display=(isT&&rvTableMode==='project')?'':'none';
+  $('rvChartView').style.display=!isT?'':'none';
+  $('rvTitle').textContent=isT?(rvTableMode==='month'?'Chi tiết theo tháng':'Chi tiết theo dự án'):'Biểu đồ doanh thu';
+  if(!isT) setTimeout(renderRvChart,0);
+}
+
+function setRvTableMode(m,el){
+  rvTableMode=m;
+  [$('rvBtnMonth'),$('rvBtnProject')].forEach(b=>b&&b.classList.remove('on'));
+  el.classList.add('on');
+  $('rvTableView').style.display=m==='month'?'':'none';
+  $('rvProjectView').style.display=m==='project'?'':'none';
+  $('rvTitle').textContent=m==='month'?'Chi tiết theo tháng':'Chi tiết theo dự án';
+  if(m==='project') renderRvByProject();
+}
+
+function toggleRvMonth(k){
+  const el=$('rvMonth-'+k),arrow=$('rvArrow-'+k);
+  const show=el.style.display==='none';
+  el.style.display=show?'':'none';
+  arrow.textContent=show?'▲':'▼';
+}
+
+function renderRvByProject(){
+  const mMap={};
+  let filtered=PROJECTS;
+  if(rvFilter==='vat') filtered=PROJECTS.filter(p=>p.hasVAT);
+  if(rvFilter==='novat') filtered=PROJECTS.filter(p=>!p.hasVAT);
+  const rvOpex=getMonthlyOpex();
+  filtered.forEach(p=>{
+    const d=p.dateStart?new Date(p.dateStart):null; if(!d)return;
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const lbl=`T${d.getMonth()+1}/${d.getFullYear()}`;
+    if(!mMap[k])mMap[k]={k,lbl,projects:[],net:0,gross:0};
+    mMap[k].projects.push(p);
+    mMap[k].net+=p.netValue||0;
+    mMap[k].gross+=(p.grossValue||p.netValue||0);
+  });
+  const months=Object.keys(mMap).sort().reverse().slice(0,24);
+  if(!months.length){
+    $('rvProjectView').innerHTML=`<div class="card"><div class="emp"><div class="eic">📊</div><div class="etl">Chưa có dữ liệu</div></div></div>`;
+    return;
+  }
+  $('rvProjectView').innerHTML=months.map(k=>{
+    const m=mMap[k];
+    const projCost=m.projects.reduce((s,p)=>s+getTotalCost(p),0);
+    const tc=projCost+rvOpex;
+    const profit=m.net-tc;
+    const mg=m.net?Math.round(profit/m.net*100):0;
+    const mc=mg>=40?'var(--gn)':mg>=20?'var(--ad)':'var(--rd)';
+    return`<div class="card" style="margin-bottom:10px;overflow:hidden">
+      <div class="rv-month-hdr" onclick="toggleRvMonth('${k}')">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <strong style="color:var(--ad);font-size:14px;min-width:70px">${m.lbl}</strong>
+          <span style="font-size:12px;color:var(--t3)">${m.projects.length} dự án</span>
+          <span style="font-size:13px;font-weight:600;color:var(--gn)">${fmt(m.gross)}</span>
+          <span style="font-size:12px;color:${profit>=0?'var(--gn)':'var(--rd)'}">LN: ${profit>=0?'+':''}${fmt(profit)} <strong style="color:${mc}">(${mg}%)</strong></span>
+        </div>
+        <span id="rvArrow-${k}" style="color:var(--t3)">▼</span>
+      </div>
+      <div id="rvMonth-${k}" style="display:none">
+        <div class="tw"><table>
+          <thead><tr style="background:var(--bg)">
+            <th>Khách hàng</th><th>Dịch vụ</th><th>Doanh thu net</th><th>VAT</th><th>Tổng thu KH</th><th>CP Nhân sự</th><th>CP Props</th><th>CP Khác</th><th>LN dự án</th><th>Trạng thái</th>
+          </tr></thead>
+          <tbody>${m.projects.sort((a,b)=>(b.grossValue||0)-(a.grossValue||0)).map(p=>{
+            const pCost=getTotalCost(p);
+            const pProfit=(p.netValue||0)-pCost;
+            const oc=(p.otherList||[]).reduce((s,x)=>s+(x.amount||0),0);
+            return`<tr style="cursor:pointer;border-bottom:1px solid var(--bl)" onclick="openDetail('${p.id}')">
+              <td style="padding:9px 12px;font-weight:500">${p.client||'—'}</td>
+              <td style="padding:9px 12px;color:var(--t2);font-size:11.5px">${p.service||'—'}</td>
+              <td style="padding:9px 12px">${fmt(p.netValue||0)}</td>
+              <td style="padding:9px 12px;color:var(--bl2)">${p.hasVAT?'+'+fmt(p.vatAmt||0):'—'}</td>
+              <td style="padding:9px 12px;font-weight:600;color:var(--gn)">${fmt(p.grossValue||p.netValue||0)}</td>
+              <td style="padding:9px 12px;color:var(--rd)">${p.staffCost?fmt(p.staffCost):'—'}</td>
+              <td style="padding:9px 12px;color:var(--rd)">${p.propsCost?fmt(p.propsCost):'—'}</td>
+              <td style="padding:9px 12px;color:var(--rd)">${oc?fmt(oc):'—'}</td>
+              <td style="padding:9px 12px" class="${pProfit>=0?'pp':'pn'}">${fmt(pProfit)}</td>
+              <td style="padding:9px 12px"><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--bg);color:var(--t2)">${p.status||'—'}</span></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderRvChart(){
+  const canvas=$('rvCanvas');
+  if(!canvas||!canvas.parentElement)return;
+  const showRev=$('rvMetricRevenue').checked;
+  const showProfit=$('rvMetricProfit').checked;
+  const mMap={};
+  let filtered=PROJECTS;
+  if(rvFilter==='vat') filtered=PROJECTS.filter(p=>p.hasVAT);
+  if(rvFilter==='novat') filtered=PROJECTS.filter(p=>!p.hasVAT);
+  const rvOpex=getMonthlyOpex();
+  filtered.forEach(p=>{
+    const d=p.dateStart?new Date(p.dateStart):null; if(!d)return;
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const mo=d.getMonth()+1,yr=d.getFullYear();
+    if(!mMap[k])mMap[k]={lbl:`T${mo}/${String(yr).slice(2)}`,net:0,gross:0,cost:0};
+    mMap[k].net+=p.netValue||0;
+    mMap[k].gross+=(p.grossValue||p.netValue||0);
+    mMap[k].cost+=getTotalCost(p);
+  });
+  const months=Object.keys(mMap).sort().slice(-12);
+  const W=canvas.parentElement.offsetWidth-36;
+  const H=260;
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+  if(!months.length){
+    ctx.fillStyle='#9b9890';ctx.font='13px DM Sans,sans-serif';ctx.textAlign='center';
+    ctx.fillText('Chưa có dữ liệu',W/2,H/2); return;
+  }
+  const data=months.map(k=>({lbl:mMap[k].lbl,revenue:mMap[k].gross,profit:mMap[k].net-mMap[k].cost-rvOpex}));
+  const series=[];
+  if(showRev) series.push({key:'revenue',color:'#2563eb',label:'Doanh thu'});
+  if(showProfit) series.push({key:'profit',color:'#e07b39',label:'Lợi nhuận'});
+  if(!series.length){
+    ctx.fillStyle='#9b9890';ctx.font='13px DM Sans,sans-serif';ctx.textAlign='center';
+    ctx.fillText('Chọn ít nhất 1 chỉ số',W/2,H/2); return;
+  }
+  const padL=58,padR=16,padT=16,padB=48;
+  const cW=W-padL-padR,cH=H-padT-padB;
+  const posVals=data.flatMap(d=>series.map(s=>Math.max(d[s.key],0)));
+  const maxVal=Math.max(...posVals,1);
+  // Grid lines
+  ctx.strokeStyle='#eeece8'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=padT+cH-(i/4)*cH;
+    ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(padL+cW,y);ctx.stroke();
+    ctx.fillStyle='#9b9890';ctx.font='10px DM Sans,sans-serif';ctx.textAlign='right';
+    ctx.fillText(_fmtShort(maxVal*i/4),padL-6,y+3.5);
+  }
+  // Bars
+  const ns=series.length;
+  const grpW=cW/data.length;
+  const barW=Math.min(grpW*0.65/ns,38);
+  const gap=ns>1?barW*0.2:0;
+  const totalBW=ns*barW+(ns-1)*gap;
+  data.forEach((d,i)=>{
+    const cx=padL+(i+0.5)*grpW;
+    const x0=cx-totalBW/2;
+    series.forEach((s,si)=>{
+      const val=d[s.key];
+      const bH=Math.max(val/maxVal*cH,0);
+      const x=x0+si*(barW+gap);
+      const y=padT+cH-bH;
+      const r=Math.min(4,bH/2);
+      ctx.fillStyle=s.color+'e0';
+      if(bH>0){
+        ctx.beginPath();
+        ctx.moveTo(x+r,y);ctx.lineTo(x+barW-r,y);
+        ctx.quadraticCurveTo(x+barW,y,x+barW,y+r);
+        ctx.lineTo(x+barW,y+bH);ctx.lineTo(x,y+bH);ctx.lineTo(x,y+r);
+        ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fill();
+      }
+      if(val<0){
+        const negH=Math.min(Math.abs(val)/maxVal*cH,cH*0.25);
+        ctx.fillStyle=s.color+'70';
+        ctx.fillRect(x,padT+cH,barW,negH);
+      }
+    });
+    ctx.fillStyle='#6b6860';ctx.font='10.5px DM Sans,sans-serif';ctx.textAlign='center';
+    ctx.fillText(d.lbl,cx,H-padB+15);
+  });
+  // Legend
+  series.forEach((s,i)=>{
+    const x=padL+i*120;
+    const y=H-padB+32;
+    ctx.fillStyle=s.color;ctx.fillRect(x,y,12,12);
+    ctx.fillStyle='#6b6860';ctx.font='11px DM Sans,sans-serif';ctx.textAlign='left';
+    ctx.fillText(s.label,x+16,y+10);
+  });
+}
+
+function _fmtShort(n){
+  if(n>=1000000) return(n/1000000%1===0?(n/1000000):(n/1000000).toFixed(1).replace(/\.0$/,''))+'tr';
+  if(n>=1000) return Math.round(n/1000)+'k';
+  return Math.round(n)+'';
 }
 
 // ═══ VIEWS UPDATE ═══
