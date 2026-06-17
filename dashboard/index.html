@@ -3904,7 +3904,9 @@ function _mergeProjects(remote){
     else{
       const lt=new Date(PROJECTS[li].updatedAt||PROJECTS[li].createdAt||0).getTime();
       const rt=new Date(rp.updatedAt||rp.createdAt||0).getTime();
-      if(rt>lt){PROJECTS[li]=rp;changed=true;}
+      // rt >= lt (không chỉ >) để khi tie (Sheets không trả updatedAt),
+      // remote đã qua _sanitizeProject thắng — sửa được ngày sai trong localStorage cũ
+      if(rt>=lt){PROJECTS[li]=rp;changed=true;}
     }
   });
   return changed;
