@@ -585,10 +585,11 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
         <button id="rvBtnMonth" class="rv-ftab on" onclick="setRvTableMode('month',this)">📋 Theo tháng</button>
         <button id="rvBtnProject" class="rv-ftab" onclick="setRvTableMode('project',this)">📁 Theo dự án</button>
       </div>
-      <div id="rvChartOpts" style="display:none;align-items:center;gap:14px;margin-bottom:12px;padding:8px 14px;background:var(--white);border:1px solid var(--border);border-radius:var(--rs)">
-        <span style="font-size:12px;color:var(--t3);font-weight:500">Hiển thị:</span>
-        <label class="rv-metric-lbl"><input type="checkbox" id="rvMetricRevenue" checked onchange="renderRvChart()"><span class="rv-metric-dot" style="background:#2563eb"></span>Doanh thu</label>
-        <label class="rv-metric-lbl"><input type="checkbox" id="rvMetricProfit" checked onchange="renderRvChart()"><span class="rv-metric-dot" style="background:#e07b39"></span>Lợi nhuận</label>
+      <div id="rvChartOpts" style="display:none;align-items:center;gap:16px;margin-bottom:12px;padding:8px 16px;background:var(--white);border:1px solid var(--border);border-radius:var(--rs);font-size:12px;color:var(--t3)">
+        <span style="font-weight:500">Biểu đồ:</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><span class="rv-metric-dot" style="background:#2563eb"></span>Doanh thu</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><span class="rv-metric-dot" style="background:#e07b39"></span>Tổng chi phí</span>
+        <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:22px;height:3px;background:#3a7d5a;border-radius:2px;vertical-align:middle"></span>Lợi nhuận</span>
       </div>
       <div id="rvTableView" class="card">
         <div class="tw"><table>
@@ -597,8 +598,17 @@ tbody tr:hover td{background:var(--bg)}tbody tr:last-child td{border-bottom:none
         </table></div>
       </div>
       <div id="rvProjectView" style="display:none"></div>
-      <div id="rvChartView" class="card" style="display:none;padding:20px 18px 14px">
-        <canvas id="rvCanvas"></canvas>
+      <div id="rvChartView" style="display:none">
+        <div style="display:grid;grid-template-columns:3fr 2fr;gap:12px">
+          <div class="card" style="padding:16px 18px 14px;overflow:hidden">
+            <div style="font-size:11.5px;color:var(--t3);margin-bottom:14px;font-weight:500">Doanh thu · Chi phí theo tháng</div>
+            <canvas id="rvBarCanvas"></canvas>
+          </div>
+          <div class="card" style="padding:16px 18px 14px;overflow:hidden">
+            <div style="font-size:11.5px;color:var(--t3);margin-bottom:14px;font-weight:500">Lợi nhuận theo tháng</div>
+            <canvas id="rvLineCanvas"></canvas>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -3357,16 +3367,14 @@ function renderRvByProject(){
   }).join('');
 }
 
-function renderRvChart(){
-  const canvas=$('rvCanvas');
-  if(!canvas||!canvas.parentElement)return;
-  const showRev=$('rvMetricRevenue').checked;
-  const showProfit=$('rvMetricProfit').checked;
+function renderRvChart(){_renderRvBarChart();_renderRvLineChart();}
+
+function _getRvChartData(){
   const mMap={};
   let filtered=PROJECTS;
   if(rvFilter==='vat') filtered=PROJECTS.filter(p=>p.hasVAT);
   if(rvFilter==='novat') filtered=PROJECTS.filter(p=>!p.hasVAT);
-  const rvOpex=getMonthlyOpex();
+  const opex=getMonthlyOpex();
   filtered.forEach(p=>{
     const d=p.dateStart?new Date(p.dateStart):null; if(!d)return;
     const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
@@ -3376,85 +3384,146 @@ function renderRvChart(){
     mMap[k].gross+=(p.grossValue||p.netValue||0);
     mMap[k].cost+=getTotalCost(p);
   });
-  const months=Object.keys(mMap).sort().slice(-12);
-  const W=canvas.parentElement.offsetWidth-36;
-  const H=260;
+  return Object.keys(mMap).sort().slice(-12).map(k=>({
+    lbl:mMap[k].lbl,
+    revenue:mMap[k].gross,
+    cost:mMap[k].cost+opex,
+    profit:mMap[k].net-mMap[k].cost-opex
+  }));
+}
+
+function _rvSetupCanvas(id,H){
+  const canvas=$(id); if(!canvas||!canvas.parentElement)return null;
   const dpr=window.devicePixelRatio||1;
+  const W=Math.max(canvas.parentElement.offsetWidth-36,100);
   canvas.width=W*dpr; canvas.height=H*dpr;
   canvas.style.width=W+'px'; canvas.style.height=H+'px';
   const ctx=canvas.getContext('2d');
-  ctx.scale(dpr,dpr);
-  ctx.clearRect(0,0,W,H);
-  if(!months.length){
-    ctx.fillStyle='#9b9890';ctx.font='13px DM Sans,sans-serif';ctx.textAlign='center';
-    ctx.fillText('Chưa có dữ liệu',W/2,H/2); return;
-  }
-  const data=months.map(k=>({lbl:mMap[k].lbl,revenue:mMap[k].gross,profit:mMap[k].net-mMap[k].cost-rvOpex}));
-  const series=[];
-  if(showRev) series.push({key:'revenue',color:'#2563eb',label:'Doanh thu'});
-  if(showProfit) series.push({key:'profit',color:'#e07b39',label:'Lợi nhuận'});
-  if(!series.length){
-    ctx.fillStyle='#9b9890';ctx.font='13px DM Sans,sans-serif';ctx.textAlign='center';
-    ctx.fillText('Chọn ít nhất 1 chỉ số',W/2,H/2); return;
-  }
-  const padL=58,padR=16,padT=16,padB=48;
+  ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
+  return{ctx,W,H};
+}
+
+function _rvRoundBar(ctx,x,y,w,h,r){
+  if(h<=0)return;
+  r=Math.min(r,h/2,w/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h); ctx.lineTo(x,y+h); ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath(); ctx.fill();
+}
+
+function _renderRvBarChart(){
+  const c=_rvSetupCanvas('rvBarCanvas',230); if(!c)return;
+  const {ctx,W,H}=c;
+  const data=_getRvChartData();
+  const padL=52,padR=10,padT=26,padB=36;
   const cW=W-padL-padR,cH=H-padT-padB;
-  const posVals=data.flatMap(d=>series.map(s=>Math.max(d[s.key],0)));
-  const maxVal=Math.max(...posVals,1);
-  // Grid lines
-  ctx.strokeStyle='#eeece8'; ctx.lineWidth=1;
-  for(let i=0;i<=4;i++){
-    const y=padT+cH-(i/4)*cH;
-    ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(padL+cW,y);ctx.stroke();
-    ctx.fillStyle='#9b9890';ctx.font='10px DM Sans,sans-serif';ctx.textAlign='right';
-    ctx.fillText(_fmtShort(maxVal*i/4),padL-6,y+3.5);
+  if(!data.length){
+    ctx.fillStyle='#9b9890';ctx.font='12px DM Sans,sans-serif';ctx.textAlign='center';
+    ctx.fillText('Chưa có dữ liệu',W/2,H/2);return;
   }
-  // Bars
-  const ns=series.length;
+  const maxVal=Math.max(...data.flatMap(d=>[d.revenue,d.cost]),1);
+  // Grid
+  ctx.strokeStyle='#eeece8';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=padT+cH*(1-i/4);
+    ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(padL+cW,y);ctx.stroke();
+    ctx.fillStyle='#9b9890';ctx.font='9.5px DM Sans,sans-serif';ctx.textAlign='right';
+    ctx.fillText(_fmtShort(maxVal*i/4),padL-5,y+3.5);
+  }
   const grpW=cW/data.length;
-  const barW=Math.min(grpW*0.65/ns,38);
-  const gap=ns>1?barW*0.2:0;
-  const totalBW=ns*barW+(ns-1)*gap;
+  const barW=Math.min(grpW*0.7/2,26);
+  const gap=barW*0.25;
+  const totalBW=2*barW+gap;
   data.forEach((d,i)=>{
     const cx=padL+(i+0.5)*grpW;
-    const x0=cx-totalBW/2;
-    series.forEach((s,si)=>{
-      const val=d[s.key];
-      const bH=Math.max(val/maxVal*cH,0);
-      const x=x0+si*(barW+gap);
-      const y=padT+cH-bH;
-      const r=Math.min(4,bH/2);
-      ctx.fillStyle=s.color+'e0';
-      if(bH>0){
-        ctx.beginPath();
-        ctx.moveTo(x+r,y);ctx.lineTo(x+barW-r,y);
-        ctx.quadraticCurveTo(x+barW,y,x+barW,y+r);
-        ctx.lineTo(x+barW,y+bH);ctx.lineTo(x,y+bH);ctx.lineTo(x,y+r);
-        ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fill();
-      }
-      if(val<0){
-        const negH=Math.min(Math.abs(val)/maxVal*cH,cH*0.25);
-        ctx.fillStyle=s.color+'70';
-        ctx.fillRect(x,padT+cH,barW,negH);
-      }
-    });
-    ctx.fillStyle='#6b6860';ctx.font='10.5px DM Sans,sans-serif';ctx.textAlign='center';
-    ctx.fillText(d.lbl,cx,H-padB+15);
-  });
-  // Legend
-  series.forEach((s,i)=>{
-    const x=padL+i*120;
-    const y=H-padB+32;
-    ctx.fillStyle=s.color;ctx.fillRect(x,y,12,12);
-    ctx.fillStyle='#6b6860';ctx.font='11px DM Sans,sans-serif';ctx.textAlign='left';
-    ctx.fillText(s.label,x+16,y+10);
+    const xR=cx-totalBW/2; // revenue bar x
+    const xC=xR+barW+gap;  // cost bar x
+    const baseline=padT+cH;
+    const revH=Math.max(d.revenue/maxVal*cH,0);
+    const cosH=Math.max(d.cost/maxVal*cH,0);
+    // Revenue bar
+    ctx.fillStyle='#2563ebe0';
+    _rvRoundBar(ctx,xR,baseline-revH,barW,revH,3);
+    // Cost bar
+    ctx.fillStyle='#e07b39e0';
+    _rvRoundBar(ctx,xC,baseline-cosH,barW,cosH,3);
+    // Value labels on top
+    ctx.font='bold 8.5px DM Sans,sans-serif';ctx.textAlign='center';
+    if(revH>12){ctx.fillStyle='#2563eb';ctx.fillText(_fmtShort(d.revenue),xR+barW/2,baseline-revH-4);}
+    if(cosH>12){ctx.fillStyle='#c0561a';ctx.fillText(_fmtShort(d.cost),xC+barW/2,baseline-cosH-4);}
+    // X label
+    ctx.fillStyle='#6b6860';ctx.font='9.5px DM Sans,sans-serif';ctx.textAlign='center';
+    ctx.fillText(d.lbl,cx,H-padB+13);
   });
 }
 
+function _renderRvLineChart(){
+  const c=_rvSetupCanvas('rvLineCanvas',230); if(!c)return;
+  const {ctx,W,H}=c;
+  const data=_getRvChartData();
+  const padL=52,padR=10,padT=26,padB=36;
+  const cW=W-padL-padR,cH=H-padT-padB;
+  if(!data.length){
+    ctx.fillStyle='#9b9890';ctx.font='12px DM Sans,sans-serif';ctx.textAlign='center';
+    ctx.fillText('Chưa có dữ liệu',W/2,H/2);return;
+  }
+  const profits=data.map(d=>d.profit);
+  const minP=Math.min(...profits,0);
+  const maxP=Math.max(...profits,0);
+  const span=Math.max(maxP-minP,1);
+  const lo=minP-span*0.12,hi=maxP+span*0.18;
+  const range=hi-lo;
+  const toY=v=>padT+cH-(v-lo)/range*cH;
+  // Grid
+  ctx.strokeStyle='#eeece8';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const v=lo+(range*i/4);
+    const y=toY(v);
+    ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(padL+cW,y);ctx.stroke();
+    ctx.fillStyle='#9b9890';ctx.font='9.5px DM Sans,sans-serif';ctx.textAlign='right';
+    ctx.fillText(_fmtShort(v),padL-5,y+3.5);
+  }
+  // Zero baseline (if mixed)
+  if(minP<0&&maxP>0){
+    const y0=toY(0);
+    ctx.save();ctx.strokeStyle='#c0392b55';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(padL,y0);ctx.lineTo(padL+cW,y0);ctx.stroke();
+    ctx.restore();
+  }
+  const pts=data.map((d,i)=>({x:padL+(i+0.5)*grpW_ln(cW,data.length),y:toY(d.profit),v:d.profit,lbl:d.lbl}));
+  // Fill under line
+  const y0=toY(Math.max(lo,0));
+  ctx.beginPath();ctx.moveTo(pts[0].x,y0);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,y0);ctx.closePath();
+  ctx.fillStyle='#3a7d5a1a';ctx.fill();
+  // Line
+  ctx.strokeStyle='#3a7d5a';ctx.lineWidth=2.5;ctx.lineJoin='round';
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
+  // Dots + labels
+  pts.forEach(p=>{
+    const pos=p.v>=0;
+    ctx.fillStyle=pos?'#3a7d5a':'#c0392b';
+    ctx.beginPath();ctx.arc(p.x,p.y,4.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=pos?'#3a7d5a':'#c0392b';
+    ctx.font='bold 8.5px DM Sans,sans-serif';ctx.textAlign='center';
+    ctx.fillText(_fmtShort(p.v),p.x,p.y+(pos?-10:17));
+    // X label
+    ctx.fillStyle='#6b6860';ctx.font='9.5px DM Sans,sans-serif';
+    ctx.fillText(p.lbl,p.x,H-padB+13);
+  });
+}
+
+function grpW_ln(cW,n){return cW/n;}
+
 function _fmtShort(n){
-  if(n>=1000000) return(n/1000000%1===0?(n/1000000):(n/1000000).toFixed(1).replace(/\.0$/,''))+'tr';
-  if(n>=1000) return Math.round(n/1000)+'k';
-  return Math.round(n)+'';
+  const abs=Math.abs(n);
+  const pfx=n<0?'-':'';
+  if(abs>=1000000)return pfx+(abs/1000000%1===0?abs/1000000:(abs/1000000).toFixed(1).replace(/\.0$/,''))+'tr';
+  if(abs>=1000)return pfx+Math.round(abs/1000)+'k';
+  return pfx+Math.round(abs)+'';
 }
 
 // ═══ VIEWS UPDATE ═══
