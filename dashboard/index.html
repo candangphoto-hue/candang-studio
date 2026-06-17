@@ -1156,15 +1156,44 @@ function _fmtWorkDays(days){if(!days||!days.length)return'—';const sorted=[...
 // Chuẩn hóa ngày: dd/mm/yyyy hoặc d/m/yyyy → yyyy-mm-dd (ISO)
 function toISO(str){
   if(!str)return'';
-  const s=String(str).split('T')[0].trim();
-  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s; // đã ISO
-  const p=s.split('/');
-  if(p.length===3){
-    const[dd,mm,yy]=p;
+  const s=String(str).trim();
+  // Date-only ISO — trả thẳng
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
+  // dd/mm/yyyy (định dạng Việt Nam)
+  const parts=s.split('T')[0].split('/');
+  if(parts.length===3){
+    const[dd,mm,yy]=parts;
     return`${yy.padStart(4,'0')}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
   }
-  return s;
+  // ISO datetime "2026-01-16T17:00:00.000Z" — Apps Script trả về UTC
+  // Dùng getFullYear/Month/Date (local time = Vietnam +7) để tránh lệch ngày
+  if(s.includes('T')||s.endsWith('Z')){
+    const d=new Date(s);
+    if(!isNaN(d)){
+      const y=d.getFullYear();
+      const m=String(d.getMonth()+1).padStart(2,'0');
+      const day=String(d.getDate()).padStart(2,'0');
+      return`${y}-${m}-${day}`;
+    }
+  }
+  return s.split('T')[0];
 }
+// Unit test inline — chạy 1 lần khi load
+(function _testToISO(){
+  const cases=[
+    ['2026-06-15','2026-06-15'],
+    ['15/06/2026','2026-06-15'],
+    ['2026-06-15T10:30:00.000Z','2026-06-15'],
+    ['',''],
+  ];
+  const fail=cases.filter(([i,e])=>toISO(i)!==e);
+  if(fail.length)console.error('[FAIL] toISO:',fail);
+  else console.log('[OK] toISO');
+  // Test timezone fix: T17:00:00Z = nửa đêm VN = ngày hôm sau UTC
+  const midnightVN=toISO('2026-01-16T17:00:00.000Z'); // phải ra 2026-01-17
+  if(midnightVN!=='2026-01-17')console.error('[FAIL] toISO timezone:',midnightVN,'!= 2026-01-17');
+  else console.log('[OK] toISO timezone (midnight VN = T17Z)');
+})();
 // Chuẩn hóa tất cả ngày trong PROJECTS về ISO một lần lúc khởi động
 function normalizeDates(){
   PROJECTS.forEach(p=>{
@@ -3824,12 +3853,52 @@ function startAutoSync(){
 }
 function stopAutoSync(){if(_autoSyncTimer){clearInterval(_autoSyncTimer);_autoSyncTimer=null;}}
 
+// Chuẩn hóa project từ Sheets: date strings, numeric fields, boolean
+function _sanitizeProject(p){
+  // Dates
+  if(p.dateStart)p.dateStart=toISO(p.dateStart);
+  if(p.dateEnd)p.dateEnd=toISO(p.dateEnd);
+  // Numeric top-level
+  const NUM=['netValue','vatAmt','grossValue','staffCost','propsCost','otherCost','tamUng','totalDays'];
+  NUM.forEach(f=>{if(p[f]!==undefined)p[f]=typeof p[f]==='number'?p[f]:(parseFloat(String(p[f]).replace(/[^\d.-]/g,''))||0);});
+  // Boolean
+  if(typeof p.hasVAT==='string')p.hasVAT=(p.hasVAT==='true'||p.hasVAT==='TRUE'||p.hasVAT==='1');
+  // Arrays
+  if(Array.isArray(p.staffList))p.staffList.forEach(s=>{
+    ['wage','total','commVal','days'].forEach(f=>{if(s[f]!==undefined)s[f]=typeof s[f]==='number'?s[f]:(parseFloat(String(s[f]).replace(/[^\d.-]/g,''))||0);});
+  });
+  if(Array.isArray(p.propsList))p.propsList.forEach(x=>{
+    ['unitPrice','qty','total'].forEach(f=>{if(x[f]!==undefined)x[f]=typeof x[f]==='number'?x[f]:(parseFloat(String(x[f]).replace(/[^\d.-]/g,''))||0);});
+  });
+  if(Array.isArray(p.otherList))p.otherList.forEach(x=>{
+    if(x.amount!==undefined)x.amount=typeof x.amount==='number'?x.amount:(parseFloat(String(x.amount).replace(/[^\d.-]/g,''))||0);
+  });
+  if(Array.isArray(p.clientCosts))p.clientCosts.forEach(x=>{
+    ['amount','vatAmt'].forEach(f=>{if(x[f]!==undefined)x[f]=typeof x[f]==='number'?x[f]:(parseFloat(String(x[f]).replace(/[^\d.-]/g,''))||0);});
+  });
+  if(Array.isArray(p.payments))p.payments.forEach(x=>{
+    if(x.amount!==undefined)x.amount=typeof x.amount==='number'?x.amount:(parseFloat(String(x.amount).replace(/[^\d.-]/g,''))||0);
+    if(x.date)x.date=toISO(x.date);
+  });
+  return p;
+}
+// Unit test _sanitizeProject
+(function _testSanitize(){
+  const mock={netValue:'1500000',vatAmt:'120000',hasVAT:'true',dateStart:'2026-01-16T17:00:00.000Z',
+    staffList:[{wage:'2000000',total:'2000000'}],payments:[{amount:'500000',date:'2026-06-15T17:00:00.000Z'}]};
+  const r=_sanitizeProject(JSON.parse(JSON.stringify(mock)));
+  const ok=r.netValue===1500000&&r.vatAmt===120000&&r.hasVAT===true
+    &&r.dateStart==='2026-01-17'&&r.staffList[0].wage===2000000
+    &&r.payments[0].amount===500000&&r.payments[0].date==='2026-06-16';
+  if(!ok)console.error('[FAIL] _sanitizeProject',r);
+  else console.log('[OK] _sanitizeProject');
+})();
+
 function _mergeProjects(remote){
   let changed=false;
   remote.forEach(rp=>{
-    if(DELETED_IDS.has(rp.id)) return; // FIX: bỏ qua lead/dự án đã xóa local
-    if(rp.dateStart)rp.dateStart=toISO(rp.dateStart);
-    if(rp.dateEnd)rp.dateEnd=toISO(rp.dateEnd);
+    if(DELETED_IDS.has(rp.id))return;
+    rp=_sanitizeProject(rp); // chuẩn hóa date/number/bool trước khi merge
     const li=PROJECTS.findIndex(p=>p.id===rp.id);
     if(li===-1){PROJECTS.unshift(rp);changed=true;}
     else{
@@ -3844,9 +3913,8 @@ function _mergeProjects(remote){
 async function autoSync2Way(){
   if(!SHEETS_URL)return;
   try{
-    // 1. Push local → Sheets (fire-and-forget)
-    fetch(SHEETS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'batchSync',projects:PROJECTS,clients:CLIENTS})});
-    // 2. Pull từ Sheets → merge
+    // 1. Pull trước — tránh race condition: nếu push trước thì MacBook
+    //    có thể ghi đè Sheets bằng localStorage rỗng/cũ trước khi nhận data mới
     const r=await fetch(SHEETS_URL+'?action=getAll&t='+Date.now());
     const d=await r.json();
     if(d.error)throw new Error(d.error);
@@ -3865,6 +3933,11 @@ async function autoSync2Way(){
     }
     if(changed){saveLocal();renderAll();}
     setSync('ok','Sync '+new Date().toLocaleTimeString('vi-VN'));
+    // 2. Push sau khi đã merge — và CHỈ push nếu có data (tránh MacBook trống ghi đè Sheets)
+    if(PROJECTS.length>0){
+      fetch(SHEETS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({action:'batchSync',projects:PROJECTS,clients:CLIENTS})});
+    }
   }catch(e){console.warn('[AutoSync]',e);}
 }
 
