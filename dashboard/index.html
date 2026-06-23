@@ -2576,6 +2576,8 @@ function renderRevenue(){
     <div class="kpi"><div class="kpi-l">💸 Tổng chi phí</div><div class="kpi-v">${fmtS(aC)}</div><div class="kpi-d nt"><span style="color:var(--t3)">DA: ${fmtS(aProjC)}</span> · <span style="color:var(--or)">Vận hành: ${fmtS(totalOpexAll)}</span></div></div>
     <div class="kpi"><div class="kpi-l">💰 Lợi nhuận thực (sau VAT)</div><div class="kpi-v" style="color:${aP>=0?'var(--gn)':'var(--rd)'}">${fmtS(Math.abs(aP))}</div><div class="kpi-d ${aP>=0?'up':'dn'}">${aP>=0?'▲ Dương':'▼ Âm'}</div></div>
     <div class="kpi"><div class="kpi-l">📊 TB/dự án</div><div class="kpi-v">${fmtS(avg)}</div><div class="kpi-d nt">──</div></div>`;
+  // FIX: re-render sub-view "Theo dự án" nếu đang active để không bị stale
+  if(typeof rvTableMode!=='undefined'&&rvTableMode==='project')renderRvByProject();
 }
 
 function showMonthDetail(k){
@@ -2738,7 +2740,29 @@ function openAddPayment(){
     </div>`;
 }
 
+// Rebind CUR_P về đúng element trong PROJECTS sau khi sync thay thế object
+function _rebindCurP(){
+  if(!CUR_P)return;
+  const fresh=PROJECTS.find(x=>x.id===CUR_P.id);
+  if(fresh&&fresh!==CUR_P)CUR_P=fresh;
+}
+// Unit test _rebindCurP
+(function _testRebindCurP(){
+  const saved=CUR_P;
+  const stale={id:'__rb_test__',client:'Stale'};
+  const fresh={id:'__rb_test__',client:'Fresh'};
+  PROJECTS.push(fresh);
+  CUR_P=stale; // CUR_P trỏ vào object không có trong PROJECTS
+  _rebindCurP();
+  const ok=CUR_P===fresh;
+  PROJECTS.splice(PROJECTS.findIndex(p=>p.id==='__rb_test__'),1);
+  CUR_P=saved;
+  if(!ok)console.error('[FAIL] _rebindCurP');
+  else console.log('[OK] _rebindCurP');
+})();
+
 function saveAddPayment(){
+  _rebindCurP();
   const amt=pM($('np-amt').value); if(!amt){toast('⚠️ Nhập số tiền');return;}
   if(!CUR_P.payments)CUR_P.payments=[];
   CUR_P.payments.push({
@@ -2757,6 +2781,7 @@ function saveAddPayment(){
 }
 
 function togglePayment(i){
+  _rebindCurP();
   if(!CUR_P.payments)return;
   CUR_P.payments[i].done=!CUR_P.payments[i].done;
   if(CUR_P.payments[i].done && !CUR_P.payments[i].date) CUR_P.payments[i].date=new Date().toISOString().split('T')[0];
@@ -2767,6 +2792,7 @@ function togglePayment(i){
 }
 
 function delPayment(i){
+  _rebindCurP();
   if(!confirm('Xóa đợt thanh toán này?'))return;
   CUR_P.payments.splice(i,1);
   CUR_P.updatedAt=new Date().toISOString();
@@ -3111,6 +3137,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('.cal-popup')&&!e.tar
 
 // ═══ MARK FULLY PAID ═══
 function markFullyPaid(){
+  _rebindCurP();
   if(!CUR_P)return;
   if(!confirm('Đánh dấu đã thu đủ tiền và chuyển trạng thái Hoàn thành?'))return;
   const gross=CUR_P.grossValue||CUR_P.netValue||0;
@@ -3935,6 +3962,29 @@ function _mergeOneProject(local,remote){
   else console.log('[OK] _mergeOneProject (2 cases)');
 })();
 
+// Unit test: _mergeProjects cập nhật CUR_P khi PROJECTS[li] bị thay thế
+(function _testMergeProjectsCurP(){
+  const savedCurP=CUR_P;
+  const savedProjects=[...PROJECTS];
+  // Setup: thêm 1 project giả vào PROJECTS và trỏ CUR_P vào nó
+  const origProj={id:'__test_curp__',client:'OldClient',createdAt:'2026-01-01T00:00:00Z',payments:[]};
+  PROJECTS.push(origProj);
+  CUR_P=PROJECTS[PROJECTS.length-1]; // CUR_P = reference đúng
+  const refBefore=CUR_P;
+  // Remote có updatedAt mới hơn → sẽ thắng và tạo object mới → PROJECTS[li] thay thế
+  const remote=[{id:'__test_curp__',client:'NewClient',createdAt:'2026-01-01T00:00:00Z',updatedAt:'2099-01-01T00:00:00Z',payments:[]}];
+  _mergeProjects(remote);
+  const projInArray=PROJECTS.find(x=>x.id==='__test_curp__');
+  const ok1=projInArray&&projInArray.client==='NewClient';  // PROJECTS[li] đã cập nhật
+  const ok2=CUR_P===projInArray;                            // CUR_P trỏ đúng vào object mới
+  const ok3=CUR_P!==refBefore;                             // CUR_P không còn là object cũ
+  // Cleanup
+  PROJECTS.splice(PROJECTS.findIndex(p=>p.id==='__test_curp__'),1);
+  CUR_P=savedCurP;
+  if(!ok1||!ok2||!ok3)console.error('[FAIL] _mergeProjects CUR_P update',{ok1,ok2,ok3,CUR_P,projInArray});
+  else console.log('[OK] _mergeProjects CUR_P update');
+})();
+
 function _mergeProjects(remote){
   let changed=false;
   remote.forEach(rp=>{
@@ -3944,7 +3994,12 @@ function _mergeProjects(remote){
     if(li===-1){PROJECTS.unshift(rp);changed=true;}
     else{
       const merged=_mergeOneProject(PROJECTS[li],rp);
-      if(JSON.stringify(merged)!==JSON.stringify(PROJECTS[li])){PROJECTS[li]=merged;changed=true;}
+      if(JSON.stringify(merged)!==JSON.stringify(PROJECTS[li])){
+        PROJECTS[li]=merged;changed=true;
+        // FIX: CUR_P đang trỏ vào object cũ bị thay thế → cập nhật lại reference
+        // để các thao tác thanh toán sau sync không ghi vào object "ma"
+        if(CUR_P&&CUR_P.id===merged.id)CUR_P=PROJECTS[li];
+      }
     }
   });
   return changed;
