@@ -1132,6 +1132,7 @@ const LEAD_COLS=[
 ];
 let leadMonthFilter='';
 let leadRegionFilter='';
+let doneExpanded=false;
 let CUR_LEAD_ID=null;
 function parseLeadData(p){
   if(!p||!p.note||!p.note.startsWith('[LEAD_FORM_v1]'))return null;
@@ -2326,12 +2327,17 @@ function renderRecentProjects(){
 }
 
 function renderKanban(){
+  const DONE_COLLAPSED_COUNT=5;
   $('kbBoard').innerHTML=COLS.map(col=>{
     const cards=PROJECTS.filter(p=>p.status===col.k).sort((a,b)=>(toISO(b.dateStart)||b.createdAt||'').localeCompare(toISO(a.dateStart)||a.createdAt||''));
     const s=SC[col.k]||{};
+    const isDone=col.k==='Hoàn thành';
+    const collapsible=isDone&&cards.length>DONE_COLLAPSED_COUNT;
+    const visibleCards=collapsible&&!doneExpanded?cards.slice(0,DONE_COLLAPSED_COUNT):cards;
+    const hiddenCount=cards.length-visibleCards.length;
     return`<div class="kc">
       <div class="kh"><div class="kt">${col.i} ${col.l}<span class="cb2" style="background:${s.bg||'#eee'};color:${s.co||'#555'}">${cards.length}</span></div></div>
-      <div class="kb2">${cards.length?cards.map(p=>{
+      <div class="kb2">${visibleCards.length?visibleCards.map(p=>{
         const cost=getTotalCost(p),profit=getProfit(p);
         const dateStr=p.dateEnd&&p.dateEnd!==p.dateStart?`${fmtDate(p.dateStart)}→${fmtDate(p.dateEnd)}`:fmtDate(p.dateStart||'');
         return`<div class="pc" onclick="openDetail('${p.id}')" style="position:relative">
@@ -2344,10 +2350,17 @@ function renderKanban(){
             <div class="pc-pf" style="color:${profit>=0?'var(--gn)':'var(--rd)'}">${(p.netValue||p.grossValue)?fmtS(profit):'—'}</div>
           </div>
         </div>`;
-      }).join(''):'<div style="text-align:center;padding:20px;color:var(--t3);font-size:11.5px">Trống</div>'}</div>
+      }).join(''):'<div style="text-align:center;padding:20px;color:var(--t3);font-size:11.5px">Trống</div>'}${collapsible?`<div onclick="toggleDoneExpand()" style="text-align:center;padding:10px;cursor:pointer;color:var(--t3);font-size:11.5px;display:flex;align-items:center;justify-content:center;gap:4px;user-select:none">
+        ${doneExpanded?'Thu gọn ▲':`Xem thêm ${hiddenCount} dự án ▼`}
+      </div>`:''}</div>
     </div>`;
   }).join('');
   $('pCnt').textContent=PROJECTS.filter(p=>p.status!=='Liên hệ mới'&&p.status!=='Đã báo giá').length+' dự án';
+}
+
+function toggleDoneExpand(){
+  doneExpanded=!doneExpanded;
+  renderKanban();
 }
 
 function renderLeads(){
