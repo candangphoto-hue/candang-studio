@@ -304,7 +304,7 @@ function updateExtra(key, idx, field, val) {
 function renderExtrasForm(key) {
   var container = document.getElementById('extRows' + key);
   if (!container) return;
-  var k = (key === 'NT') ? '"NT"' : key;
+  var k = (key === 'NT') ? "'NT'" : key;
   container.innerHTML = extras[key].map(function(e, i) {
     var safeName = (e.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
     return '<div class="extra-row">'
