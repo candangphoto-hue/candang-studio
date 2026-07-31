@@ -1428,7 +1428,8 @@ function getPropsList(){
     if(!desc)return null;
     const qty=parseFloat(el.querySelector('[data-f=qty]').value)||1;
     const up=pM(el.querySelector('[data-f=up]').value);
-    const date=el.querySelector('[data-f=date]').value;
+    const dateEl=el.querySelector('[data-f=date]');
+    const date=dateEl?dateEl.value:'';
     return{desc,qty,unitPrice:up,total:qty*up,date};
   }).filter(Boolean);
 }
@@ -1576,37 +1577,42 @@ function saveProject(){
     ds=$('f-ds').value; de=$('f-de').value;
     totalDays=ds&&de?Math.round((new Date(de)-new Date(ds))/86400000)+1:1;
   }
-  const staffList=getStaffList();
-  const propsList=getPropsList();
-  const staffCost=staffList.reduce((s,x)=>s+x.total,0);
-  const propsCost=propsList.reduce((s,x)=>s+x.total,0);
-  const otherCost=0; // đã gộp vào propsList (Chi phí dự án)
-  const tamUng=pM($('f-tu').value);
-  const p={
-    id:'P'+Date.now(),
-    client,
-    company:$('f-company')?$('f-company').value.trim():'',
-    service:$('f-sv').value||'F&B Photography',
-    dateStart:ds, dateEnd:de||ds, totalDays,
-    workDays,
-    netValue:net, hasVAT:hasVat, vatAmt:vat, grossValue:net+vat,
-    tamUng,
-    payments: tamUng ? [{label:'Tạm ứng đặt cọc',amount:tamUng,date:ds,method:'Chuyển khoản',note:'Đặt cọc trước khi chụp',done:true,createdAt:new Date().toISOString()}] : [],
-    staffList, propsList,
-    staffCost, propsCost, otherCost,
-    status:$('f-st').value,
-    owner:$('f-ow').value,
-    note:$('f-no').value,
-    createdAt:new Date().toISOString(),
-  };
-  PROJECTS.unshift(p);
-  saveLocal();
-  if(SHEETS_URL) pushSheets({action:'addProject',...p});
-  gcalPush(p);
-  closeMo();
-  renderAll();
-  toast('✅ Đã thêm: '+client);
-  resetModal();
+  try{
+    const staffList=getStaffList();
+    const propsList=getPropsList();
+    const staffCost=staffList.reduce((s,x)=>s+x.total,0);
+    const propsCost=propsList.reduce((s,x)=>s+x.total,0);
+    const otherCost=0; // đã gộp vào propsList (Chi phí dự án)
+    const tamUng=pM($('f-tu').value);
+    const p={
+      id:'P'+Date.now(),
+      client,
+      company:$('f-company')?$('f-company').value.trim():'',
+      service:$('f-sv').value||'F&B Photography',
+      dateStart:ds, dateEnd:de||ds, totalDays,
+      workDays,
+      netValue:net, hasVAT:hasVat, vatAmt:vat, grossValue:net+vat,
+      tamUng,
+      payments: tamUng ? [{label:'Tạm ứng đặt cọc',amount:tamUng,date:ds,method:'Chuyển khoản',note:'Đặt cọc trước khi chụp',done:true,createdAt:new Date().toISOString()}] : [],
+      staffList, propsList,
+      staffCost, propsCost, otherCost,
+      status:$('f-st').value,
+      owner:$('f-ow').value,
+      note:$('f-no').value,
+      createdAt:new Date().toISOString(),
+    };
+    PROJECTS.unshift(p);
+    saveLocal();
+    if(SHEETS_URL) pushSheets({action:'addProject',...p});
+    gcalPush(p);
+    closeMo();
+    renderAll();
+    toast('✅ Đã thêm: '+client);
+    resetModal();
+  }catch(e){
+    console.error('saveProject error:',e);
+    toast('❌ Lỗi khi lưu — dữ liệu đã nhập vẫn còn trong form, thử lại. ('+e.message+')');
+  }
 }
 
 function resetModal(){
@@ -2159,26 +2165,31 @@ function openEditPanel(){
 
 function saveEdit(){
   const p=PROJECTS.find(x=>x.id===EDIT_ID); if(!p)return;
-  p.client=$('e-cl').value.trim()||p.client;
-  p.service=$('e-sv').value;
-  p.dateStart=$('e-ds').value;
-  p.dateEnd=$('e-de').value;
-  p.workDays=[]; // FIX: panel dùng range mode → xóa workDays cũ để calendar render đúng
-  p.totalDays=p.dateStart&&p.dateEnd?Math.round((new Date(p.dateEnd)-new Date(p.dateStart))/86400000)+1:1;
-  p.status=$('e-st').value;
-  p.owner=$('e-ow').value;
-  p.netValue=pM($('e-nv').value);
-  p.hasVAT=$('e-vat').checked;
-  p.vatAmt=p.hasVAT?Math.round(p.netValue*0.08):0;
-  p.grossValue=p.netValue+p.vatAmt;
-  p.otherCost=pM($('e-oc').value);
-  p.note=$('e-no').value;
-  CUR_P=p;
-  p.updatedAt=new Date().toISOString();
-  saveLocal(); renderAll(); renderDPAll(p); closeMo();
-  if(SHEETS_URL) pushSheets({action:'updateProject',...p});
-  gcalPush(p);
-  toast('✅ Đã lưu thay đổi');
+  try{
+    p.client=$('e-cl').value.trim()||p.client;
+    p.service=$('e-sv').value;
+    p.dateStart=$('e-ds').value;
+    p.dateEnd=$('e-de').value;
+    p.workDays=[]; // FIX: panel dùng range mode → xóa workDays cũ để calendar render đúng
+    p.totalDays=p.dateStart&&p.dateEnd?Math.round((new Date(p.dateEnd)-new Date(p.dateStart))/86400000)+1:1;
+    p.status=$('e-st').value;
+    p.owner=$('e-ow').value;
+    p.netValue=pM($('e-nv').value);
+    p.hasVAT=$('e-vat').checked;
+    p.vatAmt=p.hasVAT?Math.round(p.netValue*0.08):0;
+    p.grossValue=p.netValue+p.vatAmt;
+    p.otherCost=pM($('e-oc').value);
+    p.note=$('e-no').value;
+    CUR_P=p;
+    p.updatedAt=new Date().toISOString();
+    saveLocal(); renderAll(); renderDPAll(p); closeMo();
+    if(SHEETS_URL) pushSheets({action:'updateProject',...p});
+    gcalPush(p);
+    toast('✅ Đã lưu thay đổi');
+  }catch(e){
+    console.error('saveEdit error:',e);
+    toast('❌ Lỗi khi lưu thay đổi. ('+e.message+')');
+  }
 }
 
 function dpTab(i,el){
